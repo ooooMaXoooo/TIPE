@@ -9,7 +9,7 @@
 
 int main(int argc, char** argv) {
 
-	pgl::Application app(640, 480, "TIPE");
+	pgl::Application app(500, 500, "TIPE");
 
 	while (!app.ShouldClose())
 	{

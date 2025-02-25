@@ -46,7 +46,7 @@ namespace pgl {
                                     "{\n"
                                     "    gl_Position = vec4(pos, 1.0);\n"
                                     "    vertexColor = vec4(1, 0.0, 0.0, 1.0);\n"
-                                    "}";
+                                    "}\0";
 
         const char* frag_source =
             "#version 330 core\n"
@@ -54,9 +54,17 @@ namespace pgl {
             "in vec4 vertexColor;\n"
             "void main()\n"
             "{\n"
-            "    FragColor = vec4(1.0, 0.0, 0.0, 1.0);"
-            "    //FragColor = vertexColor;\n"
-            "}";
+            "    vec2 coord = 2. * gl_FragCoord.xy / vec2(500.0, 500.0) - vec2(1.0);\n"
+            "    //if(gl_FragCoord.x * gl_FragCoord.x + gl_FragCoord.y * gl_FragCoord.y < 100000)\n"
+            "    //if(gl_FragCoord.x < 470)\n"
+            "    if (length(coord) < 0.5)\n"
+            "    {\n"
+            "        FragColor = vec4(1.0, 0.0, 0.0, 1.0);"
+            "    }\n"
+            "    else {\n"
+            "        FragColor = vec4(0.0);\n"
+            "    }\n"
+            "}\0";
 
 
         m_Shader = std::make_unique<Shader>(vert_source, frag_source, false);

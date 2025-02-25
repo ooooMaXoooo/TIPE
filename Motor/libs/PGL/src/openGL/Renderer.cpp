@@ -18,6 +18,11 @@ bool GLLogCall(const char* functionName, const char* fileName, int lineNumber)
     return true;
 }
 
+Renderer::Renderer(GLenum mode)
+    : m_Mode(mode)
+{
+}
+
 void Renderer::Clear() const
 {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -25,6 +30,9 @@ void Renderer::Clear() const
 
 void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const
 {
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    GLCall(glPolygonMode(GL_FRONT_AND_BACK, m_Mode));
     shader.Bind();
     va.Bind();
     ib.Bind();
