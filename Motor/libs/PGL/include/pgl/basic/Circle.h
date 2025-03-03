@@ -18,8 +18,11 @@ namespace pgl {
         Circle(glm::vec2 center, float radius);
 
 
-        virtual void OnRender() const override;
+        virtual void OnRender() override;
         virtual void OnImGuiRender() override;
+
+    private:
+        float m_Rotations[3];
     };
 
 };

@@ -10,6 +10,9 @@
 #include "OpenGL\Renderer.h"
 
 
+#include "basic\Circle.h"
+
+
 namespace pgl {
 
 	class Application
@@ -47,6 +50,9 @@ namespace pgl {
 		void OnImGuiRender();
 
 		void ProcessInputs();
+
+	private :
+		std::unique_ptr<Circle> c;
 	};
 
 };

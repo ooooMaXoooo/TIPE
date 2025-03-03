@@ -2,7 +2,7 @@
 
 namespace pgl {
 
-	void Drawable::OnRender() const {
+	void Drawable::OnRender() {
 
 	}
 

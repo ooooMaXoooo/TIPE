@@ -79,6 +79,8 @@ namespace pgl {
 
         GLCall(glEnable(GL_BLEND));
         GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+        c = std::make_unique<Circle>(glm::vec2(0.0f, 0.0f), 10.0f);
     }
 
     Application::~Application()
@@ -98,15 +100,13 @@ namespace pgl {
         m_Renderer.Clear();
         
 
-        Logger l(Logger::FILTER_INFO);
-        l.Log("test test test\n\n\n", Logger::Log_Level::WARN);
-        //std::cout << "test 1\n";
-        OnRender();
-
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+
+        OnRender();
 
         OnImGuiRender();
 
@@ -151,8 +151,8 @@ namespace pgl {
     {
         // some stuff
         // call each object's Render functions
-        Circle c(glm::vec2{ 0,0 }, 10);
-        c.OnRender();
+        
+        c->OnRender();
     }
 
     void Application::OnImGuiRender()
@@ -160,7 +160,7 @@ namespace pgl {
         ImGui::ShowDemoWindow(); // Show demo window! :)
 
         // call each object's ImGuiRender functions
-
+        c->OnImGuiRender();
 
         {
             ImGui::Begin("Specs");
