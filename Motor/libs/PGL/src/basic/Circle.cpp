@@ -83,7 +83,7 @@ namespace pgl {
 
         m_View = glm::mat4(1.0f);
         // note that we're translating the scene in the reverse direction of where we want to move
-        m_View = glm::translate(m_View, glm::vec3(0.0f, 0.0f, -3.0f));
+        m_View = glm::translate(m_View, glm::vec3(0.0f, 0.0f, -6.0f));
 
         m_Proj = glm::perspective(glm::radians(45.0f), 500.0f / 500.0f, 0.1f, 100.0f);
 
