@@ -49,12 +49,18 @@ set (BASIC_SOURCES
     "src/basic/Circle.cpp"
 )
 
+set (CORE_SOURCE
+    "src/Core/Window.cpp"
+    "src/Core/ObjectsHandler.cpp"
+)
+
 set (PGL_SOURCES
     "src/Logger.cpp"
     "src/pgl.cpp"
     "src/Drawable.cpp"
     "src/Camera.cpp"
     "${BASIC_SOURCES}"
+    "${CORE_SOURCE}"
 )
 
 # Définir les fichiers sources principaux

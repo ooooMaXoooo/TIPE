@@ -23,6 +23,7 @@ namespace pgl {
 
     private:
         float m_Rotations[3];
+        float m_Translations[3];
     };
 
 };

@@ -42,30 +42,26 @@ namespace pgl {
             "#version 330 core\n"
             "layout (location = 0) in vec3 pos;\n"
             "out vec4 vertexColor;\n"
-            "out vec3 Epos;\n"
             "uniform mat4 iMVP;\n"
             "uniform float iTime;\n"
             "void main()\n"
             "{\n"
             "    gl_Position = iMVP * vec4(pos, 1.0);\n"
             "    vertexColor = gl_Position;\n"
-            "    Epos = gl_Position.xyz;"
             "}\0";
 
         const char* frag_source =
             "#version 330 core\n"
             "out vec4 FragColor;\n"
             "in vec4 vertexColor;\n"
-            "in vec3 Epos;\n"
             "uniform float iTime;\n"
+            "uniform mat4 iMVP;\n"
             "void main()\n"
             "{\n"
-            "    vec3 coord = 2. * Epos / vec3(500.0, 500.0, 10.0f) - vec3(1.0);\n"
-            "    //if(gl_FragCoord.x * gl_FragCoord.x + gl_FragCoord.y * gl_FragCoord.y < 100000)\n"
-            "    //if(gl_FragCoord.x < 470)\n"
-            "    if (length(coord) < 1.5)\n"
+            "    vec3 coord = (2. * (vertexColor).xyz / vec3(500.0, 500.0, 5000000.0f)) - vec3(1.0);\n"
+            "    if (length(coord.xyz) < 2.0f)\n"
             "    {\n"
-            "        FragColor = vec4(vertexColor.xyz, 1.0f) * abs(sin(iTime));"
+            "        FragColor = vec4(2. * gl_FragCoord.xyz / vec3(500.0, 500.0, 500.0f) - vec3(1.0), 1.0f);//vec4(vertexColor.xyz, 1.0f);\n"
             "    }\n"
             "    else {\n"
             "        FragColor = vec4(0.0);\n"
@@ -79,20 +75,24 @@ namespace pgl {
 
 
         m_Model = glm::mat4(1.0f);
-        m_Model = glm::rotate(m_Model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        m_Model = glm::rotate(m_Model, glm::radians(55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
         m_View = glm::mat4(1.0f);
         // note that we're translating the scene in the reverse direction of where we want to move
-        m_View = glm::translate(m_View, glm::vec3(0.0f, 0.0f, -6.0f));
+        m_View = glm::translate(m_View, glm::vec3(0.0f, 0.0f, -4.0f));
 
         m_Proj = glm::perspective(glm::radians(45.0f), 500.0f / 500.0f, 0.1f, 100.0f);
 
         m_MVP = m_Proj * m_View * m_Model;
         m_Shader->SetUniformMat4f("iMVP", m_MVP);
 
-        m_Rotations[0] = -55.0f;
+        m_Rotations[0] = 55.0f;
         m_Rotations[1] = 0;
         m_Rotations[2] = 0;
+
+        m_Translations[0] = 0.0f;
+        m_Translations[1] = 0;
+        m_Translations[2] = -4.0f;
     }
 
     
@@ -115,25 +115,21 @@ namespace pgl {
     {
         ImGui::Begin("Circle");
 
-        float temp[3];
-        for (int i = 0; i < 3; i++) {
-            temp[i] = m_Rotations[i];
-        }
-        
         ImGui::SliderFloat3("rotation (x,y,z)", m_Rotations, 0, 360);
+        ImGui::SliderFloat3("translation (x,y,z)", m_Translations, -20, 20);
+        ImGui::Separator();
+        ImGui::Text("In the shader : length(coord) < %.3f", 2.0f * abs(glm::sin(glfwGetTime())));
 
-        if (m_Rotations[0] != temp[0])
-        {
-            m_Model = glm::rotate(m_Model, glm::radians(glm::radians(m_Rotations[0])), glm::vec3(1.0f, 0.0f, 0.0f));
-        }
-        if (m_Rotations[1] != temp[1])
-        {
-            m_Model = glm::rotate(m_Model, glm::radians(glm::radians(m_Rotations[1])), glm::vec3(0.0f, 1.0f, 0.0f));
-        }
-        if (m_Rotations[2] != temp[2])
-        {
-            m_Model = glm::rotate(m_Model, glm::radians(glm::radians(m_Rotations[2])), glm::vec3(0.0f, 0.0f, 1.0f));
-        }
+        // handle rotations
+        m_Model = glm::mat4(1.0f);
+        m_Model = glm::rotate(m_Model, glm::radians(m_Rotations[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+        m_Model = glm::rotate(m_Model, glm::radians(m_Rotations[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+        m_Model = glm::rotate(m_Model, glm::radians(m_Rotations[2]), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        // handle translations
+        m_View = glm::mat4(1.0f);
+        m_View = glm::translate(m_View, glm::vec3(m_Translations[0], m_Translations[1], m_Translations[2]));
+
 
         ImGui::End();
     }

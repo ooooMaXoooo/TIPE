@@ -1,16 +1,16 @@
 #pragma once
 
-#include "glad\glad.h"
-#include "GLFW\glfw3.h"
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
 
-#include "ImGui\imgui.h"
-#include "ImGui\imgui_impl_glfw.h"
-#include "ImGui\imgui_impl_opengl3.h"
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_glfw.h"
+#include "ImGui/imgui_impl_opengl3.h"
 
-#include "OpenGL\Renderer.h"
+#include "OpenGL/Renderer.h"
 
 
-#include "basic\Circle.h"
+#include "basic/Circle.h"
 
 
 namespace pgl {
@@ -31,6 +31,9 @@ namespace pgl {
 		ImGuiIO* m_IO = nullptr;
 
 		Renderer m_Renderer;
+
+		float m_DeltaTime = 0.0f;	// Time between current frame and last frame
+		float m_LastFrame = 0.0f; // Time of last frame
 
 	public:
 
@@ -58,3 +61,4 @@ namespace pgl {
 };
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);

@@ -1,7 +1,7 @@
-#include "PGL.h"
+#include "pgl.h"
 
 
-#include "basic\Circle.h"
+#include "basic/Circle.h"
 #include "Logger.h"
 
 typedef unsigned int uint;
@@ -93,6 +93,10 @@ namespace pgl {
 
     void Application::Run()
     {
+        float currentTime = glfwGetTime();
+        m_DeltaTime = currentTime - m_LastFrame;
+        m_LastFrame = currentTime;
+
         Update(1.0f / m_IO->Framerate);
 
 
@@ -185,4 +189,9 @@ namespace pgl {
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     GLCall(glViewport(0, 0, width, height));
+}
+
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+
 }
