@@ -25,7 +25,7 @@ namespace pgl {
 			std::unique_ptr<Camera> m_ActiveCamera;
 
 		public:
-			ObjectsHandler(Camera* activeCam);
+			ObjectsHandler(Camera& activeCam);
 
 
 			void AddObject(); // maybe return an id ?  --> 
