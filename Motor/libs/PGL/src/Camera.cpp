@@ -48,6 +48,27 @@ namespace pgl {
         updateCameraVectors();
     }
 
+    // copy constructor
+    Camera::Camera(const Camera& cam)
+    {
+        // camera Attributes
+        m_Position = cam.m_Position;
+        m_Front = cam.m_Front;
+        m_Up = cam.m_Up;
+        m_Right = cam.m_Right;
+        m_WorldUp = cam.m_WorldUp;
+
+        // euler Angles
+        m_Yaw = cam.m_Yaw;
+        m_Pitch = cam.m_Pitch;
+
+        // camera options
+        m_MovementSpeed = cam.m_MovementSpeed;
+        m_MouseSensitivity = cam.m_MouseSensitivity;
+        m_Zoom = cam.m_Zoom;
+
+    }
+
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 Camera::GetViewMatrix() const
     {

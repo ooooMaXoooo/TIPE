@@ -5,7 +5,7 @@
 #include "pch.h"
 
 namespace Motor {
-    class Entity : pgl::Drawable {
+    class Entity {
     protected:
         
 
@@ -15,7 +15,6 @@ namespace Motor {
         virtual ~Entity();
 
         virtual void Update(float ts);
-        virtual void OnRender() const;
     };
 
 }

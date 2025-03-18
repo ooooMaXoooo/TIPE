@@ -27,6 +27,7 @@ set(SOURCE_FILES
     "src/Motor/Entity.cpp"
 
     "src/Motor/Core/ObjectsHandler.cpp"
+    "src/Motor/Core/MassiveObject.cpp"
 )
 
 # Create executable

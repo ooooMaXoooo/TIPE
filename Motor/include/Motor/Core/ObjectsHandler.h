@@ -19,16 +19,16 @@ namespace Motor {
 		{
 		private:
 			// the vector of objects to handle
-			std::vector<std::unique_ptr<Drawable>> m_Objects;
+			std::vector<std::unique_ptr<pgl::Drawable>> m_Objects;
 
 			// the active camera
-			std::unique_ptr<Camera> m_ActiveCamera;
+			std::unique_ptr<pgl::Camera> m_ActiveCamera;
 
 		public:
-			ObjectsHandler(Camera& activeCam);
+			ObjectsHandler(pgl::Camera& activeCam);
 
 
-			void AddObject(const Drawable& object); // maybe return an id ?  --> 
+			void AddObject(const pgl::Drawable& object); // maybe return an id ?  --> 
 			//    need to update the same id if objects are removed so its a bad approach  -->
 			//    maybe not sa bad if we use nullptr when looking for an object
 
