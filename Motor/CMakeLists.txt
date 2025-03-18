@@ -37,15 +37,18 @@ target_include_directories(Motor PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/PGL/include/pgl"
 )
 
-target_compile_definitions(Motor PRIVATE 
-    $<$<CONFIG:Debug>:Mt_Debug>
-    $<$<CONFIG:Release>:Mt_Release>
-)
-
 
 
 # Ajouter PGL comme sous-projet
 add_subdirectory(libs/PGL)
+
+
+# preprocessor macro
+target_compile_definitions(PGL PRIVATE 
+    $<$<CONFIG:Debug>:Mt_Debug>
+    $<$<CONFIG:Release>:Mt_Release>
+)
+
 
 
 # Utiliser un header précompilé

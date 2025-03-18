@@ -71,6 +71,10 @@ set(SOURCES
     "${GLAD_SOURCES}"
 )
 
+
+message(STATUS "Configurations disponibles : ${CMAKE_CONFIGURATION_TYPES}")
+message(STATUS "Configuration sélectionnée : ${CMAKE_BUILD_TYPE}")
+
 # Ajout des sous-répertoires pour GLFW et GLM
 add_subdirectory("libs/glfw")
 add_subdirectory("libs/glm")

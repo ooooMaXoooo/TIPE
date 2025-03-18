@@ -80,7 +80,7 @@ namespace pgl {
         GLCall(glEnable(GL_BLEND));
         GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-        c = std::make_unique<Circle>(glm::vec2(0.0f, 0.0f), 10.0f);
+        c = std::make_unique<Circle>(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f);
     }
 
     Application::~Application()
