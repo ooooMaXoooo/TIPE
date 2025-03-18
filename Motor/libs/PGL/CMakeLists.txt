@@ -51,7 +51,7 @@ set (BASIC_SOURCES
 
 set (CORE_SOURCE
     "src/Core/Window.cpp"
-    "src/Core/ObjectsHandler.cpp"
+    #"src/Core/ObjectsHandler.cpp"
 )
 
 set (PGL_SOURCES

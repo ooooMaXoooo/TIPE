@@ -24,13 +24,15 @@ namespace pgl {
         m_Rotations[1] = 0.0f;
         m_Rotations[2] = 0.0f;
 
+        /*
         m_Translations[0] = 0.0f;
         m_Translations[1] = 0.0f;
         m_Translations[2] = -10.0f;
+        */
 
-        m_Scale[0] = 0.0f;
-        m_Scale[1] = 0.0f;
-        m_Scale[2] = 0.0f;
+        m_Scale[0] = 1.0f;
+        m_Scale[1] = 1.0f;
+        m_Scale[2] = 1.0f;
     }
 
 
@@ -47,7 +49,7 @@ namespace pgl {
         // we reserve the place for our vertices
         // 3 coordinates for each point on the circle
         // +3 for the center
-        vertices.emplace_back(3 * segment_count + 3);
+        vertices.reserve(3 * segment_count + 3);
 
         // we add the center first
         vertices.emplace_back(m_Center.x);
@@ -162,18 +164,29 @@ namespace pgl {
 
     void Circle::UpdateTransform()
     {
-        // handle rotations
+        // handle transform
         m_Model = glm::mat4(1.0f);
+
+        // Apply the translation to take the center into account
+        m_Model = glm::translate(m_Model, m_Center);
+
         m_Model = glm::rotate(m_Model, glm::radians(m_Rotations[0]), glm::vec3(1.0f, 0.0f, 0.0f));
         m_Model = glm::rotate(m_Model, glm::radians(m_Rotations[1]), glm::vec3(0.0f, 1.0f, 0.0f));
         m_Model = glm::rotate(m_Model, glm::radians(m_Rotations[2]), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        // handle translations
-        m_View = glm::mat4(1.0f);
-        m_View = glm::translate(m_View, glm::vec3(m_Translations[0], m_Translations[1], m_Translations[2]));
+
+        // Scale the object using the radius
+        m_Model = glm::scale(m_Model, glm::vec3(m_Radius));
+
 
         // handle scale
-        //m_Model = glm::scale(m_Model, glm::vec3(m_Scale[0], m_Scale[1], m_Scale[2]));
+        m_Model = glm::scale(m_Model, glm::vec3(m_Scale[0], m_Scale[1], m_Scale[2]));
+
+
+        // handle translations
+        m_View = glm::mat4(1.0f);
+        //m_View = glm::translate(m_View, glm::vec3(m_Translations[0], m_Translations[1], m_Translations[2]));
+
 
 
         m_Proj = glm::perspective(glm::radians(45.0f), 500.0f / 500.0f, 0.1f, 100.0f);
@@ -186,13 +199,11 @@ namespace pgl {
     void Circle::SetRadius(float radius)
     {
         m_Radius = radius;
-        Init();
     }
 
     void Circle::SetPosition(glm::vec3 center)
     {
         m_Center = center;
-        Init();
     }
 
     void Circle::SetScale(glm::vec3 scale)
@@ -230,32 +241,17 @@ namespace pgl {
     void Circle::OnImGuiRender()
     {
         ImGui::Begin("Circle");
-        
-        float pos[3];
 
-        for (int i = 0; i < 3; i++)
-        {
-            pos[i] = m_Center[i];
-        }
-
+        ImGui::SliderFloat3("position (x,y,z)", &m_Center[0], -20, 20);
         ImGui::SliderFloat3("rotation (x,y,z)", m_Rotations, 0, 360);
-        ImGui::SliderFloat3("translation (x,y,z) (broken)", m_Translations, -20, 20);
-        ImGui::SliderFloat3("translation (x,y,z)", pos, -20, 20);
         ImGui::SliderFloat3("scaling (x,y,z)", m_Scale, 0, 5);
         ImGui::Separator();
         ImGui::Text("In the shader : length(coord) < %.3f", 2.0f * abs(glm::sin(glfwGetTime())));
 
-
-        if (pos[0] != m_Center[0] ||
-            pos[1] != m_Center[1] ||
-            pos[2] != m_Center[2])
-        {
-            SetPosition(glm::vec3(pos[0], pos[1], pos[2]));
-            Logger l(Logger::Filter::FILTER_INFO);
-
-            l.Log("updated postion\n");
-        }
-
+        /*// we change the position only if it change
+        if (ImGui::IsItemDeactivatedAfterEdit()) {
+            SetPosition(m_Center);
+        }*/
 
         UpdateTransform();
 

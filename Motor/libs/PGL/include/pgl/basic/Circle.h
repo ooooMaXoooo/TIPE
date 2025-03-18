@@ -7,7 +7,7 @@
 
 namespace pgl {
 
-    constexpr float PI = 3.14159264;
+    constexpr float PI = glm::pi<float>();
 
     class Circle : public Drawable
     {
@@ -36,7 +36,7 @@ namespace pgl {
 
     private:
         float m_Rotations[3];
-        float m_Translations[3];
+        //float m_Translations[3];
         float m_Scale[3];
 
     private:

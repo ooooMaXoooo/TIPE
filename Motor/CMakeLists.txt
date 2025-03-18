@@ -25,6 +25,8 @@ set(SOURCE_FILES
     "src/Motor/2D/MassiveObject2D.cpp"
     "src/Motor/2D/Planet2D.cpp"
     "src/Motor/Entity.cpp"
+
+    "src/Motor/Core/ObjectsHandler.cpp"
 )
 
 # Create executable

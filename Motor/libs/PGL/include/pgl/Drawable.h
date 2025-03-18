@@ -35,5 +35,6 @@ namespace pgl {
 		virtual void OnRender();
 		virtual void OnImGuiRender();
 
+		void UpdateViewMatrix(glm::mat4 view);
 	};
 };

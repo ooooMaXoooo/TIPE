@@ -9,7 +9,7 @@
 #include <vector>
 
 
-namespace pgl {
+namespace Motor {
 	namespace Core {
 
 		/// <summary>
@@ -28,9 +28,12 @@ namespace pgl {
 			ObjectsHandler(Camera& activeCam);
 
 
-			void AddObject(); // maybe return an id ?  --> 
+			void AddObject(const Drawable& object); // maybe return an id ?  --> 
 			//    need to update the same id if objects are removed so its a bad approach  -->
 			//    maybe not sa bad if we use nullptr when looking for an object
+
+			void UpdateViewMatrix();
+			void UpdateObjects();
 		};
 	};
 };
