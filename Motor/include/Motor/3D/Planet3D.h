@@ -1,21 +1,19 @@
 #pragma once
 
-#include "MassiveObject2D.h"
-#include "pch.h"
+#include "Motor/3D/MassiveObject3D.h"
 
-namespace Motor
-{
-	class Planet2D : public MassiveObject2D
+namespace Motor {
+	class Planet3D : public MassiveObject3D
 	{
 	protected:
 		const double m_Radius;
 
 	public:
-		Planet2D(ldouble mass, glm::vec2 center, double radius, glm::vec2 initial_speed = glm::vec2(0, 0), glm::vec2 initial_acceleration = glm::vec2(0, 0));
-		Planet2D(const Planet2D& planet);
+		Planet3D(ldouble mass, glm::vec3 center, double radius, glm::vec3 initial_speed = glm::vec3(0, 0, 0), glm::vec3 initial_acceleration = glm::vec3(0, 0, 0));
+		Planet3D(const Planet3D& planet);
 		//Planet2D(Planet2D&& planet);
 
-		~Planet2D();
+		~Planet3D();
 
 		// virtual method of entity
 		virtual void Update(float ts) override;
@@ -27,4 +25,4 @@ namespace Motor
 	private:
 		// private methods
 	};
-}
+};

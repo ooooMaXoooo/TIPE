@@ -6,7 +6,10 @@
 
 #include "Camera.h"
 
-#include <vector>
+#include "pch.h"
+
+
+#include "Motor/3D/Planet3D.h"
 
 
 namespace Motor {
@@ -18,22 +21,24 @@ namespace Motor {
 		class ObjectsHandler
 		{
 		private:
+			using Object = Planet3D;
+
 			// the vector of objects to handle
-			std::vector<std::unique_ptr<pgl::Drawable>> m_Objects;
+			std::vector<std::unique_ptr<Object>> m_Objects;
 
 			// the active camera
-			std::unique_ptr<pgl::Camera> m_ActiveCamera;
+			const pgl::Camera& m_ActiveCamera;
 
 		public:
 			ObjectsHandler(pgl::Camera& activeCam);
 
 
-			void AddObject(const pgl::Drawable& object); // maybe return an id ?  --> 
+			void AddObject(const Object& object); // maybe return an id ?  --> 
 			//    need to update the same id if objects are removed so its a bad approach  -->
 			//    maybe not sa bad if we use nullptr when looking for an object
 
 			void UpdateViewMatrix();
-			void UpdateObjects();
+			void UpdateObjects(float ts);
 		};
 	};
 };

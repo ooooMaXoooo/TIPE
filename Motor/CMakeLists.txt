@@ -24,7 +24,12 @@ set(SOURCE_FILES
 
     "src/Motor/2D/MassiveObject2D.cpp"
     "src/Motor/2D/Planet2D.cpp"
+
+    "src/Motor/3D/MassiveObject3D.cpp"
+    "src/Motor/3D/Planet3D.cpp"
+
     "src/Motor/Entity.cpp"
+
 
     "src/Motor/Core/ObjectsHandler.cpp"
     "src/Motor/Core/MassiveObject.cpp"

@@ -9,9 +9,5 @@ namespace Motor {
 	void Entity::Update(float ts)
 	{
 	}
-
-	void Entity::OnRender() const
-	{
-	}
 }
 

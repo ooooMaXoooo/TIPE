@@ -2,7 +2,11 @@
 
 namespace Motor {
 	namespace Core {
+		MassiveObject::MassiveObject(ldouble mass)
+			: m_Mass(mass), Entity(), pgl::Drawable()
+		{
 
+		}
 
 	};
 };
