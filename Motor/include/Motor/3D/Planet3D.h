@@ -22,6 +22,8 @@ namespace Motor {
 		virtual void OnRender() override;
 		virtual void OnImGuiRender() override;
 
+		double GetRadius() const { return m_Radius; }
+
 	private:
 		// private methods
 	};

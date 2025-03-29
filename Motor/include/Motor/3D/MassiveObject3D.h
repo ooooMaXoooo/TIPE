@@ -29,5 +29,11 @@ namespace Motor
 
 
         void ApplyForce(const glm::vec3& force);
+
+        glm::vec3 GetPosition() const { return m_Pos; }
+        glm::vec3 GetVelocity() const { return m_Velocity; }
+        glm::vec3 GetAcceleration() const { return m_Acceleration; }
+
+        glm::vec3 GetForces() const { return m_Forces; }
 	};
 };
