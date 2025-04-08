@@ -7,6 +7,9 @@
 
 namespace pgl {
 
+
+
+    /*
     // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
     enum Camera_Movement {
         FORWARD,
@@ -14,6 +17,7 @@ namespace pgl {
         LEFT,
         RIGHT
     };
+    */
 
     // Default camera values
     constexpr float YAW = -90.0f;
@@ -60,8 +64,9 @@ namespace pgl {
         float GetFov() const;
 
 
-        // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-        void ProcessKeyboard(Camera_Movement direction, float deltaTime);
+        // processes input received from any keyboard-like input system. Accepts input parameter in the form of a direction vector (to abstract it from windowing systems).
+        // The direction vector may need to be a unit length and it is in the base (right, front, up) of the camera
+        void ProcessKeyboard(glm::vec3 direction, float deltaTime);
 
         // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
         void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);

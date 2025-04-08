@@ -81,9 +81,20 @@ namespace pgl {
     }
 
 
-    // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime)
+    // processes input received from any keyboard-like input system. Accepts input parameter in the form of a direction vector (to abstract it from windowing systems).
+    // The direction vector may need to be a unit length and it is in the base (right, front, up) of the camera
+    void Camera::ProcessKeyboard(glm::vec3 direction, float deltaTime)
     {
+        // update the direction to put in the base requiered
+        direction = direction.x * m_Right + direction.y * m_Front + direction.z * m_Up;
+
+        // apply changes
+        const float speed = m_MovementSpeed * deltaTime;
+        m_Position += direction * speed;
+
+        /*
+        *   old version -- to delete in the futur
+        *
         float velocity = m_MovementSpeed * deltaTime;
         if (direction == FORWARD)
             m_Position += m_Front * velocity;
@@ -93,6 +104,7 @@ namespace pgl {
             m_Position -= m_Right * velocity;
         if (direction == RIGHT)
             m_Position += m_Right * velocity;
+        */
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.

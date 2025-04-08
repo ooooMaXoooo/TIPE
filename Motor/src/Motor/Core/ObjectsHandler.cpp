@@ -167,22 +167,39 @@ namespace Motor {
 
 		void ObjectsHandler::processInputs(float deltaTime)
 		{
+			// handle camera movements
+			glm::vec3 direction = glm::vec3(0);
 			if (ImGui::IsKeyDown(ImGuiKey_Z))
 			{
-				m_ActiveCamera.ProcessKeyboard(pgl::Camera_Movement::FORWARD, deltaTime);
+				direction += glm::vec3(0.0f, 1.0f, 0.0f);
 			} 
-			else if (ImGui::IsKeyDown(ImGuiKey_S))
+			if (ImGui::IsKeyDown(ImGuiKey_S))
 			{
-				m_ActiveCamera.ProcessKeyboard(pgl::Camera_Movement::BACKWARD, deltaTime);
+				direction += glm::vec3(0.0f, -1.0f, 0.0f);
 			}
-			else if (ImGui::IsKeyDown(ImGuiKey_Q))
+			if (ImGui::IsKeyDown(ImGuiKey_Q))
 			{
-				m_ActiveCamera.ProcessKeyboard(pgl::Camera_Movement::LEFT, deltaTime);
+				direction += glm::vec3(-1.0f, 0.0f, 0.0f);
 			}
-			else if (ImGui::IsKeyDown(ImGuiKey_D))
+			if (ImGui::IsKeyDown(ImGuiKey_D))
 			{
-				m_ActiveCamera.ProcessKeyboard(pgl::Camera_Movement::RIGHT, deltaTime);
+				direction += glm::vec3(1.0f, 0.0f, 0.0f);
 			}
+			if (ImGui::IsKeyDown(ImGuiKey_A))
+			{
+				direction += (glm::vec3(0.0f, 0.0f, -1.0f));
+			}
+			if (ImGui::IsKeyDown(ImGuiKey_E))
+			{
+				direction += (glm::vec3(0.0f, 0.0f, 1.0f));
+			}
+
+			const float DIRECTION_LENGTH = glm::length(direction);
+
+			if (DIRECTION_LENGTH)
+				direction = glm::normalize(direction);
+
+			m_ActiveCamera.ProcessKeyboard(direction, deltaTime);
 		}
 	};
 };
