@@ -19,7 +19,7 @@ namespace Motor {
 
     public:
 
-        MassiveObject2D(ldouble mass, glm::vec2 pos, glm::vec2 initial_velocity = glm::vec2(0, 0), glm::vec2 initial_acceleration = glm::vec2(0, 0));
+        MassiveObject2D(ldouble mass, glm::vec2 pos, GLFWwindow* parent_window, glm::vec2 initial_velocity = glm::vec2(0, 0), glm::vec2 initial_acceleration = glm::vec2(0, 0));
         MassiveObject2D(const MassiveObject2D& massiveObject_2D);
 
         virtual ~MassiveObject2D();

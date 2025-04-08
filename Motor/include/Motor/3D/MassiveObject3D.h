@@ -15,7 +15,7 @@ namespace Motor
 
     public:
 
-        MassiveObject3D(ldouble mass, glm::vec3 pos, glm::vec3 initial_velocity = glm::vec3(0, 0, 0), glm::vec3 initial_acceleration = glm::vec3(0, 0, 0));
+        MassiveObject3D(ldouble mass, glm::vec3 pos, GLFWwindow* parent_window, glm::vec3 initial_velocity = glm::vec3(0, 0, 0), glm::vec3 initial_acceleration = glm::vec3(0, 0, 0));
         MassiveObject3D(const MassiveObject3D& massiveObject_3D);
 
         virtual ~MassiveObject3D();

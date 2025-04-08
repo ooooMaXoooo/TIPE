@@ -1,13 +1,13 @@
 #include "Motor\2D\Planet2D.h"
 
 namespace Motor {
-    Planet2D::Planet2D(ldouble mass, glm::vec2 center, double radius, glm::vec2 v0, glm::vec2 a0)
-        : MassiveObject2D{ mass, center, v0, a0 }, m_Radius(radius)
+    Planet2D::Planet2D(ldouble mass, glm::vec2 center, double radius, GLFWwindow* parent_window, glm::vec2 v0, glm::vec2 a0)
+        : MassiveObject2D{ mass, center, parent_window, v0, a0 }, m_Radius(radius)
     {
     }
 
     Planet2D::Planet2D(const Planet2D& p)
-        : m_Radius(p.m_Radius), MassiveObject2D{ p.m_Mass, p.m_Pos, p.m_Velocity, p.m_Acceleration }
+        : m_Radius(p.m_Radius), MassiveObject2D{ p.m_Mass, p.m_Pos, p.m_Parent_window, p.m_Velocity, p.m_Acceleration }
     {
     }
 

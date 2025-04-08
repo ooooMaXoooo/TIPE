@@ -2,8 +2,8 @@
 
 namespace Motor {
 	namespace Core {
-		MassiveObject::MassiveObject(ldouble mass)
-			: m_Mass(mass), Entity(), pgl::Drawable()
+		MassiveObject::MassiveObject(ldouble mass, GLFWwindow* parent_window)
+			: m_Mass(mass), Entity(), pgl::Drawable(parent_window)
 		{
 
 		}

@@ -17,7 +17,7 @@ namespace Motor
 
 		public:
 
-			MassiveObject(ldouble mass);
+			MassiveObject(ldouble mass, GLFWwindow* parent_window);
 
 			/*
 			// virtual method of entity

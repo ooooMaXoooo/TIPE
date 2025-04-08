@@ -18,7 +18,7 @@ namespace pgl {
         
     public:
 
-        Circle(glm::vec3 center, float radius);
+        Circle(glm::vec3 center, float radius, GLFWwindow* parent_window);
 
 
         virtual void OnRender() override;

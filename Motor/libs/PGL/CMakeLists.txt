@@ -56,7 +56,7 @@ set (CORE_SOURCE
 
 set (PGL_SOURCES
     "src/Logger.cpp"
-    "src/pgl.cpp"
+    #"src/pgl.cpp"
     "src/Drawable.cpp"
     "src/Camera.cpp"
     "${BASIC_SOURCES}"

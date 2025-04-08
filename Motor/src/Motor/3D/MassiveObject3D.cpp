@@ -1,18 +1,23 @@
 #include "Motor/3D/MassiveObject3D.h"
 
 namespace Motor {
-	MassiveObject3D::MassiveObject3D(ldouble mass, glm::vec3 pos, glm::vec3 v0, glm::vec3 a0)
-		: Core::MassiveObject(mass), m_Pos(pos), m_Velocity(v0), m_Acceleration(a0)
+	MassiveObject3D::MassiveObject3D(ldouble mass, glm::vec3 pos, GLFWwindow* parent_window, glm::vec3 v0, glm::vec3 a0)
+		: Core::MassiveObject(mass, parent_window), m_Pos(pos), m_Velocity(v0), m_Acceleration(a0),
+		m_Forces(0)
 	{
-
 	}
 
 	MassiveObject3D::MassiveObject3D(const MassiveObject3D& massiveObject_3D)
-		:   Core::MassiveObject(massiveObject_3D.m_Mass),
+		:   Core::MassiveObject(massiveObject_3D.m_Mass, massiveObject_3D.m_Parent_window),
 			m_Pos(massiveObject_3D.m_Pos),
 			m_Velocity(massiveObject_3D.m_Velocity),
-			m_Acceleration(massiveObject_3D.m_Acceleration)
+			m_Acceleration(massiveObject_3D.m_Acceleration),
+			m_Forces(0)
 	{
+	}
+
+	MassiveObject3D::~MassiveObject3D() {
+
 	}
 
 	// virtual method of entity

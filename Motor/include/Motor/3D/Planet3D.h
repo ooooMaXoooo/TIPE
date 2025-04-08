@@ -9,7 +9,8 @@ namespace Motor {
 		const double m_Radius;
 
 	public:
-		Planet3D(ldouble mass, glm::vec3 center, double radius, glm::vec3 initial_speed = glm::vec3(0, 0, 0), glm::vec3 initial_acceleration = glm::vec3(0, 0, 0));
+
+		Planet3D(ldouble mass, glm::vec3 center, double radius, GLFWwindow* parent_window, Renderer& renderer, glm::vec3 initial_speed = glm::vec3(0, 0, 0), glm::vec3 initial_acceleration = glm::vec3(0, 0, 0));
 		Planet3D(const Planet3D& planet);
 		//Planet2D(Planet2D&& planet);
 
@@ -26,5 +27,8 @@ namespace Motor {
 
 	private:
 		// private methods
+		void UpdateTransform();
+
+		void InitPlanet();
 	};
 };

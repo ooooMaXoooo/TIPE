@@ -31,10 +31,14 @@ namespace pgl {
 		glm::mat4 m_MVP;
 
 
+		GLFWwindow* m_Parent_window;
+
 	public :
+		Drawable(GLFWwindow* parent_window);
+
 		virtual void OnRender();
 		virtual void OnImGuiRender();
 
-		void UpdateViewMatrix(glm::mat4 view);
+		void UpdateViewMatrix(const glm::mat4& view);
 	};
 };

@@ -20,7 +20,7 @@ set(SOURCE_FILES
     "src/pch.cpp"
     "src/Motor.cpp"
 
-    "src/General/Vector.cpp"
+    "src/General/Application.cpp"
 
     "src/Motor/2D/MassiveObject2D.cpp"
     "src/Motor/2D/Planet2D.cpp"
