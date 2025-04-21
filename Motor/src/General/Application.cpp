@@ -102,7 +102,8 @@ void Application::Run()
     m_DeltaTime = currentTime - m_LastFrame;
     m_LastFrame = currentTime;
 
-    Update(1.0f / m_IO->Framerate);
+    //Update(1.0f / m_IO->Framerate);
+    Update(m_DeltaTime);
 
 
     GLCall(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));

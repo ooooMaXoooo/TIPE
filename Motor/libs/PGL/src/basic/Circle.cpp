@@ -6,8 +6,8 @@
 
 namespace pgl {
 
-    Circle::Circle(glm::vec3 center, float radius, GLFWwindow* parent_window)
-        : m_Center(center), m_Radius(radius), Drawable(parent_window)
+    Circle::Circle(glm::vec3 center, float radius, GLFWwindow* parent_window, Renderer& renderer)
+        : m_Center(center), m_Radius(radius), Drawable(parent_window, renderer)
     {
         Init();
 

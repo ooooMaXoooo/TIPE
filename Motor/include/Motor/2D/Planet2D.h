@@ -11,7 +11,7 @@ namespace Motor
 		const double m_Radius;
 
 	public:
-		Planet2D(ldouble mass, glm::vec2 center, double radius, GLFWwindow* parent_window, glm::vec2 initial_speed = glm::vec2(0, 0), glm::vec2 initial_acceleration = glm::vec2(0, 0));
+		Planet2D(ldouble mass, glm::vec2 center, double radius, GLFWwindow* parent_window, Renderer& renderer, glm::vec2 initial_speed = glm::vec2(0, 0), glm::vec2 initial_acceleration = glm::vec2(0, 0));
 		Planet2D(const Planet2D& planet);
 		//Planet2D(Planet2D&& planet);
 

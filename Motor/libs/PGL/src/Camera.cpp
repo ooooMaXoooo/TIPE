@@ -1,5 +1,12 @@
 #include "Camera.h"
 
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
+
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_glfw.h"
+#include "ImGui/imgui_impl_opengl3.h"
+
 namespace pgl {
 	/*Camera::Camera(const glm::vec3& position, const glm::vec3& target)
 		: m_Pos(position), m_Target(target)
@@ -90,7 +97,7 @@ namespace pgl {
 
         // apply changes
         const float speed = m_MovementSpeed * deltaTime;
-        m_Position += direction * speed;
+        m_Position += speed * direction;
 
         /*
         *   old version -- to delete in the futur
@@ -151,5 +158,21 @@ namespace pgl {
         // also re-calculate the Right and Up vector
         m_Right = glm::normalize(glm::cross(m_Front, m_WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
         m_Up = glm::normalize(glm::cross(m_Right, m_Front));
+    }
+
+    void Camera::OnImGuiRender()
+    {
+        //ImGui::Begin("Camera");
+
+        ImGui::Text("Position (x, y, z) : (%.2f, %.2f ,%.2f)", m_Position.x, m_Position.y, m_Position.z);
+        ImGui::InputFloat("Camera speed", &m_MovementSpeed, 1, 10);
+
+        glm::mat4 view = GetViewMatrix();
+        ImGui::Text("View matrix :");
+        for (int i = 0; i < 4; ++i) {
+            ImGui::Text("[% .3f, % .3f, % .3f, % .3f]",
+                view[i][0], view[i][1], view[i][2], view[i][3]);
+        }
+        //ImGui::End();
     }
 }

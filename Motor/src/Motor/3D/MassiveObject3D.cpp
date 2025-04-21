@@ -1,14 +1,14 @@
 #include "Motor/3D/MassiveObject3D.h"
 
 namespace Motor {
-	MassiveObject3D::MassiveObject3D(ldouble mass, glm::vec3 pos, GLFWwindow* parent_window, glm::vec3 v0, glm::vec3 a0)
-		: Core::MassiveObject(mass, parent_window), m_Pos(pos), m_Velocity(v0), m_Acceleration(a0),
+	MassiveObject3D::MassiveObject3D(ldouble mass, glm::vec3 pos, GLFWwindow* parent_window, Renderer& renderer, glm::vec3 v0, glm::vec3 a0)
+		: Core::MassiveObject(mass, parent_window, renderer), m_Pos(pos), m_Velocity(v0), m_Acceleration(a0),
 		m_Forces(0)
 	{
 	}
 
 	MassiveObject3D::MassiveObject3D(const MassiveObject3D& massiveObject_3D)
-		:   Core::MassiveObject(massiveObject_3D.m_Mass, massiveObject_3D.m_Parent_window),
+		:   Core::MassiveObject(massiveObject_3D.m_Mass, massiveObject_3D.m_Parent_window, massiveObject_3D.m_renderer),
 			m_Pos(massiveObject_3D.m_Pos),
 			m_Velocity(massiveObject_3D.m_Velocity),
 			m_Acceleration(massiveObject_3D.m_Acceleration),
@@ -46,7 +46,8 @@ namespace Motor {
 		// apply the remaining half of acceleration to velocity in order to correct the mean
 		m_Velocity += half_acc;
 
-		// done ?
+		// reset forces to avoid old forces to interact at the next frame
+		m_Forces = glm::vec3(0.0f);
 	}
 
 	// virtual method of drawable

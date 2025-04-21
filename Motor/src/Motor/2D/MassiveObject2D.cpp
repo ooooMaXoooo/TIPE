@@ -3,8 +3,8 @@
 
 namespace Motor {
 
-    MassiveObject2D::MassiveObject2D(ldouble mass, glm::vec2 pos, GLFWwindow* parent_window, glm::vec2 initial_velocity, glm::vec2 initial_acceleration)
-        : Core::MassiveObject(mass, parent_window),
+    MassiveObject2D::MassiveObject2D(ldouble mass, glm::vec2 pos, GLFWwindow* parent_window, Renderer& renderer, glm::vec2 initial_velocity, glm::vec2 initial_acceleration)
+        : Core::MassiveObject(mass, parent_window, renderer),
           m_Pos(pos), m_Velocity(initial_velocity), m_Acceleration(initial_acceleration),
           m_Forces(glm::vec2(0))
     {
@@ -13,7 +13,7 @@ namespace Motor {
     
 
     MassiveObject2D::MassiveObject2D(const MassiveObject2D& other)
-        : Core::MassiveObject(other.m_Mass, other.m_Parent_window), m_Pos(other.m_Pos), m_Velocity(other.m_Velocity), m_Acceleration(other.m_Acceleration),
+        : Core::MassiveObject(other.m_Mass, other.m_Parent_window, other.m_renderer), m_Pos(other.m_Pos), m_Velocity(other.m_Velocity), m_Acceleration(other.m_Acceleration),
             m_Forces(other.m_Forces)
     {
     }

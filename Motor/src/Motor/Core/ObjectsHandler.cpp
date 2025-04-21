@@ -35,39 +35,105 @@ namespace Motor {
 
 			// handle forces and update every object at the same time
 			const size_t NB_OBJECTS = m_Objects.size();
+			const ldouble softening = 1e-3; // valeur ajustable selon tes unités
+
 			for (int i = 0; i < NB_OBJECTS; i++)
 			{
 				std::unique_ptr<Object>& obj1 = m_Objects[i];
+
 				for (int j = i + 1; j < NB_OBJECTS; j++)
 				{
-					//calculate the force of i on j
 					std::unique_ptr<Object>& obj2 = m_Objects[j];
-					const glm::vec3 direction_vector = obj1->GetPosition() - obj2->GetPosition(); // i - j
-					const glm::vec3 unit_vector = glm::normalize(direction_vector);
-					const ldouble distance = glm::length(direction_vector);
 
-					glm::vec3 force(0);
+					// Vecteur direction de i vers j
+					const glm::vec3 direction_vector = obj1->GetPosition() - obj2->GetPosition();
 
-					if(distance != 0)
-						force = (static_cast<float>(_G * obj1->GetMass() * obj2->GetMass() / distance) * unit_vector);
+					// Distance au carré avec softening
+					const ldouble distance_squared = glm::dot(direction_vector, direction_vector) + softening * softening;
+					const ldouble distance = std::sqrt(distance_squared);
 
-					// apply this force on j and the opposite on i
-					obj1->ApplyForce(-force); // i
-					obj2->ApplyForce(force);  // j
+					// Vecteur unitaire
+					const glm::vec3 unit_vector = direction_vector / static_cast<float>(distance);
+
+					// Force gravitationnelle
+					glm::vec3 force = static_cast<float>(_G * obj1->GetMass() * obj2->GetMass() / distance_squared) * unit_vector;
+
+					// Application de la force : action = -réaction
+					obj1->ApplyForce(-force);
+					obj2->ApplyForce(force);
 				}
-				// we have finish looking for all forces on i.
-				// update i
+
+				// Une fois toutes les forces appliquées sur obj1, on met à jour sa position
 				obj1->Update(ts);
 			}
 		}
 
-		/// <summary>
-		/// check for collisions with an octree
-		/// if there is collision between 2 objects, we destroy both of them
-		/// </summary>
 		void ObjectsHandler::HandleCollisions()
 		{
+			// Le facteur de masse pour déterminer quel objet est "très peu massique"
+			const double massFactor = 1e4;
 
+			// On utilise une taille dynamique pour éviter des problèmes avec les indices après suppression
+			size_t NB_OBJECTS = m_Objects.size();
+			for (size_t i = 0; i < NB_OBJECTS; ++i) {
+				std::unique_ptr<Object>& obj1 = m_Objects[i];
+
+				for (size_t j = i + 1; j < NB_OBJECTS; ++j) {
+					std::unique_ptr<Object>& obj2 = m_Objects[j];
+
+					// Vérifier si une collision a eu lieu (avec ta méthode de détection de collision, par exemple)
+					if (DetectCollision(*obj1, *obj2)) {
+						// Calcul des masses relatives pour déterminer quel objet est dominant
+						double massRatio = obj1->GetMass() / obj2->GetMass();
+
+						// Traiter la collision selon le rapport de masse
+						if (massRatio >= massFactor) {
+							// obj2 est très léger, on applique un impact léger sur obj1 et on détruit obj2
+							obj1->ApplyForce((obj2->GetVelocity() - obj1->GetVelocity()) * 0.01f);
+							m_Objects.erase(m_Objects.begin() + j);  // Supprimer obj2 du tableau
+							--j; // Ajuster l'index j après la suppression
+							NB_OBJECTS = m_Objects.size(); // Mettre à jour la taille après suppression
+							continue; // Passer à la prochaine paire
+						}
+						else if (massRatio <= 1.0 / massFactor) {
+							// obj1 est très léger, on applique un impact léger sur obj2 et on détruit obj1
+							obj2->ApplyForce((obj1->GetVelocity() - obj2->GetVelocity()) * 0.01f);
+							m_Objects.erase(m_Objects.begin() + i);  // Supprimer obj1 du tableau
+							--i; // Ajuster l'index i après la suppression
+							NB_OBJECTS = m_Objects.size(); // Mettre à jour la taille après suppression
+							break; // Passer à l'objet suivant
+						}
+						else {
+							// Les deux objets ont des masses similaires, on les détruit tous les deux
+							m_Objects.erase(m_Objects.begin() + j);  // Supprimer obj2
+							m_Objects.erase(m_Objects.begin() + i);  // Supprimer obj1
+							--j; // Ajuster l'index j après la suppression de obj2
+							NB_OBJECTS = m_Objects.size(); // Mettre à jour la taille après suppression
+							break; // Passer à l'objet suivant
+						}
+					}
+				}
+			}
+		}
+
+		bool ObjectsHandler::DetectCollision(const Object& obj1, const Object& obj2) const
+		{
+			// Récupérer les positions des objets
+			const glm::vec3 pos1 = obj1.GetPosition();
+			const glm::vec3 pos2 = obj2.GetPosition();
+
+			// Calculer la distance entre les deux objets
+			float distance = glm::length(pos1 - pos2);
+
+			// Récupérer les rayons des objets (supposés être des sphères)
+			float radius1 = obj1.GetRadius();
+			float radius2 = obj2.GetRadius();
+
+			// Vérifier si la distance est inférieure à la somme des rayons
+			if (distance < (radius1 + radius2)) {
+				return true; // Collision détectée
+			}
+			return false; // Pas de collision
 		}
 
 		void ObjectsHandler::RenderObjects()
@@ -104,10 +170,9 @@ namespace Motor {
 
 				if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-
-					ImGui::SliderFloat3("Position (x, y, z)", &pos_to_add[0], -20, 20);
-					ImGui::SliderFloat3("Rotation (x, y, z)", &rot_to_add[0], -20, 20);
-					ImGui::SliderFloat3("Scale (x, y, z)", &sca_to_add[0], 0, 5);
+					ImGui::InputFloat3("Position (x, y, z)", &pos_to_add[0]);
+					ImGui::InputFloat3("Rotation (x, y, z)", &rot_to_add[0]);
+					ImGui::InputFloat3("Scale (x, y, z)", &sca_to_add[0]);
 
 					ImGui::TreePop();
 				}
@@ -161,9 +226,15 @@ namespace Motor {
 				ImGui::EndTable();
 			}
 
+			// camera component
+			ImGui::SeparatorText("Camera");
+			m_ActiveCamera.OnImGuiRender();
+
+			// renderer component
+			m_Renderer.OnImGuiRender();
+
 			ImGui::End();
 		}
-
 
 		void ObjectsHandler::processInputs(float deltaTime)
 		{

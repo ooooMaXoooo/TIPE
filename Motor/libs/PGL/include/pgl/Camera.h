@@ -74,6 +74,10 @@ namespace pgl {
         // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
         void ProcessMouseScroll(float yoffset);
 
+
+        // UI
+        void OnImGuiRender();
+
     private:
         // calculates the front vector from the Camera's (updated) Euler Angles
         void updateCameraVectors();

@@ -25,7 +25,7 @@ namespace pgl {
 
 		std::unique_ptr<Shader> m_Shader;
 
-		Renderer m_renderer;
+		Renderer& m_renderer;
 
 		glm::mat4 m_Proj, m_View, m_Model;
 		glm::mat4 m_MVP;
@@ -34,7 +34,7 @@ namespace pgl {
 		GLFWwindow* m_Parent_window;
 
 	public :
-		Drawable(GLFWwindow* parent_window);
+		Drawable(GLFWwindow* parent_window, Renderer& renderer);
 
 		virtual void OnRender();
 		virtual void OnImGuiRender();

@@ -82,6 +82,8 @@ namespace Motor {
 			*/
 			void HandleCollisions();
 
+			bool DetectCollision(const Object& obj1, const Object& obj2) const;
+
 		};
 	};
 };

@@ -3,16 +3,14 @@
 namespace Motor {
 
     Planet3D::Planet3D(ldouble mass, glm::vec3 center, double radius, GLFWwindow* parent_window, Renderer& renderer, glm::vec3 v0, glm::vec3 a0)
-        : MassiveObject3D{ mass, center, parent_window, v0, a0 }, m_Radius(radius)
+        : MassiveObject3D{ mass, center, parent_window, renderer, v0, a0 }, m_Radius(radius)
     {
-        m_renderer = renderer;
         InitPlanet();
     }
 
     Planet3D::Planet3D(const Planet3D& p)
-        : m_Radius(p.m_Radius), MassiveObject3D{ p.m_Mass, p.m_Pos, p.m_Parent_window, p.m_Velocity, p.m_Acceleration }
+        : m_Radius(p.m_Radius), MassiveObject3D{ p.m_Mass, p.m_Pos, p.m_Parent_window, p.m_renderer, p.m_Velocity, p.m_Acceleration }
     {
-        m_renderer = p.m_renderer;
         InitPlanet();
     }
 
@@ -79,19 +77,41 @@ namespace Motor {
 
     void Planet3D::InitPlanet()
     {
-        float vertices[] =
-        {   -0.5f, -0.5f, 0.0f,
-            -0.5f,  0.5f, 0.0f,
-             0.5f,  0.5f, 0.0f,
-             0.5f, -0.5f, 0.0f
-        };
+        std::vector<glm::vec3> vertices;
+        std::vector<unsigned int> indices;
+        int sectorCount = 36;
+        int stackCount = 18;
+        float radius = 1.0f;
 
-        uint indices[] =
-        {   0, 1, 2,
-            2, 3, 0
-        };
+        for (int i = 0; i <= stackCount; ++i) {
+            float stackAngle = glm::pi<float>() / 2 - i * glm::pi<float>() / stackCount; // de +pi/2 à -pi/2
+            float xy = radius * cos(stackAngle);
+            float z = radius * sin(stackAngle);
 
-        m_VBO = std::make_unique<VertexBuffer>(vertices, sizeof(vertices));
+            for (int j = 0; j <= sectorCount; ++j) {
+                float sectorAngle = j * 2 * glm::pi<float>() / sectorCount;
+
+                float x = xy * cos(sectorAngle);
+                float y = xy * sin(sectorAngle);
+                vertices.push_back(glm::vec3(x, y, z));
+            }
+        }
+
+        for (int i = 0; i < stackCount; ++i) {
+            int k1 = i * (sectorCount + 1); // début de la pile i
+            int k2 = k1 + sectorCount + 1;  // début de la pile suivante
+
+            for (int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
+                if (i != 0)
+                    indices.push_back(k1), indices.push_back(k2), indices.push_back(k1 + 1);
+                if (i != (stackCount - 1))
+                    indices.push_back(k1 + 1), indices.push_back(k2), indices.push_back(k2 + 1);
+            }
+        }
+
+
+        m_VBO = std::make_unique<VertexBuffer>(reinterpret_cast<const float*>(vertices.data()), vertices.size() * sizeof(glm::vec3));
+
 
         // vertex buffer layout
         VertexBufferLayout layout;
@@ -103,7 +123,8 @@ namespace Motor {
 
 
         // index buffer
-        m_IBO = std::make_unique<IndexBuffer>(indices, 6);
+        m_IBO = std::make_unique<IndexBuffer>(indices.data(), indices.size());
+
 
 
         /// Shaders
@@ -116,27 +137,21 @@ namespace Motor {
             "void main()\n"
             "{\n"
             "    gl_Position = iMVP * vec4(pos, 1.0);\n"
-            "    vertexColor = gl_Position;\n"
+            "    float colorFactor = (sin(iTime + pos.x) + cos(iTime + pos.y)) * 0.5 + 0.5;\n"
+            "    vertexColor = vec4(colorFactor, colorFactor * 0.5, 1.0 - colorFactor, 1.0);\n"
             "}\0";
+
 
         const char* frag_source =
             "#version 330 core\n"
             "out vec4 FragColor;\n"
             "in vec4 vertexColor;\n"
             "uniform float iTime;\n"
-            "//uniform mat4 iMVP;\n"
-            "uniform float iRadius;\n"
             "void main()\n"
             "{\n"
-            "    vec3 coord = (2. * (vertexColor).xyz / vec3(500.0, 500.0, 1.0f)) - vec3(1.0);\n"
-            "    if (length(vertexColor.xy) < iRadius)\n"
-            "    {\n"
-            "        FragColor = vec4(vertexColor.xyz, 1.0f);\n"
-            "    }\n"
-            "    else {\n"
-            "        FragColor = vec4(0.0);\n"
-            "    }\n"
-            "    //FragColor = vec4(vertexColor.xyz, 1.0f);\n"
+            "    float intensity = 0.5 + 0.5 * sin(iTime);\n"
+            "    vec3 color = mix(vertexColor.rgb, vec3(1.0, 1.0, 1.0), intensity * 0.2);\n"
+            "    FragColor = vec4(color, 1.0);\n"
             "}\0";
 
         m_Shader = std::make_unique<Shader>(vert_source, frag_source, false);
