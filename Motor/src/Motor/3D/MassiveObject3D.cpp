@@ -26,7 +26,7 @@ namespace Motor {
 		// look for forces  --> job done by the objectHandler
 		// apply the resultant to the acceleration
 		// ( WARNING : do not ADD the forces to the acceleration / velocity, Newton's laws is   acceleration IS EQUAL TO the sum of forces)
-		m_Acceleration = m_Forces;
+		m_Acceleration = static_cast<float>(1 / m_Mass) * m_Forces;
 
 		// check for potential collisions
 
@@ -37,7 +37,7 @@ namespace Motor {
 		//  ----> it's handle by the objectHandler
 
 		// apply half the acceleration to velocity
-		const glm::vec3 half_acc = m_Acceleration * ts * 0.5f;
+		const glm::vec3 half_acc = static_cast<float>(ts * 0.5) * m_Acceleration;
 		m_Velocity += half_acc;
 
 		// apply velocity to position
@@ -47,8 +47,25 @@ namespace Motor {
 		m_Velocity += half_acc;
 
 		// reset forces to avoid old forces to interact at the next frame
-		m_Forces = glm::vec3(0.0f);
+		m_Forces = glm::vec3(0.0);
 	}
+
+
+	void MassiveObject3D::UpdateFirstPart(float ts) {
+		m_Acceleration = static_cast<float>(1/m_Mass) * m_Forces;
+		m_Velocity += static_cast<float>(ts*0.5) * m_Acceleration;
+		m_Pos += ts * m_Velocity;
+
+		m_Forces = glm::vec3(0.0);
+	}
+
+	void MassiveObject3D::UpdateSecondPart(float ts) {
+		m_Acceleration = static_cast<float>(1 / m_Mass) * m_Forces;
+		m_Velocity += static_cast<float>(ts * 0.5) * m_Acceleration;
+		m_Forces = glm::vec3(0.0);
+	}
+
+
 
 	// virtual method of drawable
 	void MassiveObject3D::OnRender()

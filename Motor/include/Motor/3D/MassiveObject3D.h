@@ -22,6 +22,8 @@ namespace Motor
 
         // virtual method of entity
         virtual void Update(float ts) override;
+        virtual void UpdateFirstPart(float ts) override;
+        virtual void UpdateSecondPart(float ts) override;
 
         // virtual method of drawable
         virtual void OnRender() override;

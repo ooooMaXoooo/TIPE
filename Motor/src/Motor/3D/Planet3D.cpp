@@ -24,7 +24,7 @@ namespace Motor {
         // look for forces  --> job done by the objectHandler
         // apply the resultant to the acceleration
         // ( WARNING : do not ADD the forces to the acceleration / velocity, Newton's laws is   acceleration IS EQUAL TO the sum of forces)
-        m_Acceleration = m_Forces / glm::vec3(m_Mass);
+        m_Acceleration = static_cast<float>(1/m_Mass) * m_Forces;
 
         // check for potential collisions
 
@@ -49,6 +49,20 @@ namespace Motor {
         UpdateTransform();
 
         // done ?
+    }
+
+    void Planet3D::UpdateFirstPart(float ts) {
+        m_Acceleration = static_cast<float>(1 / m_Mass) * m_Forces;
+        m_Velocity += static_cast<float>(ts * 0.5) * m_Acceleration;
+        m_Pos += ts * m_Velocity;
+
+        m_Forces = glm::vec3(0.0);
+    }
+
+    void Planet3D::UpdateSecondPart(float ts) {
+        m_Acceleration = static_cast<float>(1 / m_Mass) * m_Forces;
+        m_Velocity += static_cast<float>(ts * 0.5) * m_Acceleration;
+        m_Forces = glm::vec3(0.0);
     }
 
 

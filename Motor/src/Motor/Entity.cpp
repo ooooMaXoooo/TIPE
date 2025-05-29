@@ -9,5 +9,13 @@ namespace Motor {
 	void Entity::Update(float ts)
 	{
 	}
+
+	void Entity::UpdateFirstPart(float ts) {
+
+	}
+	
+	void Entity::UpdateSecondPart(float ts) {
+
+	}
 }
 

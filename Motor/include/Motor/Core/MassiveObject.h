@@ -3,7 +3,7 @@
 #include "pch.h"
 #include "Motor/Entity.h"
 
-constexpr auto _G = 6.67e-11;
+constexpr double _G = 6.67e-11;
 
 using ldouble = long double;
 

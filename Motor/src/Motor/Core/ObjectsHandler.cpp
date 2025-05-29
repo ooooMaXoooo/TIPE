@@ -35,7 +35,7 @@ namespace Motor {
 
 			// handle forces and update every object at the same time
 			const size_t NB_OBJECTS = m_Objects.size();
-			const ldouble softening = 1e-3; // valeur ajustable selon tes unités
+			const ldouble softening = 1e-3; // valeur ajustable selon les unités
 
 			for (int i = 0; i < NB_OBJECTS; i++)
 			{
@@ -64,7 +64,38 @@ namespace Motor {
 				}
 
 				// Une fois toutes les forces appliquées sur obj1, on met à jour sa position
-				obj1->Update(ts);
+				obj1->UpdateFirstPart(ts);
+			}
+
+			// tous les objets ont été mis à jours, il faut maintenant faire la seconde partie de la méthode de Leapfrog
+			for (int i = 0; i < NB_OBJECTS; i++)
+			{
+				std::unique_ptr<Object>& obj1 = m_Objects[i];
+
+				for (int j = i + 1; j < NB_OBJECTS; j++)
+				{
+					std::unique_ptr<Object>& obj2 = m_Objects[j];
+
+					// Vecteur direction de i vers j
+					const glm::vec3 direction_vector = obj1->GetPosition() - obj2->GetPosition();
+
+					// Distance au carré avec softening
+					const ldouble distance_squared = glm::dot(direction_vector, direction_vector) + softening * softening;
+					const ldouble distance = std::sqrt(distance_squared);
+
+					// Vecteur unitaire
+					const glm::vec3 unit_vector = direction_vector / static_cast<float>(distance);
+
+					// Force gravitationnelle
+					glm::vec3 force = static_cast<float>(_G * obj1->GetMass() * obj2->GetMass() / distance_squared) * unit_vector;
+
+					// Application de la force : action = -réaction
+					obj1->ApplyForce(-force);
+					obj2->ApplyForce(force);
+				}
+
+				// Une fois toutes les forces appliquées sur obj1, on met à jour sa position
+				obj1->UpdateSecondPart(ts);
 			}
 		}
 

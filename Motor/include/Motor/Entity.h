@@ -15,6 +15,8 @@ namespace Motor {
         virtual ~Entity();
 
         virtual void Update(float ts);
+        virtual void UpdateFirstPart(float ts);
+        virtual void UpdateSecondPart(float ts);
     };
 
 }
