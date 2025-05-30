@@ -173,6 +173,7 @@ void Application::ProcessInputs(float deltaTime)
 {
     if (ImGui::IsKeyPressed(ImGuiKey_Escape))
     {
+        m_ShouldClose = true;
         glfwSetWindowShouldClose(m_Window, true);
     }
 

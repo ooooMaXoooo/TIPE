@@ -55,6 +55,8 @@ namespace Motor {
         m_Acceleration = static_cast<float>(1 / m_Mass) * m_Forces;
         m_Velocity += static_cast<float>(ts * 0.5) * m_Acceleration;
         m_Pos += ts * m_Velocity;
+        // update the view
+        UpdateTransform();
 
         m_Forces = glm::vec3(0.0);
     }
@@ -62,6 +64,7 @@ namespace Motor {
     void Planet3D::UpdateSecondPart(float ts) {
         m_Acceleration = static_cast<float>(1 / m_Mass) * m_Forces;
         m_Velocity += static_cast<float>(ts * 0.5) * m_Acceleration;
+
         m_Forces = glm::vec3(0.0);
     }
 
