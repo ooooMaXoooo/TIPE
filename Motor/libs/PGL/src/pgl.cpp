@@ -1,7 +1,7 @@
-#include "PGL.h"
+/*#include "pgl.h"
 
 
-#include "basic\Circle.h"
+#include "basic/Circle.h"
 #include "Logger.h"
 
 typedef unsigned int uint;
@@ -75,6 +75,12 @@ namespace pgl {
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
         ImGui_ImplOpenGL3_Init(glsl_version);
+
+
+        GLCall(glEnable(GL_BLEND));
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+        c = std::make_unique<Circle>(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f);
     }
 
     Application::~Application()
@@ -87,6 +93,10 @@ namespace pgl {
 
     void Application::Run()
     {
+        float currentTime = glfwGetTime();
+        m_DeltaTime = currentTime - m_LastFrame;
+        m_LastFrame = currentTime;
+
         Update(1.0f / m_IO->Framerate);
 
 
@@ -94,15 +104,13 @@ namespace pgl {
         m_Renderer.Clear();
         
 
-        Logger l(Logger::FILTER_INFO);
-        l.Log("test test test\n\n\n", Logger::Log_Level::WARN);
-        //std::cout << "test 1\n";
-        OnRender();
-
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+
+        OnRender();
 
         OnImGuiRender();
 
@@ -147,69 +155,8 @@ namespace pgl {
     {
         // some stuff
         // call each object's Render functions
-        Circle c(glm::vec2{ 0,0 }, 10);
-        c.OnRender();
-
-
-
-
-        float vertices[] = {
-            -0.5f, -0.5f,  0.0f,   // vertex 1
-            -0.5f,  0.5f,  0.0f,   // vertex 2
-             0.5f,  0.5f,  0.0f,   // vertex 3
-             0.5f, -0.5f,  0.0f    // vertex 4
-        };
-
-        uint indices[] = {
-            0, 1, 2,
-            2, 3, 0
-        };
-
-        // vertex buffer 
-        VertexBuffer m_VBO(vertices, sizeof(vertices), GL_STATIC_DRAW);
-
-        // vertex layout
-        VertexBufferLayout layout;
-        layout.Push<float>(3);
-
-        // vertex array
-        VertexArray m_VAO;
-        m_VAO.AddBuffer(m_VBO, layout);
-
-
-        // index array
-        IndexBuffer m_IBO(indices, 6);
-
-        Renderer renderer;
-
-
-        // Shaders
-
-        const char* vert_source = "#version 330 core\n"
-            "layout (location = 0) in vec3 pos;\n"
-            "out vec4 vertexColor;\n"
-            "void main()\n"
-            "{\n"
-            "    gl_Position = vec4(pos, 1.0);\n"
-            "    vertexColor = vec4(1, 0.0, 0.0, 1.0);\n"
-            "}";
-
-        const char* frag_source =
-            "#version 330 core\n"
-            "out vec4 FragColor;\n"
-            "in vec4 vertexColor;\n"
-            "void main()\n"
-            "{\n"
-            "    FragColor = vec4(1.0, 0.0, 0.0, 1.0);"
-            "    //FragColor = vertexColor;\n"
-            "}";
-
-
-        Shader m_Shader(vert_source, frag_source, false);
-        m_Shader.Bind();
-
-        m_Renderer.Draw(m_VAO, m_IBO, m_Shader);
-
+        
+        c->OnRender();
     }
 
     void Application::OnImGuiRender()
@@ -217,7 +164,7 @@ namespace pgl {
         ImGui::ShowDemoWindow(); // Show demo window! :)
 
         // call each object's ImGuiRender functions
-
+        c->OnImGuiRender();
 
         {
             ImGui::Begin("Specs");
@@ -243,3 +190,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     GLCall(glViewport(0, 0, width, height));
 }
+
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+
+}
+*/

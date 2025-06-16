@@ -49,12 +49,18 @@ set (BASIC_SOURCES
     "src/basic/Circle.cpp"
 )
 
+set (CORE_SOURCE
+    "src/Core/Window.cpp"
+    #"src/Core/ObjectsHandler.cpp"
+)
+
 set (PGL_SOURCES
     "src/Logger.cpp"
-    "src/pgl.cpp"
+    #"src/pgl.cpp"
     "src/Drawable.cpp"
     "src/Camera.cpp"
     "${BASIC_SOURCES}"
+    "${CORE_SOURCE}"
 )
 
 # Définir les fichiers sources principaux
@@ -64,6 +70,10 @@ set(SOURCES
     "${OPENGL_SOURCES}"
     "${GLAD_SOURCES}"
 )
+
+
+message(STATUS "Configurations disponibles : ${CMAKE_CONFIGURATION_TYPES}")
+message(STATUS "Configuration sélectionnée : ${CMAKE_BUILD_TYPE}")
 
 # Ajout des sous-répertoires pour GLFW et GLM
 add_subdirectory("libs/glfw")

@@ -1,13 +1,23 @@
+#include "OpenGL/Renderer.h"
+
+
+#include "basic/Circle.h"
+
+/*
 #pragma once
 
-#include "glad\glad.h"
-#include "GLFW\glfw3.h"
 
-#include "ImGui\imgui.h"
-#include "ImGui\imgui_impl_glfw.h"
-#include "ImGui\imgui_impl_opengl3.h"
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
 
-#include "OpenGL\Renderer.h"
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_glfw.h"
+#include "ImGui/imgui_impl_opengl3.h"
+
+#include "OpenGL/Renderer.h"
+
+
+#include "basic/Circle.h"
 
 
 namespace pgl {
@@ -29,6 +39,9 @@ namespace pgl {
 
 		Renderer m_Renderer;
 
+		float m_DeltaTime = 0.0f;	// Time between current frame and last frame
+		float m_LastFrame = 0.0f; // Time of last frame
+
 	public:
 
 		Application(uint16_t width, uint16_t height, const char* title, uint16_t version_major = 3, uint16_t version_minor = 3);
@@ -47,8 +60,14 @@ namespace pgl {
 		void OnImGuiRender();
 
 		void ProcessInputs();
+
+	private :
+		std::unique_ptr<Circle> c;
 	};
 
 };
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+*/

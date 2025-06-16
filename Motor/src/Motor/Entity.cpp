@@ -10,8 +10,12 @@ namespace Motor {
 	{
 	}
 
-	void Entity::OnRender() const
-	{
+	void Entity::UpdateFirstPart(float ts) {
+
+	}
+	
+	void Entity::UpdateSecondPart(float ts) {
+
 	}
 }
 

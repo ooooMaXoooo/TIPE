@@ -18,16 +18,36 @@ bool GLLogCall(const char* functionName, const char* fileName, int lineNumber)
     return true;
 }
 
+Renderer::Renderer(GLenum mode)
+    : m_Mode(mode)
+{
+}
+
 void Renderer::Clear() const
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT);
+    GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
 void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const
 {
+    //GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+
+    GLCall(glPolygonMode(GL_FRONT_AND_BACK, m_Mode));
     shader.Bind();
     va.Bind();
     ib.Bind();
 
     GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+}
+
+void Renderer::OnImGuiRender()
+{
+    ImGui::Begin("Renderer");
+
+    ImGui::Checkbox("View Mesh", &m_skeleton);
+    m_Mode = m_skeleton ? GL_LINE : GL_FILL;
+    
+
+    ImGui::End();
 }

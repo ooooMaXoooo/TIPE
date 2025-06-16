@@ -1,5 +1,13 @@
 #pragma once
 
+#ifdef Mt_Debug
+#pragma message("Mt_Debug is defined")
+#endif
+
+#ifdef Mt_Release
+#pragma message("Mt_Release is defined")
+#endif
+
 
 #include <iostream>
 #include <ostream>
@@ -101,7 +109,7 @@ inline void Logger::Log(const char* msg, Logger::Log_Level lvl, Logger_Color col
 	std::string prefix = std::string("\n") + date + std::string("[ line : ") + std::to_string(__LINE__) + "]" + std::string(", [file : ") + __FILE__ + std::string("]     message :\n");
 
 	// we cut out messages at two high level
-	if ((char)lvl >= (char)m_Filter)
+	if ((char)lvl > (char)m_Filter)
 	{
 
 		Logger::SetColor(Logger_Color::Colors::YELLOW);

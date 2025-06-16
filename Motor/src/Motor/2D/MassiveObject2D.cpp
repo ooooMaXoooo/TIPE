@@ -2,14 +2,19 @@
 
 
 namespace Motor {
-    MassiveObject2D::MassiveObject2D(double mass, Vec2<int> pos, Vec2<double> v0, Vec2<double> a0)
-        : m_Mass(mass), m_Pos(pos), m_Velocity(v0), m_Acceleration(a0)
+
+    MassiveObject2D::MassiveObject2D(ldouble mass, glm::vec2 pos, GLFWwindow* parent_window, Renderer& renderer, glm::vec2 initial_velocity, glm::vec2 initial_acceleration)
+        : Core::MassiveObject(mass, parent_window, renderer),
+          m_Pos(pos), m_Velocity(initial_velocity), m_Acceleration(initial_acceleration),
+          m_Forces(glm::vec2(0))
     {
 
     }
+    
 
     MassiveObject2D::MassiveObject2D(const MassiveObject2D& other)
-        : m_Mass(other.m_Mass), m_Pos(other.m_Pos), m_Velocity(other.m_Velocity), m_Acceleration(other.m_Acceleration)
+        : Core::MassiveObject(other.m_Mass, other.m_Parent_window, other.m_renderer), m_Pos(other.m_Pos), m_Velocity(other.m_Velocity), m_Acceleration(other.m_Acceleration),
+            m_Forces(other.m_Forces)
     {
     }
 
@@ -17,11 +22,20 @@ namespace Motor {
     {
     }
 
-    void MassiveObject2D::Update(float ts)
-    {
+    void MassiveObject2D::Update(float ts) {
+
     }
 
-    void MassiveObject2D::OnRender() const
+    void MassiveObject2D::OnRender() {
+
+    }
+
+    void MassiveObject2D::OnImGuiRender() {
+
+    }
+
+    void MassiveObject2D::ApplyForce(const glm::vec2& force)
     {
+        m_Forces += force;
     }
 }

@@ -20,11 +20,19 @@ set(SOURCE_FILES
     "src/pch.cpp"
     "src/Motor.cpp"
 
-    "src/General/Vector.cpp"
+    "src/General/Application.cpp"
 
     "src/Motor/2D/MassiveObject2D.cpp"
     "src/Motor/2D/Planet2D.cpp"
+
+    "src/Motor/3D/MassiveObject3D.cpp"
+    "src/Motor/3D/Planet3D.cpp"
+
     "src/Motor/Entity.cpp"
+
+
+    "src/Motor/Core/ObjectsHandler.cpp"
+    "src/Motor/Core/MassiveObject.cpp"
 )
 
 # Create executable
@@ -37,15 +45,18 @@ target_include_directories(Motor PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/PGL/include/pgl"
 )
 
-target_compile_definitions(Motor PRIVATE 
-    $<$<CONFIG:Debug>:Mt_Debug>
-    $<$<CONFIG:Release>:Mt_Release>
-)
-
 
 
 # Ajouter PGL comme sous-projet
 add_subdirectory(libs/PGL)
+
+
+# preprocessor macro
+target_compile_definitions(PGL PRIVATE 
+    $<$<CONFIG:Debug>:Mt_Debug>
+    $<$<CONFIG:Release>:Mt_Release>
+)
+
 
 
 # Utiliser un header précompilé

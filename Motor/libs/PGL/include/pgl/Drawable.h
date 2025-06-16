@@ -3,6 +3,14 @@
 #include "pgl/openGL/Renderer.h"
 
 #include "glm/glm.hpp"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_glfw.h"
+#include "ImGui/imgui_impl_opengl3.h"
+
 
 #include <memory>
 
@@ -17,15 +25,20 @@ namespace pgl {
 
 		std::unique_ptr<Shader> m_Shader;
 
-		Renderer m_renderer;
+		Renderer& m_renderer;
 
 		glm::mat4 m_Proj, m_View, m_Model;
 		glm::mat4 m_MVP;
 
 
+		GLFWwindow* m_Parent_window;
+
 	public :
-		virtual void OnRender() const;
+		Drawable(GLFWwindow* parent_window, Renderer& renderer);
+
+		virtual void OnRender();
 		virtual void OnImGuiRender();
 
+		void UpdateViewMatrix(const glm::mat4& view);
 	};
 };

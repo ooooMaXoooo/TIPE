@@ -1,0 +1,4 @@
+[submodule "Physics_tests"]
+	path = Physics_tests
+	url = https://github.com/ooooMaXoooo/tipe_physics_python_cpp.git
+	branch = main
