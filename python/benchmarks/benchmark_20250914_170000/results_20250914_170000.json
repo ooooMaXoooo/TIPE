@@ -1,0 +1,135 @@
+{
+  "metadata": {
+    "timestamp": "20250914_170000",
+    "mu": 1.32712440018e+20,
+    "R_Mars": 228000000000.0,
+    "r1": [
+      150000000000.0,
+      0.0,
+      0.0
+    ],
+    "total_tests": 10
+  },
+  "results": [
+    {
+      "n_points": 50,
+      "n_orbits": 2500,
+      "time_cpp": 0.05861939996248111,
+      "time_conversion": 0.00012320000678300858,
+      "time_numpy": 0.048874700034502894,
+      "time_total_cpp": 0.05874259996926412,
+      "throughput_cpp": 42558.55207818644,
+      "throughput_numpy": 51151.20907617101,
+      "speedup": 1.2019020050822824,
+      "memory_usage_mb": 0.3814697265625
+    },
+    {
+      "n_points": 100,
+      "n_orbits": 10000,
+      "time_cpp": 0.20363290002569556,
+      "time_conversion": 0.0004726999904960394,
+      "time_numpy": 0.20086730003822595,
+      "time_total_cpp": 0.2041056000161916,
+      "throughput_cpp": 48994.246111849476,
+      "throughput_numpy": 49784.111192299366,
+      "speedup": 1.0161215886177062,
+      "memory_usage_mb": 1.52587890625
+    },
+    {
+      "n_points": 150,
+      "n_orbits": 22500,
+      "time_cpp": 0.4491703999810852,
+      "time_conversion": 0.0010095000034198165,
+      "time_numpy": 0.4519186000106856,
+      "time_total_cpp": 0.450179899984505,
+      "throughput_cpp": 49980.01910075159,
+      "throughput_numpy": 49787.72725766982,
+      "speedup": 0.996152625658383,
+      "memory_usage_mb": 3.4332275390625
+    },
+    {
+      "n_points": 200,
+      "n_orbits": 40000,
+      "time_cpp": 0.7744918999960646,
+      "time_conversion": 0.001442900043912232,
+      "time_numpy": 0.750999000039883,
+      "time_total_cpp": 0.7759348000399768,
+      "throughput_cpp": 51550.72307356129,
+      "throughput_numpy": 53262.387829911546,
+      "speedup": 1.0332035062613527,
+      "memory_usage_mb": 6.103515625
+    },
+    {
+      "n_points": 250,
+      "n_orbits": 62500,
+      "time_cpp": 1.1440624999813735,
+      "time_conversion": 0.0022089999984018505,
+      "time_numpy": 1.16146650002338,
+      "time_total_cpp": 1.1462714999797754,
+      "throughput_cpp": 54524.60433771819,
+      "throughput_numpy": 53811.28082363279,
+      "speedup": 0.9869174013686157,
+      "memory_usage_mb": 9.5367431640625
+    },
+    {
+      "n_points": 300,
+      "n_orbits": 90000,
+      "time_cpp": 1.6455755999777466,
+      "time_conversion": 0.003270199988037348,
+      "time_numpy": 1.6134585999534465,
+      "time_total_cpp": 1.648845799965784,
+      "throughput_cpp": 54583.63662743213,
+      "throughput_numpy": 55780.792889632736,
+      "speedup": 1.02193251194258,
+      "memory_usage_mb": 13.73291015625
+    },
+    {
+      "n_points": 350,
+      "n_orbits": 122500,
+      "time_cpp": 2.2047314000083134,
+      "time_conversion": 0.004030500014778227,
+      "time_numpy": 2.2002057999488898,
+      "time_total_cpp": 2.2087619000230916,
+      "throughput_cpp": 55460.9349240945,
+      "throughput_numpy": 55676.60988933201,
+      "speedup": 1.0038887726204524,
+      "memory_usage_mb": 18.6920166015625
+    },
+    {
+      "n_points": 400,
+      "n_orbits": 160000,
+      "time_cpp": 2.881304199981969,
+      "time_conversion": 0.007180300017353147,
+      "time_numpy": 2.885147200024221,
+      "time_total_cpp": 2.888484499999322,
+      "throughput_cpp": 55392.36925108566,
+      "throughput_numpy": 55456.44256856523,
+      "speedup": 1.0011567174025204,
+      "memory_usage_mb": 24.4140625
+    },
+    {
+      "n_points": 450,
+      "n_orbits": 202500,
+      "time_cpp": 3.6300412999698892,
+      "time_conversion": 0.009265300002880394,
+      "time_numpy": 3.598613700014539,
+      "time_total_cpp": 3.6393065999727696,
+      "throughput_cpp": 55642.46771665657,
+      "throughput_numpy": 56271.66928175199,
+      "speedup": 1.011307937820074,
+      "memory_usage_mb": 30.8990478515625
+    },
+    {
+      "n_points": 500,
+      "n_orbits": 250000,
+      "time_cpp": 4.479384200007189,
+      "time_conversion": 0.008795300032943487,
+      "time_numpy": 4.473431299964432,
+      "time_total_cpp": 4.4881795000401326,
+      "throughput_cpp": 55701.87199459481,
+      "throughput_numpy": 55885.512314001055,
+      "speedup": 1.0032968428677598,
+      "memory_usage_mb": 38.14697265625
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+============================================================
+RÉSULTATS DU BENCHMARK LAMBERT
+Date: 2025-09-13 23:44:11
+Backend matplotlib: qtagg
+============================================================
+
+DÉTAILS PAR TAILLE DE GRILLE:
+------------------------------------------------------------
+N=100 | Vector:  0.117s | Numpy:  0.092s | Speedup: 1.27x
+N=200 | Vector:  0.389s | Numpy:  0.361s | Speedup: 1.08x
+N=300 | Vector:  0.864s | Numpy:  0.848s | Speedup: 1.02x
+N=400 | Vector:  1.401s | Numpy:  1.523s | Speedup: 0.92x
+N=500 | Vector:  2.121s | Numpy:  2.240s | Speedup: 0.95x
+
+ANALYSE DE COMPLEXITÉ:
+------------------------------
+Vector method: O(N^1.80)
+Numpy method: O(N^1.99)
+
+STATISTIQUES GLOBALES:
+------------------------------
+Temps total vector method: 4.892s
+Temps total numpy method: 5.063s
+Speedup global moyen: 0.97x
+Nombre total d'orbites calculées: 550,000
+Débit moyen vector: 112433.2 orbites/s
+Débit moyen numpy: 108620.7 orbites/s
+
+PARAMÈTRES TECHNIQUES:
+------------------------------
+Paramètre gravitationnel μ: 1.33e+20 m³/s²
+Rayon orbital Mars: 2.28e+11 m
+Position initiale r1: [1.5e+11, 0.0e+00, 0.0e+00] m
+Tailles de grille testées: [100, 200, 300, 400, 500]
+Plage temps de vol: 20 à 500 jours
+Plage angles: 0° à 360°

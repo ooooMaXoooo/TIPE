@@ -1,0 +1,131 @@
+============================================================
+RÉSULTATS DU BENCHMARK LAMBERT
+Date: 2025-09-14 00:04:42
+Backend matplotlib: qtagg
+============================================================
+
+DÉTAILS PAR TAILLE DE GRILLE:
+------------------------------------------------------------
+N= 10 | Vector:  0.003s | Numpy:  0.002s | Speedup: 1.99x
+N= 20 | Vector:  0.004s | Numpy:  0.006s | Speedup: 0.73x
+N= 30 | Vector:  0.009s | Numpy:  0.009s | Speedup: 1.06x
+N= 40 | Vector:  0.015s | Numpy:  0.017s | Speedup: 0.91x
+N= 50 | Vector:  0.023s | Numpy:  0.027s | Speedup: 0.85x
+N= 60 | Vector:  0.038s | Numpy:  0.037s | Speedup: 1.04x
+N= 70 | Vector:  0.047s | Numpy:  0.050s | Speedup: 0.93x
+N= 80 | Vector:  0.065s | Numpy:  0.070s | Speedup: 0.94x
+N= 90 | Vector:  0.085s | Numpy:  0.093s | Speedup: 0.91x
+N=100 | Vector:  0.117s | Numpy:  0.116s | Speedup: 1.00x
+N=110 | Vector:  0.132s | Numpy:  0.134s | Speedup: 0.99x
+N=120 | Vector:  0.154s | Numpy:  0.146s | Speedup: 1.06x
+N=130 | Vector:  0.161s | Numpy:  0.192s | Speedup: 0.84x
+N=140 | Vector:  0.201s | Numpy:  0.196s | Speedup: 1.03x
+N=150 | Vector:  0.224s | Numpy:  0.262s | Speedup: 0.86x
+N=160 | Vector:  0.266s | Numpy:  0.280s | Speedup: 0.95x
+N=170 | Vector:  0.286s | Numpy:  0.291s | Speedup: 0.98x
+N=180 | Vector:  0.348s | Numpy:  0.316s | Speedup: 1.10x
+N=190 | Vector:  0.368s | Numpy:  0.339s | Speedup: 1.08x
+N=200 | Vector:  0.405s | Numpy:  0.428s | Speedup: 0.95x
+N=210 | Vector:  0.387s | Numpy:  0.430s | Speedup: 0.90x
+N=220 | Vector:  0.450s | Numpy:  0.470s | Speedup: 0.96x
+N=230 | Vector:  0.514s | Numpy:  0.533s | Speedup: 0.96x
+N=240 | Vector:  0.574s | Numpy:  0.575s | Speedup: 1.00x
+N=250 | Vector:  0.559s | Numpy:  0.562s | Speedup: 1.00x
+N=260 | Vector:  0.656s | Numpy:  0.636s | Speedup: 1.03x
+N=270 | Vector:  0.755s | Numpy:  0.761s | Speedup: 0.99x
+N=280 | Vector:  0.782s | Numpy:  0.767s | Speedup: 1.02x
+N=290 | Vector:  0.737s | Numpy:  0.772s | Speedup: 0.96x
+N=300 | Vector:  0.864s | Numpy:  0.907s | Speedup: 0.95x
+N=310 | Vector:  0.923s | Numpy:  0.913s | Speedup: 1.01x
+N=320 | Vector:  0.962s | Numpy:  0.993s | Speedup: 0.97x
+N=330 | Vector:  0.986s | Numpy:  1.022s | Speedup: 0.97x
+N=340 | Vector:  1.053s | Numpy:  1.062s | Speedup: 0.99x
+N=350 | Vector:  1.060s | Numpy:  1.144s | Speedup: 0.93x
+N=360 | Vector:  1.142s | Numpy:  1.199s | Speedup: 0.95x
+N=370 | Vector:  1.312s | Numpy:  1.271s | Speedup: 1.03x
+N=380 | Vector:  1.380s | Numpy:  1.326s | Speedup: 1.04x
+N=390 | Vector:  1.470s | Numpy:  1.344s | Speedup: 1.09x
+N=400 | Vector:  1.423s | Numpy:  1.473s | Speedup: 0.97x
+N=410 | Vector:  1.502s | Numpy:  1.545s | Speedup: 0.97x
+N=420 | Vector:  1.564s | Numpy:  1.731s | Speedup: 0.90x
+N=430 | Vector:  1.712s | Numpy:  1.756s | Speedup: 0.97x
+N=440 | Vector:  1.863s | Numpy:  1.828s | Speedup: 1.02x
+N=450 | Vector:  1.842s | Numpy:  1.851s | Speedup: 0.99x
+N=460 | Vector:  1.786s | Numpy:  1.845s | Speedup: 0.97x
+N=470 | Vector:  1.888s | Numpy:  2.070s | Speedup: 0.91x
+N=480 | Vector:  1.937s | Numpy:  2.084s | Speedup: 0.93x
+N=490 | Vector:  2.306s | Numpy:  2.272s | Speedup: 1.02x
+N=500 | Vector:  2.271s | Numpy:  2.342s | Speedup: 0.97x
+N=510 | Vector:  2.269s | Numpy:  2.417s | Speedup: 0.94x
+N=520 | Vector:  2.310s | Numpy:  2.397s | Speedup: 0.96x
+N=530 | Vector:  2.594s | Numpy:  2.465s | Speedup: 1.05x
+N=540 | Vector:  2.506s | Numpy:  2.677s | Speedup: 0.94x
+N=550 | Vector:  2.568s | Numpy:  2.675s | Speedup: 0.96x
+N=560 | Vector:  2.833s | Numpy:  2.848s | Speedup: 0.99x
+N=570 | Vector:  3.065s | Numpy:  3.001s | Speedup: 1.02x
+N=580 | Vector:  3.047s | Numpy:  2.822s | Speedup: 1.08x
+N=590 | Vector:  3.049s | Numpy:  3.184s | Speedup: 0.96x
+N=600 | Vector:  3.029s | Numpy:  3.260s | Speedup: 0.93x
+N=610 | Vector:  3.274s | Numpy:  3.505s | Speedup: 0.93x
+N=620 | Vector:  3.382s | Numpy:  3.729s | Speedup: 0.91x
+N=630 | Vector:  3.459s | Numpy:  3.352s | Speedup: 1.03x
+N=640 | Vector:  3.473s | Numpy:  3.686s | Speedup: 0.94x
+N=650 | Vector:  3.684s | Numpy:  3.742s | Speedup: 0.98x
+N=660 | Vector:  3.776s | Numpy:  4.011s | Speedup: 0.94x
+N=670 | Vector:  3.925s | Numpy:  3.814s | Speedup: 1.03x
+N=680 | Vector:  4.066s | Numpy:  4.275s | Speedup: 0.95x
+N=690 | Vector:  4.116s | Numpy:  4.134s | Speedup: 1.00x
+N=700 | Vector:  4.172s | Numpy:  4.457s | Speedup: 0.94x
+N=710 | Vector:  4.422s | Numpy:  4.536s | Speedup: 0.97x
+N=720 | Vector:  4.594s | Numpy:  4.696s | Speedup: 0.98x
+N=730 | Vector:  4.525s | Numpy:  4.746s | Speedup: 0.95x
+N=740 | Vector:  4.865s | Numpy:  4.883s | Speedup: 1.00x
+N=750 | Vector:  5.436s | Numpy:  5.335s | Speedup: 1.02x
+N=760 | Vector:  4.913s | Numpy:  5.094s | Speedup: 0.96x
+N=770 | Vector:  5.218s | Numpy:  5.589s | Speedup: 0.93x
+N=780 | Vector:  5.104s | Numpy:  5.489s | Speedup: 0.93x
+N=790 | Vector:  5.226s | Numpy:  5.641s | Speedup: 0.93x
+N=800 | Vector:  5.414s | Numpy:  5.697s | Speedup: 0.95x
+N=810 | Vector:  5.656s | Numpy:  5.981s | Speedup: 0.95x
+N=820 | Vector:  5.655s | Numpy:  5.539s | Speedup: 1.02x
+N=830 | Vector:  6.471s | Numpy:  6.264s | Speedup: 1.03x
+N=840 | Vector:  5.913s | Numpy:  6.301s | Speedup: 0.94x
+N=850 | Vector:  6.032s | Numpy:  6.393s | Speedup: 0.94x
+N=860 | Vector:  6.638s | Numpy:  6.740s | Speedup: 0.98x
+N=870 | Vector:  6.476s | Numpy:  7.071s | Speedup: 0.92x
+N=880 | Vector:  6.559s | Numpy:  6.772s | Speedup: 0.97x
+N=890 | Vector:  7.100s | Numpy:  6.645s | Speedup: 1.07x
+N=900 | Vector:  7.093s | Numpy:  6.780s | Speedup: 1.05x
+N=910 | Vector:  7.127s | Numpy:  7.488s | Speedup: 0.95x
+N=920 | Vector:  7.327s | Numpy:  7.532s | Speedup: 0.97x
+N=930 | Vector:  7.337s | Numpy:  7.550s | Speedup: 0.97x
+N=940 | Vector:  7.507s | Numpy:  7.873s | Speedup: 0.95x
+N=950 | Vector:  7.740s | Numpy:  8.043s | Speedup: 0.96x
+N=960 | Vector:  7.983s | Numpy:  8.432s | Speedup: 0.95x
+N=970 | Vector:  8.650s | Numpy:  8.011s | Speedup: 1.08x
+N=980 | Vector:  8.868s | Numpy:  8.236s | Speedup: 1.08x
+N=990 | Vector:  8.843s | Numpy:  8.731s | Speedup: 1.01x
+N=1000 | Vector:  8.494s | Numpy:  8.878s | Speedup: 0.96x
+
+ANALYSE DE COMPLEXITÉ:
+------------------------------
+Vector method: O(N^1.73)
+Numpy method: O(N^1.89)
+
+STATISTIQUES GLOBALES:
+------------------------------
+Temps total vector method: 297.394s
+Temps total numpy method: 303.911s
+Speedup global moyen: 0.98x
+Nombre total d'orbites calculées: 33,835,000
+Débit moyen vector: 113771.6 orbites/s
+Débit moyen numpy: 111332.0 orbites/s
+
+PARAMÈTRES TECHNIQUES:
+------------------------------
+Paramètre gravitationnel μ: 1.33e+20 m³/s²
+Rayon orbital Mars: 2.28e+11 m
+Position initiale r1: [1.5e+11, 0.0e+00, 0.0e+00] m
+Tailles de grille testées: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350, 360, 370, 380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750, 760, 770, 780, 790, 800, 810, 820, 830, 840, 850, 860, 870, 880, 890, 900, 910, 920, 930, 940, 950, 960, 970, 980, 990, 1000]
+Plage temps de vol: 20 à 500 jours
+Plage angles: 0° à 360°

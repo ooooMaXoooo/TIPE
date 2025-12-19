@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36127.28 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimuCore", "SimuCore\SimuCore.vcxproj", "{ECAB35E1-9D47-4716-8C39-E5AFA96A8159}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimuApp", "SimuApp\SimuApp.vcxproj", "{4B015973-C633-46B4-9F20-931B94607825}"
+	ProjectSection(ProjectDependencies) = postProject
+		{ECAB35E1-9D47-4716-8C39-E5AFA96A8159} = {ECAB35E1-9D47-4716-8C39-E5AFA96A8159}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimuPy", "SimuPy\SimuPy.vcxproj", "{87AA83C5-3890-433B-A9BB-CC19C1752339}"
+	ProjectSection(ProjectDependencies) = postProject
+		{ECAB35E1-9D47-4716-8C39-E5AFA96A8159} = {ECAB35E1-9D47-4716-8C39-E5AFA96A8159}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ECAB35E1-9D47-4716-8C39-E5AFA96A8159}.Debug|x64.ActiveCfg = Debug|x64
+		{ECAB35E1-9D47-4716-8C39-E5AFA96A8159}.Debug|x64.Build.0 = Debug|x64
+		{ECAB35E1-9D47-4716-8C39-E5AFA96A8159}.Debug|x86.ActiveCfg = Debug|Win32
+		{ECAB35E1-9D47-4716-8C39-E5AFA96A8159}.Debug|x86.Build.0 = Debug|Win32
+		{ECAB35E1-9D47-4716-8C39-E5AFA96A8159}.Release|x64.ActiveCfg = Release|x64
+		{ECAB35E1-9D47-4716-8C39-E5AFA96A8159}.Release|x64.Build.0 = Release|x64
+		{ECAB35E1-9D47-4716-8C39-E5AFA96A8159}.Release|x86.ActiveCfg = Release|Win32
+		{ECAB35E1-9D47-4716-8C39-E5AFA96A8159}.Release|x86.Build.0 = Release|Win32
+		{4B015973-C633-46B4-9F20-931B94607825}.Debug|x64.ActiveCfg = Debug|x64
+		{4B015973-C633-46B4-9F20-931B94607825}.Debug|x64.Build.0 = Debug|x64
+		{4B015973-C633-46B4-9F20-931B94607825}.Debug|x86.ActiveCfg = Debug|Win32
+		{4B015973-C633-46B4-9F20-931B94607825}.Debug|x86.Build.0 = Debug|Win32
+		{4B015973-C633-46B4-9F20-931B94607825}.Release|x64.ActiveCfg = Release|x64
+		{4B015973-C633-46B4-9F20-931B94607825}.Release|x64.Build.0 = Release|x64
+		{4B015973-C633-46B4-9F20-931B94607825}.Release|x86.ActiveCfg = Release|Win32
+		{4B015973-C633-46B4-9F20-931B94607825}.Release|x86.Build.0 = Release|Win32
+		{87AA83C5-3890-433B-A9BB-CC19C1752339}.Debug|x64.ActiveCfg = Debug|x64
+		{87AA83C5-3890-433B-A9BB-CC19C1752339}.Debug|x64.Build.0 = Debug|x64
+		{87AA83C5-3890-433B-A9BB-CC19C1752339}.Debug|x86.ActiveCfg = Debug|Win32
+		{87AA83C5-3890-433B-A9BB-CC19C1752339}.Debug|x86.Build.0 = Debug|Win32
+		{87AA83C5-3890-433B-A9BB-CC19C1752339}.Release|x64.ActiveCfg = Release|x64
+		{87AA83C5-3890-433B-A9BB-CC19C1752339}.Release|x64.Build.0 = Release|x64
+		{87AA83C5-3890-433B-A9BB-CC19C1752339}.Release|x86.ActiveCfg = Release|Win32
+		{87AA83C5-3890-433B-A9BB-CC19C1752339}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {992DE39A-D5C0-46F3-A688-7CA695D28108}
+	EndGlobalSection
+EndGlobal

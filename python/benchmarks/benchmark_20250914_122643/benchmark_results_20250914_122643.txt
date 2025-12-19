@@ -1,0 +1,43 @@
+============================================================
+RÉSULTATS DU BENCHMARK LAMBERT
+Date: 2025-09-14 13:59:20
+Backend matplotlib: qtagg
+============================================================
+
+DÉTAILS PAR TAILLE DE GRILLE:
+------------------------------------------------------------
+N= 50 | Vector:  0.057s | Numpy:  0.052s | Speedup: 1.10x
+N=100 | Vector:  0.204s | Numpy:  0.204s | Speedup: 1.00x
+N=150 | Vector:  0.448s | Numpy:  0.442s | Speedup: 1.01x
+N=200 | Vector:  0.791s | Numpy:  0.752s | Speedup: 1.05x
+N=250 | Vector:  1.165s | Numpy:  1.147s | Speedup: 1.02x
+N=300 | Vector:  1.758s | Numpy:  1.770s | Speedup: 0.99x
+N=350 | Vector:  2.253s | Numpy:  2.455s | Speedup: 0.92x
+N=400 | Vector:  3.200s | Numpy:  2.885s | Speedup: 1.11x
+N=450 | Vector:  3.711s | Numpy:  3.869s | Speedup: 0.96x
+N=500 | Vector:  4.524s | Numpy:  4.941s | Speedup: 0.92x
+N=550 | Vector:  5.438s | Numpy:  5.393s | Speedup: 1.01x
+N=600 | Vector:  6.529s | Numpy:  6.421s | Speedup: 1.02x
+
+ANALYSE DE COMPLEXITÉ:
+------------------------------
+Vector method: O(N^1.91)
+Numpy method: O(N^1.94)
+
+STATISTIQUES GLOBALES:
+------------------------------
+Temps total vector method: 30.079s
+Temps total numpy method: 30.332s
+Speedup global moyen: 0.99x
+Nombre total d'orbites calculées: 1,625,000
+Débit moyen vector: 54024.4 orbites/s
+Débit moyen numpy: 53573.5 orbites/s
+
+PARAMÈTRES TECHNIQUES:
+------------------------------
+Paramètre gravitationnel μ: 1.33e+20 m³/s²
+Rayon orbital Mars: 2.28e+11 m
+Position initiale r1: [1.5e+11, 0.0e+00, 0.0e+00] m
+Tailles de grille testées: [50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600]
+Plage temps de vol: 20 à 500 jours
+Plage angles: 0° à 360°
