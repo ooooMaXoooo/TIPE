@@ -56,7 +56,8 @@ namespace SimuCore {
 
 				thread_local SimuCore::Systems::AdaptedSystem local_system = system;
 
-				local_system.Reset();					// On réinitialise le système pour que les individus commençent tous dans les mêmes confitions initiales.
+				//local_system.Reset();					// On réinitialise le système pour que les individus commençent tous dans les mêmes confitions initiales.
+				// On n'a pas besoin de réinitialiser car la fonction Score le fait déjà.
 				return local_system.Score(vecs);		// A VERIFIER !!!!! OK ?
 				};
 
@@ -77,7 +78,6 @@ namespace SimuCore {
 
 			return SimuCore::Structures::Rocket(0, std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(), 500, 5.4);
 		}
-
-
+				
 	}
 }

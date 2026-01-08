@@ -48,6 +48,8 @@ namespace SimuCore::Systems {
 		m_MaxTime(daysInSeconds(max_duration)),
 		m_deltaTime(dt_seconds)
 	{
+		assert(start_planet != final_planet && "Les planètes de départ et d'arrivée doivent être différentes.");
+
 		InitPlanet(true, start_planet);
 		InitPlanet(false, final_planet);
 
@@ -82,88 +84,19 @@ namespace SimuCore::Systems {
 		return current_state;
 	}
 
-	void AdaptedSystem::Reset() {
+	void AdaptedSystem::Reset(double t) {
 		m_time = 0;
-
-		SetAnglePlanet(m_startPlanet, m_startAngle);
-		SetAnglePlanet(m_finalPlanet, m_finalAngle);
-
-		SetPlanetSpeed(m_startPlanet, m_startAngle);
-		SetPlanetSpeed(m_finalPlanet, m_finalAngle);
 
 		m_sun.position = glm::dvec3(0, 0, 0);
 		m_sun.velocity = glm::dvec3(0, 0, 0);
-
 		m_sun.forces = glm::dvec3(0, 0, 0);
-		m_startPlanet.forces = glm::dvec3(0, 0, 0);
-		m_finalPlanet.forces = glm::dvec3(0, 0, 0);
 
-		// besoin de reset la rocket ???  TODO
-	}
-
-	AdaptedSystem::Real AdaptedSystem::Score(const std::vector<std::vector<Real>>& individu) {
-		// On initialise la fusée avec les positions et vitesses initiales.
-		const double max_reels_position = RingSize_meter();
-
-		auto convert_to = [max_reels_position](double x, double min, double max) {
-			return convertIntervals(-max_reels_position, max_reels_position, -max, max, x);
-			};
-
-		//////// gestion de la position initiale qui va conditionner la transformation des vecteurs en impulsions
-		// Pour mettre la fusée sur un anneau, la position initiale donnée doit être ajoutée avec un vecteur colinéaire à lui même, de norme
-		//		égale au rayon minimal de l'anneau.
-		glm::dvec3 position_initiale = glm::dvec3(
-			individu[0][0],
-			individu[0][1],
-			//individu[0][2]
-			0
-		);
-
-		// si la distance de position_initiale à l'origine n'est pas dans le cerlce de rayon <jsp quoi> alors t'es mort
-		if (glm::length(position_initiale) > RingSize_meter()) {
-			return m_LowScore; // score pas fou
-		}
-
-		// transformation 1er vecteur en position initiale
+		// on calcule les angles des planètes à l'instant t
+		// Pour cela, on calcule la vitesse angulaire de chaque planète, et on multiplie par t pour obtenir l'angle
 		{
-			// on récupère un vecteur colinéaire au vecteur position_initiale
-			glm::dvec3 direction = glm::normalize(position_initiale);
-			position_initiale += m_startPlanet.minOrbitRadius() * direction; // anneau centré sur le soleil (en considérant chaque position_initiale possible)
-		}
+			m_startAngle = m_startPlanet.getAngularVelocity(m_sun) * t;
+			m_finalAngle = m_finalPlanet.getAngularVelocity(m_sun) * t;
 
-
-
-		//////// gestion des impulsions
-
-		//// gestion de la 1ère impulsion (avec son temps t1)
-		// sa norme doit être plus grande que la vitesse de la libération et sa direction doit être dans une sphère
-		// On réinitialise le temps à t1 ("t1 devient 0").
-
-		// Calculons le nouvel état initial, il suffit de reset les 2 planètes
-		// pour cela, on met le temps t1 entre 0 et <le temps qu'il faut aux deux planètes pour revenir à la même configuration (on reste en 2D pour le moment)>
-
-		double temps_1ere_impulsion = individu[2][0];
-		{
-			double dist_init_planet_to_sun = glm::length(m_startPlanet.position);
-			double dist_final_planet_to_sun = glm::length(m_finalPlanet.position);
-			double omega_planete_initiale = std::sqrt(m_planets[0].getMu() / (dist_init_planet_to_sun * dist_init_planet_to_sun * dist_init_planet_to_sun));
-			double omega_planete_finale = std::sqrt(m_planets[0].getMu() / (dist_final_planet_to_sun * dist_final_planet_to_sun * dist_final_planet_to_sun));
-			double temps_1ere_impulsion_max = std::abs(2 * constants::PI / (omega_planete_initiale - omega_planete_finale));
-
-			// on veut remplacer l'intervalle [min_real, max_real] en [0, temps_1ere_impulsion_max]
-			/*// Or min_real = - RingSize_meter() = - max_real
-			temps_1ere_impulsion += RingSize_meter();			// dans [0, min_real + max_real]
-			temps_1ere_impulsion /= 2 * RingSize_meter();		// dans [0, 1]
-			temps_1ere_impulsion *= temps_1ere_impulsion_max;	// on a gagné*/
-
-			temps_1ere_impulsion = convert_to(temps_1ere_impulsion, 0, temps_1ere_impulsion_max);
-
-
-			// modifier les position et vitesses initiales des deux planètes
-			// calculons les angles
-			m_startAngle = omega_planete_initiale * temps_1ere_impulsion;
-			m_startAngle = omega_planete_finale * temps_1ere_impulsion;
-			
 			SetAnglePlanet(m_startPlanet, m_startAngle);
 			SetAnglePlanet(m_finalPlanet, m_finalAngle);
 
@@ -171,85 +104,19 @@ namespace SimuCore::Systems {
 			SetPlanetSpeed(m_finalPlanet, m_finalAngle);
 		}
 
-		// on coupe les vecteur trop grand (pas dans la sphère)
-		glm::dvec3 vitesse_initiale = glm::dvec3(
-			individu[1][0],
-			individu[1][1],
-			//individu[1][2]
-			0
-		);
+		m_startPlanet.forces = glm::dvec3(0, 0, 0);
+		m_finalPlanet.forces = glm::dvec3(0, 0, 0);
 
-		if (glm::length(vitesse_initiale) > max_reels_position) {
-			return m_LowScore; // score pas fou
+		// besoin de reset la rocket ???  TODO
+	}
+
+	AdaptedSystem::Real AdaptedSystem::Score(const std::vector<std::vector<Real>>& individu) {
+		auto [rocket, gen_state] = IndividualToRocket(individu, *this);
+		m_rocket = rocket;
+
+		if (gen_state != GenerationState::VALID) {
+			return m_LowScore;
 		}
-
-		{
-			glm::dvec3 direction = glm::normalize(vitesse_initiale);
-			vitesse_initiale += m_startPlanet.extractionVelocity( glm::length(position_initiale) ) * direction;
-		}
-
-
-		//// gestion des autres impulsions
-		// Les individus sont composés de vecteurs générés aléatoirement dans un pavé droit, où chaque composante est comprise entre [min_real, max_real]
-		// Or on souhaite que les impulsions de la fusée soient de "direction aléatoire uniforme" (sphère != pavé droit)
-
-		size_t nombre_impulsions = (individu.size() - 1) / 2;
-		std::vector<std::pair<Structures::Impulsion, double>> toutes_les_impulsions;
-		toutes_les_impulsions.reserve(nombre_impulsions);
-		toutes_les_impulsions.emplace_back(Structures::Impulsion(vitesse_initiale), temps_1ere_impulsion);
-
-		{
-			double somme_des_temps = 0;
-
-			for (size_t i = 1; i < nombre_impulsions; i++) {
-				// individu[2 * i + 2][0] correspond à l'écart de temps entre l'impulsion i et i-1
-				// on remet instant entre 0 et <jsp encore> : TODO (on peut aussi forcer la somme des ecart de temps à être plus petit que m_MaxTime)
-				// Afin de faciliter la recherche des solutions, on met les temps entre 0 et m_Max_Time.
-				double instant = convert_to(individu[2 * i + 2][0], 0, m_MaxTime);
-
-				glm::dvec3 impulsion = glm::dvec3{
-					individu[2 * i + 1][0],
-					individu[2 * i + 1][1],
-					//convert_to(individu[2 * i + 1][2], -max_reels_position, max_reels_position)
-					0
-				};
-
-				const auto& [impul_precedente, temps_precedent] = toutes_les_impulsions[i - 1];
-
-				somme_des_temps += instant;
-				instant += temps_precedent;
-
-				// on s'assure que l'impulsion impulsion est généré dans la sphère :
-				if (glm::length(impulsion) > RingSize_meter()) {
-					return m_LowScore;
-				}
-
-				toutes_les_impulsions.emplace_back(Structures::Impulsion(impulsion), instant);
-			}
-
-			if (somme_des_temps > m_MaxTime) {
-				return m_LowScore;
-			}
-		}
-
-
-		m_rocket.position = position_initiale + m_startPlanet.position; // anneau centré sur la planète initiale
-		m_rocket.velocity = m_startPlanet.velocity; // impulsion pour moduler ce terme.
-		m_rocket.acceleration = 0; // une acceleration valide pour que le RocketState initial soit sûr d'être valide. (Pas utiliser dans les calculs)
-		m_rocket.setImpulsions(toutes_les_impulsions);
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -269,14 +136,35 @@ namespace SimuCore::Systems {
 			constexpr Real acceleration_maximale = constants::g * 5; // 5g - m/s² - Accélération maximale tolérée pour les humains dans la fusée
 			Real acceleration = rocket.acceleration;
 			if (acceleration > acceleration_maximale) {
-				return RocketState::DEAD;
+				return RocketState::DEAD_ACCELERATION_TOO_HIGH;
 			}
 
 			// check les collisions --> brute force car seulement 3 comparaisons
 			bool collided = rocket_collide_with(ObjectName::SUN) || rocket_collide_with(ObjectName::START) || rocket_collide_with(ObjectName::FINAL);
 
 			if (collided) {
-				return RocketState::DEAD;
+				// déterminer la vitesse au moment de la collision
+				Real speed = glm::length(rocket.velocity);
+
+				// Il faut déterminer si la vitesse est "faible" ou "élevée"
+				// On considère qu'une vitesse inférieure à la vitesse de libération de l'astre qu'on a touché est une "faible" vitesse
+				Real vitesse_de_liberation;
+				if (rocket_collide_with(ObjectName::SUN)) {
+					vitesse_de_liberation = m_sun.extractionVelocity(m_sun.getRadius());
+				}
+				else if (rocket_collide_with(ObjectName::START)) {
+					vitesse_de_liberation = m_startPlanet.extractionVelocity(m_startPlanet.getRadius());
+				}
+				else { // FINAL
+					vitesse_de_liberation = m_finalPlanet.extractionVelocity(m_finalPlanet.getRadius());
+				}
+
+				if (speed < vitesse_de_liberation) {
+					return RocketState::DEAD_TOUCH_PLANET_LOW_SPEED;
+				}
+				else {
+					return RocketState::DEAD_TOUCH_PLANET_HIGH_SPEED;
+				}
 			}
 
 			// on check la position finale, et si la fusée est en orbite autour de la planète finale
@@ -319,15 +207,33 @@ namespace SimuCore::Systems {
 		RocketState final_state = Run(rocket_state);
 		switch (final_state)
 		{
-		case RocketState::DEAD:
-			return m_LowScore;
+
+		case RocketState::DEAD_TOUCH_PLANET_HIGH_SPEED:
+			// on veut que la borne inf soit 1/epsilon
+			// on veut que la borne sup soit 2/epsilon
+			return (1 / (constants::epsilon + glm::length(m_rocket.velocity)) ) + 1/constants::epsilon; // TODO : ajuster la formule
 			break;
+
+		case RocketState::DEAD_ACCELERATION_TOO_HIGH:
+			// on veut que la borne inf soit 2/epsilon
+			// on veut que la borne sup soit 3/epsilon
+			return (1 / (constants::epsilon + m_rocket.acceleration)) + 2 / constants::epsilon; // TODO : ajuster la formule
+			break;
+
+		case RocketState::DEAD_TOUCH_PLANET_LOW_SPEED:
+			// on veut que la borne inf soit 3/epsilon
+			// on veut que la borne sup soit 4/epsilon
+			return (1 / (constants::epsilon + glm::length(m_rocket.velocity))) + 3 / constants::epsilon; // TODO : ajuster la formule
+			break;
+
 		case RocketState::NEUTRAL:
 			return HandleScoreNeutralState();
 			break;
+
 		case RocketState::VALID:
 			return HandleScoreValidState();
 			break;
+
 		default:
 			throw std::runtime_error("Unknown RocketState encountered in Score calculation.");
 			break;
@@ -409,7 +315,7 @@ namespace SimuCore::Systems {
 		
 		// Un majorant simple est de prendre le cas où la position et la vitesse sont parfaites (donc l'influence position et vitesse est maximale).
 		// Comme on ajoute un epsilon pour éviter la division par zéro, on peut prendre 1 / epsilon comme influence maximale, pour chaque influence.
-		constexpr Real Majorant_etat_neutre = 2 / constants::epsilon;
+		constexpr Real Majorant_etat_neutre = 5 / constants::epsilon;
 
 
 		Real cout_energetique = m_rocket.getDeltaM(); // TODO
@@ -422,11 +328,11 @@ namespace SimuCore::Systems {
 		Real cout_energetique = m_rocket.getDeltaM(); // TODO 
 		Real tof = m_time;
 
-		Real influence_temps_energie = 1/(cout_energetique * tof + constants::epsilon);
+		Real influence_temps_energie = 0.5/(cout_energetique * tof + constants::epsilon);
 
 
 
-		Real influence_position = 1 / constants::epsilon; // Trouver un maximum pertinent
+		Real influence_position = 0.5 / constants::epsilon; // Trouver un maximum pertinent
 
 		glm::dvec3 projection_on_ring = m_finalPlanet.targetRadius() * glm::normalize(m_rocket.position - m_finalPlanet.position);
 		Real distance_to_ring = glm::length(m_rocket.position - projection_on_ring);
@@ -435,12 +341,40 @@ namespace SimuCore::Systems {
 		bool position_ok = (m_finalPlanet.minOrbitRadius() <= distance_to_ring && distance_to_ring <= m_finalPlanet.maxOrbitRadius());
 		if (!position_ok)
 		{
-			influence_position = 1 / (distance_to_ring + constants::epsilon); // On veut que l'influence diminue quand on s'éloigne de la distance cible
+			influence_position = 0.5 / (distance_to_ring + constants::epsilon); // On veut que l'influence diminue quand on s'éloigne de la distance cible
 		}
+		// on veut que la borne inf soit 4/epsilon, donc on ajoute 4 / epsilon
+		// donc la borne sup est 0.5/epsilon + 0.5/epsilon + 4/epsilon = 5/epsilon
+
+
 
 
 		// TODO : vérifier avec des assertions que les influences sont bien dans les bornes attendues.
-		return influence_temps_energie + influence_position;
+		return influence_temps_energie + influence_position + 4/constants::epsilon;
+	}
+
+	AdaptedSystem::Real AdaptedSystem::HandleScoreInvalidGenerationState(GenerationState gen_state) const {
+		// TODO : améliorer en fonction des différents états invalides, pour pénaliser plus ou moins sévèrement
+		// afin d'orienter la génération vers des individus valides.
+
+		switch (gen_state)
+		{
+		case SimuCore::GenerationState::VALID:
+			std::cerr << "Warning: HandleScoreInvalidGenerationState called with VALID state." << std::endl;
+			std::abort();
+			break;
+		case SimuCore::GenerationState::INVALID_GENES_OUT_OF_BOUNDS_POSITION:
+			return m_LowScore * 10; // Pour pouvoir différencier des autres états invalides
+			break;
+		case SimuCore::GenerationState::INVALID_GENES_OUT_OF_BOUNDS_VELOCITY:
+			return m_LowScore * 100; // Pour pouvoir différencier des autres états invalides
+			break;
+		case SimuCore::GenerationState::INVALID_GENES_OUT_OF_BOUNDS_IMPULSION:
+			return m_LowScore * 1000; // Pour pouvoir différencier des autres états invalides
+			break;
+		default:
+			break;
+		}
 	}
 
 	bool AdaptedSystem::rocket_collide_with(ObjectName name) const {

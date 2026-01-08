@@ -312,11 +312,11 @@ int main(int argc, char** argv) {
 	SimuCore::Systems::AdaptedSystem sy(SimuCore::Systems::PlanetsName::Terre, SimuCore::Systems::PlanetsName::Mars, 0, 0, SimuCore::Structures::Rocket(lifetime, std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(), 700000, 4.5), lifetime, 3600);
 
     genetic::CrossoverType cross_type = genetic::CrossoverType::UNIFORM_BIT_LEVEL;
-    bool elitism = false;
+    bool elitism = true;
     bool auto_adapt = true;
     size_t population_size = 100;
-    size_t max_generation  =  10000;
-    size_t print_interval  =   10;
+    size_t max_generation  =  100;
+    size_t print_interval  =   1;
 
 	SimuCore::Optimization::getBestRocket<2>("", sy,
         cross_type, elitism, auto_adapt,

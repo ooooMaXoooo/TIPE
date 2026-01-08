@@ -22,3 +22,5 @@
 #include <limits>
 #include <memory>
 #include <utility>
+#include <string>
+#include <cassert>
