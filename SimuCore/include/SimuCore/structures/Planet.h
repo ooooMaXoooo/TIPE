@@ -41,17 +41,18 @@ namespace SimuCore {
             }
 
             Planet& operator=(const Planet& other) {
-				m_Name = other.m_Name;
-				mass = other.mass;
-				position = other.position;
-				velocity = other.velocity;
-				forces = other.forces;
-				m_radius = other.m_radius;
-				m_exobase = other.m_exobase;
-				m_maxAltitude = other.m_maxAltitude;
-				m_muPlanet = other.m_muPlanet;
+                if (this != &other) {
+                    Entity::operator=(other);
+                    this->m_Name = other.m_Name;
+                    this->m_radius = other.m_radius;
+                    this->m_muPlanet = other.m_muPlanet;
+                    this->m_mass = other.m_mass;
+                    this->m_exobase = other.m_exobase;
+                    this->m_maxAltitude = other.m_maxAltitude;
+                }
                 return *this;
-            }
+			}
+            
 
             std::string Name() const { return std::string(m_Name); }
 

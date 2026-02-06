@@ -55,10 +55,22 @@ namespace SimuCore::Systems {
 
 		SetAnglePlanet(m_startPlanet, start_angle);
 		SetAnglePlanet(m_finalPlanet, final_angle);
+	} // AdaptedSystem
+
+	AdaptedSystem::AdaptedSystem(const AdaptedSystem& sys) :
+		m_MaxTime(sys.m_MaxTime),
+		m_deltaTime(sys.m_deltaTime),
+		m_startPlanet(sys.m_startPlanet),
+		m_finalPlanet(sys.m_finalPlanet), // TODO vérifier constructeur par copie
+		m_sun(sys.m_sun),
+		m_rocket(sys.m_rocket), // TODO vérifier constructeur par copie
+		m_time(sys.m_time),
+		m_startAngle(sys.m_deltaTime),
+		m_finalAngle(sys.m_finalAngle)
+	{
 	}
 
-
-	AdaptedSystem::RocketState AdaptedSystem::Run(std::function<RocketState(const Rocket&) > state) {
+	AdaptedSystem::RocketState AdaptedSystem::Run(std::function<RocketState()> state) {
 		std::vector<Entity*> entities; // vérifier la mémoire durant l'éxécution
 		entities.reserve(4);
 		entities.push_back(&m_rocket);
@@ -74,15 +86,15 @@ namespace SimuCore::Systems {
 
 		while (current_state == RocketState::NEUTRAL && iteration < MAX_ITERATIONS) {
 			Integrator::IntegrateStep(entities, m_deltaTime, m_time); // ici à 15h31 jeudi 27/11/2025
-			m_rocket = *dynamic_cast<Rocket*>(entities[0]);
+			//m_rocket = *dynamic_cast<Rocket*>(entities[0]); --> tout est modifié en place, pas besoin de recopie. Enfin normalement.
 
-			current_state = state(m_rocket);
+			current_state = state();
 			m_time += m_deltaTime;
 			iteration++;
 		}
 
 		return current_state;
-	}
+	} // Run
 
 	void AdaptedSystem::Reset(double t) {
 		m_time = 0;
@@ -108,15 +120,16 @@ namespace SimuCore::Systems {
 		m_finalPlanet.forces = glm::dvec3(0, 0, 0);
 
 		// besoin de reset la rocket ???  TODO
-	}
+	} // Reset
 
 	AdaptedSystem::Real AdaptedSystem::Score(const std::vector<std::vector<Real>>& individu) {
 		auto [rocket, gen_state] = IndividualToRocket(individu, *this);
-		m_rocket = rocket;
 
 		if (gen_state != GenerationState::VALID) {
-			return m_LowScore;
+			return HandleScoreInvalidGenerationState(gen_state);
 		}
+
+		m_rocket = rocket;
 
 
 
@@ -129,79 +142,8 @@ namespace SimuCore::Systems {
 		//	• le temps de vol
 		//
 
-
-
-		auto rocket_state = [this](const Rocket& rocket) -> RocketState {
-			// on check l'acceleration
-			constexpr Real acceleration_maximale = constants::g * 5; // 5g - m/s² - Accélération maximale tolérée pour les humains dans la fusée
-			Real acceleration = rocket.acceleration;
-			if (acceleration > acceleration_maximale) {
-				return RocketState::DEAD_ACCELERATION_TOO_HIGH;
-			}
-
-			// check les collisions --> brute force car seulement 3 comparaisons
-			bool collided = rocket_collide_with(ObjectName::SUN) || rocket_collide_with(ObjectName::START) || rocket_collide_with(ObjectName::FINAL);
-
-			if (collided) {
-				// déterminer la vitesse au moment de la collision
-				Real speed = glm::length(rocket.velocity);
-
-				// Il faut déterminer si la vitesse est "faible" ou "élevée"
-				// On considère qu'une vitesse inférieure à la vitesse de libération de l'astre qu'on a touché est une "faible" vitesse
-				Real vitesse_de_liberation;
-				if (rocket_collide_with(ObjectName::SUN)) {
-					vitesse_de_liberation = m_sun.extractionVelocity(m_sun.getRadius());
-				}
-				else if (rocket_collide_with(ObjectName::START)) {
-					vitesse_de_liberation = m_startPlanet.extractionVelocity(m_startPlanet.getRadius());
-				}
-				else { // FINAL
-					vitesse_de_liberation = m_finalPlanet.extractionVelocity(m_finalPlanet.getRadius());
-				}
-
-				if (speed < vitesse_de_liberation) {
-					return RocketState::DEAD_TOUCH_PLANET_LOW_SPEED;
-				}
-				else {
-					return RocketState::DEAD_TOUCH_PLANET_HIGH_SPEED;
-				}
-			}
-
-			// on check la position finale, et si la fusée est en orbite autour de la planète finale
-			glm::dvec3 position_dans_referentiel_planete = rocket.position - m_finalPlanet.position;
-			Real distance = glm::length(position_dans_referentiel_planete);
-			bool distance_ok = (m_finalPlanet.minOrbitRadius() <= distance && distance <= m_finalPlanet.maxOrbitRadius());
-
-			if (distance_ok) {
-				glm::dvec3 vecteur_vitesse_referentiel_planete_finale = rocket.velocity - m_finalPlanet.velocity;
-				Real norme_vitesse = glm::length(vecteur_vitesse_referentiel_planete_finale);
-
-				// TODO check les formules
-				double energie_orbitale = 0.5 * norme_vitesse * norme_vitesse - m_finalPlanet.getMu() / distance;
-
-				if (energie_orbitale >= 0 - constants::epsilon) return RocketState::NEUTRAL; // vérifier qu'on enleve pas trop de trajectoires
-
-				
-				glm::dvec3 presque_moment_cinetique = glm::cross(position_dans_referentiel_planete, vecteur_vitesse_referentiel_planete_finale);
-				double constante_des_aires = glm::length(presque_moment_cinetique);
-
-				double demi_grand_axe = -0.5 * m_finalPlanet.getMu() / energie_orbitale;
-				double excentricite = std::sqrt(1 + (2 * energie_orbitale * (constante_des_aires/ m_finalPlanet.getMu()) * (constante_des_aires / m_finalPlanet.getMu())));
-
-				double perige = demi_grand_axe * (1 - excentricite);
-				double apogee = demi_grand_axe * (1 + excentricite);
-
-				// on reste dans l'anneau si le perigé est plus grand que l'orbite min et que l'apogée est plus petit que l'orbite min
-				// car si on dépasse, le soleil a une forte influences
-				bool vitesse_ok = (perige >= m_finalPlanet.minOrbitRadius()) && (apogee <= m_finalPlanet.maxOrbitRadius());
-
-				return vitesse_ok ? RocketState::VALID : RocketState::NEUTRAL;
-			}
-
-			else {
-				return RocketState::NEUTRAL;
-			}
-
+		auto rocket_state = [this]() -> RocketState {
+			return Rocket_state();
 		};
 
 		RocketState final_state = Run(rocket_state);
@@ -211,22 +153,22 @@ namespace SimuCore::Systems {
 		case RocketState::DEAD_TOUCH_PLANET_HIGH_SPEED:
 			// on veut que la borne inf soit 1/epsilon
 			// on veut que la borne sup soit 2/epsilon
-			return (1 / (constants::epsilon + glm::length(m_rocket.velocity)) ) + 1/constants::epsilon; // TODO : ajuster la formule
+			return (1 / (m_CstScore + glm::length(m_rocket.velocity))) + 1/m_CstScore; // TODO : ajuster la formule
 			break;
 
 		case RocketState::DEAD_ACCELERATION_TOO_HIGH:
 			// on veut que la borne inf soit 2/epsilon
 			// on veut que la borne sup soit 3/epsilon
-			return (1 / (constants::epsilon + m_rocket.acceleration)) + 2 / constants::epsilon; // TODO : ajuster la formule
+			return (1 / (m_CstScore + m_rocket.acceleration)) + 2 / m_CstScore; // TODO : ajuster la formule
 			break;
 
 		case RocketState::DEAD_TOUCH_PLANET_LOW_SPEED:
 			// on veut que la borne inf soit 3/epsilon
 			// on veut que la borne sup soit 4/epsilon
-			return (1 / (constants::epsilon + glm::length(m_rocket.velocity))) + 3 / constants::epsilon; // TODO : ajuster la formule
+			return (1 / (m_CstScore + glm::length(m_rocket.velocity))) + 3 / m_CstScore; // TODO : ajuster la formule
 			break;
 
-		case RocketState::NEUTRAL:
+		case RocketState::NEUTRAL: /// A vérifier prochainement
 			return HandleScoreNeutralState();
 			break;
 
@@ -238,11 +180,15 @@ namespace SimuCore::Systems {
 			throw std::runtime_error("Unknown RocketState encountered in Score calculation.");
 			break;
 		}	
-	}
+	} // Score
 
+	/// <summary>
+	/// La taille de l'anneau dans lequel les fusées sont générées
+	/// </summary>
+	/// <returns></returns>
 	AdaptedSystem::Real AdaptedSystem::RingSize_meter() const {
 		return m_startPlanet.maxOrbitRadius() - m_startPlanet.minOrbitRadius();
-	}
+	} // RingSize_meter
 
 	void AdaptedSystem::InitPlanet(bool is_start_planet, PlanetsName name) {
 		switch (name) {
@@ -286,7 +232,7 @@ namespace SimuCore::Systems {
 			else					m_finalPlanet = m_planets[8];
 			break;
 		}
-	}
+	} // InitPlanet
 
 	void AdaptedSystem::SetAnglePlanet(Planet& planet, double theta) {
 		double norme = glm::length(planet.position);
@@ -295,7 +241,7 @@ namespace SimuCore::Systems {
 		double ordonnee = std::sin(theta) * norme;
 
 		planet.position = glm::dvec3(abscisse, ordonnee, 0);
-	}
+	} // SetAnglePlanet
 
 	void AdaptedSystem::SetPlanetSpeed(Planet& planet, double theta) {
 		double norme = glm::length(planet.velocity);
@@ -304,7 +250,7 @@ namespace SimuCore::Systems {
 		double ordonnee = std::sin(theta + constants::PI / 2) * norme;
 
 		planet.velocity = glm::dvec3(abscisse, ordonnee, 0);
-	}
+	} // SetPlanetSpeed
 
 
 	AdaptedSystem::Real AdaptedSystem::HandleScoreValidState() const
@@ -315,24 +261,24 @@ namespace SimuCore::Systems {
 		
 		// Un majorant simple est de prendre le cas où la position et la vitesse sont parfaites (donc l'influence position et vitesse est maximale).
 		// Comme on ajoute un epsilon pour éviter la division par zéro, on peut prendre 1 / epsilon comme influence maximale, pour chaque influence.
-		constexpr Real Majorant_etat_neutre = 5 / constants::epsilon;
+		constexpr Real Majorant_etat_neutre = 5 / m_CstScore;
 
 
 		Real cout_energetique = m_rocket.getDeltaM(); // TODO
 		Real tof = m_time;
-		return 1/(tof*cout_energetique + constants::epsilon) + Majorant_etat_neutre;
-	}
+		return 1/(tof*cout_energetique + m_CstScore) + Majorant_etat_neutre;
+	} // HandleScoreValidState
 
 	AdaptedSystem::Real AdaptedSystem::HandleScoreNeutralState() const
 	{
 		Real cout_energetique = m_rocket.getDeltaM(); // TODO 
 		Real tof = m_time;
 
-		Real influence_temps_energie = 0.5/(cout_energetique * tof + constants::epsilon);
+		Real influence_temps_energie = 0.5/(cout_energetique * tof + m_CstScore);
 
 
 
-		Real influence_position = 0.5 / constants::epsilon; // Trouver un maximum pertinent
+		Real influence_position = 0.5 / m_CstScore; // Trouver un maximum pertinent
 
 		glm::dvec3 projection_on_ring = m_finalPlanet.targetRadius() * glm::normalize(m_rocket.position - m_finalPlanet.position);
 		Real distance_to_ring = glm::length(m_rocket.position - projection_on_ring);
@@ -341,7 +287,7 @@ namespace SimuCore::Systems {
 		bool position_ok = (m_finalPlanet.minOrbitRadius() <= distance_to_ring && distance_to_ring <= m_finalPlanet.maxOrbitRadius());
 		if (!position_ok)
 		{
-			influence_position = 0.5 / (distance_to_ring + constants::epsilon); // On veut que l'influence diminue quand on s'éloigne de la distance cible
+			influence_position = 0.5 / (distance_to_ring + m_CstScore); // On veut que l'influence diminue quand on s'éloigne de la distance cible
 		}
 		// on veut que la borne inf soit 4/epsilon, donc on ajoute 4 / epsilon
 		// donc la borne sup est 0.5/epsilon + 0.5/epsilon + 4/epsilon = 5/epsilon
@@ -350,8 +296,8 @@ namespace SimuCore::Systems {
 
 
 		// TODO : vérifier avec des assertions que les influences sont bien dans les bornes attendues.
-		return influence_temps_energie + influence_position + 4/constants::epsilon;
-	}
+		return influence_temps_energie + influence_position + 4/m_CstScore;
+	} // HandleScoreNeutralState
 
 	AdaptedSystem::Real AdaptedSystem::HandleScoreInvalidGenerationState(GenerationState gen_state) const {
 		// TODO : améliorer en fonction des différents états invalides, pour pénaliser plus ou moins sévèrement
@@ -364,18 +310,18 @@ namespace SimuCore::Systems {
 			std::abort();
 			break;
 		case SimuCore::GenerationState::INVALID_GENES_OUT_OF_BOUNDS_POSITION:
-			return m_LowScore * 10; // Pour pouvoir différencier des autres états invalides
+			return m_LowestScore * 0.001; // Pour pouvoir différencier des autres états invalides
 			break;
 		case SimuCore::GenerationState::INVALID_GENES_OUT_OF_BOUNDS_VELOCITY:
-			return m_LowScore * 100; // Pour pouvoir différencier des autres états invalides
+			return m_LowestScore * 0.1; // Pour pouvoir différencier des autres états invalides
 			break;
 		case SimuCore::GenerationState::INVALID_GENES_OUT_OF_BOUNDS_IMPULSION:
-			return m_LowScore * 1000; // Pour pouvoir différencier des autres états invalides
+			return m_LowestScore; // Pour pouvoir différencier des autres états invalides
 			break;
 		default:
 			break;
 		}
-	}
+	} // HandleScoreInvalidGenerationState
 
 	bool AdaptedSystem::rocket_collide_with(ObjectName name) const {
 		glm::dvec3 object_pos;
@@ -405,5 +351,147 @@ namespace SimuCore::Systems {
 		double distance = glm::length(m_rocket.position - object_pos);
 
 		return distance < object_radius + constants::epsilon;
+	}// rocket_collide_with
+
+	SimuCore::Structures::Planet getPlanetFromName(PlanetsName name)
+	{
+		switch (name) {
+		case PlanetsName::Mercure:
+			return SimuCore::Structures::Planet(Systems::AdaptedSystem::m_planets[1]);
+			break;
+
+		case PlanetsName::Venus:
+			return SimuCore::Structures::Planet(Systems::AdaptedSystem::m_planets[2]);
+			break;
+
+		case PlanetsName::Terre:
+			return SimuCore::Structures::Planet(Systems::AdaptedSystem::m_planets[3]);
+			break;
+
+		case PlanetsName::Mars:
+			return SimuCore::Structures::Planet(Systems::AdaptedSystem::m_planets[4]);
+			break;
+
+		case PlanetsName::Jupiter:
+			return SimuCore::Structures::Planet(Systems::AdaptedSystem::m_planets[5]);
+			break;
+
+		case PlanetsName::Saturne:
+			return SimuCore::Structures::Planet(Systems::AdaptedSystem::m_planets[6]);
+			break;
+
+		case PlanetsName::Uranus:
+			return SimuCore::Structures::Planet(Systems::AdaptedSystem::m_planets[7]);
+			break;
+
+		case PlanetsName::Neptune:
+			return SimuCore::Structures::Planet(Systems::AdaptedSystem::m_planets[8]);
+			break;
+
+		}
+	} // getPlanetFromName
+
+	AdaptedSystem::RocketState GetRocketState(const Structures::Rocket& rocket, AdaptedSystem& system) {
+
+		// on sauvegarde l'état actuel du système
+		Structures::Rocket saved_rocket = system.m_rocket;
+		Structures::Planet saved_start_planet = system.m_startPlanet;
+		Structures::Planet saved_final_planet = system.m_finalPlanet;
+		Structures::Planet saved_sun = system.m_sun;
+		double saved_time = system.m_time;
+		double saved_start_angle = system.m_startAngle;
+		double saved_final_angle = system.m_finalAngle;
+
+		// on remplace la fusée par celle passée en paramètre et on calcule l'état
+		system.m_rocket = rocket;
+		AdaptedSystem::RocketState state = system.Rocket_state(); // Rocket_state est une fonction const donc il n'y avait pas besoin de sauvegarder/restaurer l'état du système, mais on le fait quand même pour être sûr
+
+		// on restaure l'état du système
+		system.m_rocket = saved_rocket;
+		system.m_startPlanet = saved_start_planet;
+		system.m_finalPlanet = saved_final_planet;
+		system.m_sun = saved_sun;
+		system.m_time = saved_time;
+		system.m_startAngle = saved_start_angle;
+		system.m_finalAngle = saved_final_angle;
+
+		return state;
 	}
-};
+
+	AdaptedSystem::RocketState AdaptedSystem::Rocket_state() const {
+		// on check l'acceleration
+		constexpr Real acceleration_maximale = constants::g * 5; // 5g - m/s² - Accélération maximale tolérée pour les humains dans la fusée
+		Real acceleration = m_rocket.acceleration;
+		if (acceleration > acceleration_maximale) {
+			return RocketState::DEAD_ACCELERATION_TOO_HIGH;
+		}
+
+		// check les collisions --> brute force car seulement 3 comparaisons
+		// TODO : Corriger les erreurs : des fonctions membre utilisent m_rocket au lieu de rocket passé en paramètre
+
+		bool collided = rocket_collide_with(ObjectName::SUN) || rocket_collide_with(ObjectName::START) || rocket_collide_with(ObjectName::FINAL);
+
+		if (collided) {
+			// déterminer la vitesse au moment de la collision
+			Real speed = glm::length(m_rocket.velocity);
+
+			// Il faut déterminer si la vitesse est "faible" ou "élevée"
+			// On considère qu'une vitesse inférieure à la vitesse de libération de l'astre qu'on a touché est une "faible" vitesse
+			Real vitesse_de_liberation;
+			if (rocket_collide_with(ObjectName::SUN)) {
+				vitesse_de_liberation = m_sun.extractionVelocity(m_sun.getRadius());
+			}
+			else if (rocket_collide_with(ObjectName::START)) {
+				vitesse_de_liberation = m_startPlanet.extractionVelocity(m_startPlanet.getRadius());
+			}
+			else { // FINAL
+				vitesse_de_liberation = m_finalPlanet.extractionVelocity(m_finalPlanet.getRadius());
+			}
+
+			if (speed < vitesse_de_liberation) {
+				return RocketState::DEAD_TOUCH_PLANET_LOW_SPEED;
+			}
+			else {
+				return RocketState::DEAD_TOUCH_PLANET_HIGH_SPEED;
+			}
+		}
+
+		// on check la position finale, et si la fusée est en orbite autour de la planète finale
+		glm::dvec3 position_dans_referentiel_planete = m_rocket.position - m_finalPlanet.position;
+		Real distance = glm::length(position_dans_referentiel_planete);
+		bool distance_ok = (m_finalPlanet.minOrbitRadius() <= distance && distance <= m_finalPlanet.maxOrbitRadius());
+
+		if (distance_ok) {
+			glm::dvec3 vecteur_vitesse_referentiel_planete_finale = m_rocket.velocity - m_finalPlanet.velocity;
+			Real norme_vitesse = glm::length(vecteur_vitesse_referentiel_planete_finale);
+
+			// TODO check les formules
+			double energie_orbitale = 0.5 * norme_vitesse * norme_vitesse - m_finalPlanet.getMu() / distance;
+
+			if (energie_orbitale >= 0 - constants::epsilon) return RocketState::NEUTRAL; // vérifier qu'on enleve pas trop de trajectoires
+
+
+			glm::dvec3 presque_moment_cinetique = glm::cross(position_dans_referentiel_planete, vecteur_vitesse_referentiel_planete_finale);
+			double constante_des_aires = glm::length(presque_moment_cinetique);
+
+			double demi_grand_axe = -0.5 * m_finalPlanet.getMu() / energie_orbitale;
+			double excentricite = std::sqrt(1 + (2 * energie_orbitale * (constante_des_aires / m_finalPlanet.getMu()) * (constante_des_aires / m_finalPlanet.getMu())));
+
+			double perige = demi_grand_axe * (1 - excentricite);
+			double apogee = demi_grand_axe * (1 + excentricite);
+
+			// on reste dans l'anneau si le perigé est plus grand que l'orbite min et que l'apogée est plus petit que l'orbite min
+			// car si on dépasse, le soleil a une forte influences
+			bool vitesse_ok = (perige >= m_finalPlanet.minOrbitRadius()) && (apogee <= m_finalPlanet.maxOrbitRadius());
+
+			return vitesse_ok ? RocketState::VALID : RocketState::NEUTRAL;
+		}
+
+		else {
+			return RocketState::NEUTRAL;
+		}
+	}
+
+
+
+}; // namespace SimuCore::Systems

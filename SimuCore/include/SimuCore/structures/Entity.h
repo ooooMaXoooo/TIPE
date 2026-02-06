@@ -19,6 +19,16 @@ namespace SimuCore {
 				forces = glm::dvec3(0);
 			}
 
+			Entity& operator=(const Entity& other) {
+				if (this != &other) {
+					this->position = other.position;
+					this->velocity = other.velocity;
+					this->mass = other.mass;
+					this->forces = other.forces;
+				}
+				return *this;
+			}
+
 			virtual void UpdateFirstPart(double dt) {
 				glm::dvec3 acceleration = forces / mass;
 				velocity += 0.5 * dt * acceleration;

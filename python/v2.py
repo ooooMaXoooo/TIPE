@@ -67,9 +67,9 @@ def clamp (x, a, b) :
 
 
 # === Paramètres utilisateur ===
-n_points = 100
+n_points = 200
 tof_min_days, tof_max_days = 50, 500
-theta_min, theta_max = 0.1, 2*np.pi
+theta_min, theta_max = 0, 2 * np.pi - 0.1
 tof_chosen_days, theta_chosen = 259, np.deg2rad(179.99)
 
 tof_chosen_days = clamp(tof_chosen_days, tof_min_days, tof_max_days)

@@ -31,13 +31,13 @@ namespace SimuCore {
 			Neptune
 		};
 
+		SimuCore::Structures::Planet getPlanetFromName(PlanetsName name);
+
 		class AdaptedSystem {
 			using Entity = SimuCore::Structures::Entity;
 			using Planet = SimuCore::Structures::Planet;
 			using Rocket = SimuCore::Structures::Rocket;
 
-			inline static constexpr uint8_t m_NbPlanets = 9;
-			static const std::array<Planet, m_NbPlanets> m_planets; // fusée + soleil + planète depart + planète arrivée
 
 			Planet m_startPlanet;
 			Planet m_finalPlanet;
@@ -55,14 +55,6 @@ namespace SimuCore {
 
 			using vecteur = glm::dvec3;
 
-			const enum class RocketState : uint8_t {
-				VALID,
-				NEUTRAL,
-				DEAD_TOUCH_PLANET_HIGH_SPEED,
-				DEAD_TOUCH_PLANET_LOW_SPEED,
-				DEAD_ACCELERATION_TOO_HIGH
-			};
-
 			const enum class ObjectName : uint8_t {
 				SUN,
 				START,
@@ -72,11 +64,37 @@ namespace SimuCore {
 
 		public:
 			using Real = double;
-			inline static constexpr double m_LowScore = -1e6;
+			inline static constexpr double m_LowestScore = -1e9;
+			inline static constexpr double m_CstScore = 1e8;
+
+			inline static constexpr uint8_t m_NbPlanets = 9;
+			static const std::array<Planet, m_NbPlanets> m_planets; // fusée + soleil + planète depart + planète arrivée
+
+			const enum class RocketState : uint8_t {
+				VALID,
+				NEUTRAL,
+				DEAD_TOUCH_PLANET_HIGH_SPEED,
+				DEAD_TOUCH_PLANET_LOW_SPEED,
+				DEAD_ACCELERATION_TOO_HIGH
+			};
 
 			AdaptedSystem();
 
+			/// <summary>
+			/// constructeur de la classe AdaptedSystem
+			/// </summary>
+			/// <param name="start_planet"></param>
+			/// <param name="final_planet"></param>
+			/// <param name="start_angle"></param>
+			/// <param name="final_angle"></param>
+			/// <param name="rocket"></param>
+			/// <param name="max_duration"> en jours </param>
+			/// <param name="dt_seconds"> en secondes </param>
 			AdaptedSystem(PlanetsName start_planet, PlanetsName final_planet, double start_angle, double final_angle, Rocket rocket, double max_duration, double dt_seconds);
+
+			AdaptedSystem(const AdaptedSystem& sys);
+
+			AdaptedSystem& operator=(const AdaptedSystem& sys) = delete;
 
 			/**
 			* @brief Simule le système à partir de son état courant
@@ -84,7 +102,7 @@ namespace SimuCore {
 			* @param state Une fonction booléenne, prenant en paramètre une fusée, et indiquant si son état est valide
 			* @return l'état de la fusée à la fin de la simulation
 			*/
-			RocketState Run(std::function<RocketState(const Rocket&) > state); // TODO : Revoir la fonction de simulation pour modification
+			RocketState Run(std::function<RocketState()> state); // TODO : Revoir la fonction de simulation pour modification
 
 			/// <summary>
 			/// Réinitialise le système à l'état à un instant donné, qui deviendra l'instant initial de la simulation.
@@ -107,20 +125,39 @@ namespace SimuCore {
 			const Planet& getSun() const { return m_sun; }
 			const double& getDeltaTime() const { return m_deltaTime; }
 			const double& getMaxTime() const { return m_MaxTime; }
+			const double& getCurrentTime() const { return m_time; }
+			
+			///////// other
+
+			size_t getMaxIterations() const { return static_cast<size_t>(m_MaxTime / m_deltaTime); }
+
+			RocketState Rocket_state() const;
+
+			friend RocketState GetRocketState(const Rocket& rocket, AdaptedSystem& system);
 
 
 		private:
 			void InitPlanet(bool is_start_planet, PlanetsName name); // TODO AMELIORER L'IMPLEM
 			void SetAnglePlanet(Planet& planet, double theta);
 			void SetPlanetSpeed(Planet& planet, double theta);
+					
+
+			bool rocket_collide_with(ObjectName name) const;
+
+
+			///////////////////////////////////////////////////////
+			// Fonctions de score
+			///////////////////////////////////////////////////////
 
 			Real HandleScoreValidState() const;
 			Real HandleScoreNeutralState() const;
 			Real HandleScoreInvalidGenerationState(GenerationState gen_state) const;
 
-			bool rocket_collide_with(ObjectName name) const;
-
 		}; // class AdaptedSystem
+
+
+		AdaptedSystem::RocketState GetRocketState(const Structures::Rocket& rocket, AdaptedSystem& system);
+
 	}; // namespace Systems
 
 
@@ -152,7 +189,7 @@ namespace SimuCore {
 
 		// faire la conversion
 
-		SimuCore::Structures::Rocket rocket(0, std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(), 500, 5.4);
+		SimuCore::Structures::Rocket rocket(0, std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(), 700000, 4.5);
 
 		// Comme les individus sont codés dans des vecteurs de coordonnées comprise entre 
 		// [-system.RingSize_meter(), system.RingSize_meter()], on créer une fonction pour convertir
@@ -163,8 +200,8 @@ namespace SimuCore {
 		auto convert = [max_reels_genes](double min, double max) {
 			return [max_reels_genes, min, max](double x) {
 				return convertIntervals(-max_reels_genes, max_reels_genes, -max, max, x);
-				};
 			};
+		};
 
 		// la fonction convert est une fonction qui :
 		// - prend en paramètre min et max

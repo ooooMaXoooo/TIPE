@@ -218,8 +218,8 @@ static void test_algo_bornes() {
     // Configuration pour Rosenbrock (minimum global en (1, 1))
     using ConfigType = genetic::Config<double, uint64_t, 1, 2>;
     ConfigType config;
-    config.population_size = 60;    // NOLINT (cppcoreguidlines-avoid-magic-numbers)
-    config.max_generations = 50000;  // NOLINT (cppcoreguidlines-avoid-magic-numbers)
+    config.population_size = 2000;    // NOLINT (cppcoreguidlines-avoid-magic-numbers)
+    config.max_generations = 5000;  // NOLINT (cppcoreguidlines-avoid-magic-numbers)
     config.number_of_vectors = 1;   // Un seul vecteur
     config.dimension = 2;           // 2D: (x, y)
     config.min_real = -5;         // NOLINT (cppcoreguidlines-avoid-magic-numbers)
@@ -233,8 +233,10 @@ static void test_algo_bornes() {
     // On veut minimiser, donc maximiser -f
     using Real = ConfigType::real_type;
     auto rosenbrock = [](const std::vector<std::vector<Real>>& vecs) -> Real {
-        double x = convertIntervals(-5, 5, -1e5, 1e5, vecs[0][0]);
-        double y = convertIntervals(-5, 5, -1e5, 1e5, vecs[0][1]);
+        /*double x = convertIntervals(-5, 5, -1e5, 1e5, vecs[0][0]);
+        double y = convertIntervals(-5, 5, -1e5, 1e5, vecs[0][1]);*/
+        double x = vecs[0][0];
+        double y = vecs[0][1];
 
         double term1 = (1.0 - x) * (1.0 - x);
         double term2 = 100.0 * (y - x * x) * (y - x * x);
@@ -246,8 +248,8 @@ static void test_algo_bornes() {
     auto print_info_end_algo = [&ga, &rosenbrock]() -> void {
         // Le minimum global devrait être proche de (1, 1)
         auto best_vecs = ga.get_best_individual().to_real_vectors();
-        std::cout << "Best solution found: (" << convertIntervals(-5, 5, -1e5, 1e5, best_vecs[0][0]) << ", " <<
-            convertIntervals(-5, 5, -1e5, 1e5, best_vecs[0][1]) << ")\n";
+        std::cout << "Best solution found: (" << best_vecs[0][0] << ", " <<
+            best_vecs[0][1] << ")\n";
 		std::cout << "\t~~> Score: " << rosenbrock(best_vecs) << '\n';
         std::cout << "Expected: (1.0, 1.0)\n";
         std::cout << "\n";
@@ -289,8 +291,8 @@ static void test_algo_bornes() {
 
 
 int main(int argc, char** argv) {
-    
-    /*genetic::print_info();
+    /*
+    genetic::print_info();
     std::cout << '\n';
 
     try {
@@ -304,24 +306,24 @@ int main(int argc, char** argv) {
 
     std::cout << "Appuyez sur une touche pour continuer ...";
     std::cin.get();
-    return 0;*/
-    
+    return 0;
+    */
 
     
-	double lifetime = 500;
+	double lifetime = 500; // durée de simulation en jours
 	SimuCore::Systems::AdaptedSystem sy(SimuCore::Systems::PlanetsName::Terre, SimuCore::Systems::PlanetsName::Mars, 0, 0, SimuCore::Structures::Rocket(lifetime, std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(), 700000, 4.5), lifetime, 3600);
 
     genetic::CrossoverType cross_type = genetic::CrossoverType::UNIFORM_BIT_LEVEL;
     bool elitism = true;
     bool auto_adapt = true;
-    size_t population_size = 100;
-    size_t max_generation  =  100;
-    size_t print_interval  =   1;
+    size_t population_size =  1000;
+    size_t max_generation  =  2000;
+    size_t print_interval  =  100;
+    bool verbose = true;
+	size_t snapshot_interval = 30;
 
 	SimuCore::Optimization::getBestRocket<2>("", sy,
         cross_type, elitism, auto_adapt,
-        population_size, max_generation, print_interval);
-    
-
-    //std::cout << convertIntervals(2, 3, -5, 5, 2.75) << '\n';
+        population_size, max_generation,
+        print_interval, verbose, snapshot_interval);
 }

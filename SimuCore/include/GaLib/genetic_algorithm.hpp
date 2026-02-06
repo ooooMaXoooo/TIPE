@@ -32,14 +32,15 @@ public:
     using Real = typename ConfigType::real_type;
     using Integer = typename ConfigType::integer_type;
 
-    using Individual = Individu<ConfigType>;
-    using Population = std::vector<Individual>;
+    using Individual = typename Individu<ConfigType>;
+    using Population = typename std::vector<Individual>;
 
     /**
      * @brief Fitness function type
      * Takes vectors of real values and returns a fitness score (higher is better)
      */
-    using FitnessFunction = std::function<Real(const std::vector<std::vector<Real>>&)>;
+    using FitnessFunction = typename std::function<Real(const std::vector<std::vector<Real>>&)>;
+    using CallbackFunctionType = typename std::function<void(size_t, Real, const Individual&, Real, const Individual&, const Population&)>;
 
 private:
     ConfigType m_config;
@@ -85,13 +86,20 @@ public:
         m_selected.resize(m_config.get_half_population_size());
     }
 
+
     /**
-     * @brief Runs the complete genetic algorithm
+	 * @brief Runs the complete genetic algorithm and returns the best individual found
      *
      * @param verbose Print progress information
-     * @param callback Optional callback called after each generation
+     * @param callback Optional callback called after each generation, it takes in order :
+            - the current_generation
+            - the best fitness
+            - the best individual
+            - the worst fitness
+            - the worst individual
+            - the vector of all individual in the current generation
      */
-    void run(bool verbose = true, std::function<void(size_t, Real, const Individual&)> callback = nullptr) {
+    Individual run(bool verbose = true, CallbackFunctionType callback = nullptr) {
         if (verbose) {
             std::cout << "Starting genetic algorithm..." << '\n';
             std::cout << m_config;
@@ -158,7 +166,7 @@ public:
             }
 
             if (callback) {
-                callback(gen, m_best_fitness, m_best_individual);
+                callback(gen, m_best_fitness, m_best_individual, m_worst_fitness, m_worst_individual, m_population);
             }
         }
 
@@ -166,6 +174,8 @@ public:
             std::cout << "\nFinal best fitness: " << m_best_fitness << std::endl;
             std::cout << "Best individual:\n" << m_best_individual << std::endl;
         }
+
+		return m_best_individual;
     }
 
     void reset(const ConfigType& config) {
@@ -173,11 +183,10 @@ public:
 
         m_config = config;
         m_best_fitness = std::numeric_limits<Real>::lowest();
-        m_worst_fitness = m_best_fitness;
+        m_worst_fitness = std::numeric_limits<Real>::max();
         m_index_dist = std::uniform_int_distribution<size_t>(0, config.population_size - 1);
         m_cut_dist = std::uniform_int_distribution<size_t>(0, (config.dimension * config.integer_bits) - 1);
-        m_cut_dist_proba =
-            std::uniform_int_distribution<size_t>(0, ((config.number_of_vectors + 1) * config.integer_bits) - 1);
+        m_cut_dist_proba = std::uniform_int_distribution<size_t>(0, ((config.number_of_vectors + 1) * config.integer_bits) - 1);
 
         m_best_individual = Individual(m_config, m_rng);
         initialize_population();

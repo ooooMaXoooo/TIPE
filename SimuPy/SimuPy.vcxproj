@@ -86,26 +86,29 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;SIMUPY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>H5_BUILT_AS_DYNAMIC_LIB;WIN32;_DEBUG;SIMUPY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>python312.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)external\python\lib;$(SolutionDir)x64\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>hdf5.lib;hdf5_cpp.lib;python312.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)external\python\lib;$(SolutionDir)x64\$(Configuration);$(SolutionDir)external\HDF5\2.0.0\lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>if "$(Configuration)"=="Debug" (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit_d.pyd"
 ) else (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit.pyd"
-)</Command>
+)
+
+xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
+</Command>
       <Message>copy the module in the python directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -115,26 +118,29 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;SIMUPY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>H5_BUILT_AS_DYNAMIC_LIB;WIN32;NDEBUG;SIMUPY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>python312.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)external\python\lib;$(SolutionDir)x64\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>hdf5.lib;hdf5_cpp.lib;python312.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)external\python\lib;$(SolutionDir)x64\$(Configuration);$(SolutionDir)external\HDF5\2.0.0\lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>if "$(Configuration)"=="Debug" (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit_d.pyd"
 ) else (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit.pyd"
-)</Command>
+)
+
+xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
+</Command>
       <Message>copy the module in the python directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -142,11 +148,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;SIMUPY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>H5_BUILT_AS_DYNAMIC_LIB;_DEBUG;SIMUPY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp23</LanguageStandard>
     </ClCompile>
@@ -154,15 +160,18 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>python312.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)external\python\lib;$(SolutionDir)x64\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>hdf5.lib;hdf5_cpp.lib;python312.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)external\python\lib;$(SolutionDir)x64\$(Configuration);$(SolutionDir)external\HDF5\2.0.0\lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>if "$(Configuration)"=="Debug" (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit_d.pyd"
 ) else (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit.pyd"
-)</Command>
+)
+
+xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
+</Command>
       <Message>copy the module in the python directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -172,26 +181,30 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;SIMUPY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>H5_BUILT_AS_DYNAMIC_LIB;NDEBUG;SIMUPY_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;$(SolutionDir)external\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
+      <LanguageStandard>stdcpp23</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>python312.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)external\python\lib;$(SolutionDir)x64\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>hdf5.lib;hdf5_cpp.lib;python312.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)external\python\lib;$(SolutionDir)x64\$(Configuration);$(SolutionDir)external\HDF5\2.0.0\lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>if "$(Configuration)"=="Debug" (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit_d.pyd"
 ) else (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit.pyd"
-)</Command>
+)
+
+xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
+</Command>
       <Message>copy the module in the python directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>

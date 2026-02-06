@@ -1,45 +1,76 @@
-#pragma once
+Ôªø#pragma once
 
 #include <pch.h>
 #include "../structures/Rocket.h"
 #include "../structures/System.h"
 #include "../utility.h"
+#include <SimuCore\integrator\integrator.h>
 
 #include <Galib/genetic.hpp>
+#include <DataExport\Snapshot.h>
+#include <DataExport\HDF5WriterAsync.h>
+#include <DataExport\GenerationStats.h>
+#include <DataExport\TrajectorySoA.h>
+#include <DataExport\Accumulators.h>
 
 namespace SimuCore {
 	namespace Optimization {
 
+		inline std::string generate_snapshot_filename(const std::string& extension = "h5") {
+			// R√©cup√©rer le temps actuel
+			auto now = std::chrono::system_clock::now();
+			std::time_t t_now = std::chrono::system_clock::to_time_t(now);
+			std::tm local_tm;
+
+#if defined(_WIN32) || defined(_WIN64)
+			localtime_s(&local_tm, &t_now);  // Windows
+#else
+			localtime_r(&t_now, &local_tm);  // Linux / macOS
+#endif
+
+			// Construire le nom sous la forme simu_jour_mois_annee_heure_minute_seconde.extension
+			std::ostringstream oss;
+			oss << "simu_"
+				<< std::setfill('0') << std::setw(2) << local_tm.tm_mday << "_"
+				<< std::setfill('0') << std::setw(2) << local_tm.tm_mon + 1 << "_"
+				<< local_tm.tm_year + 1900 << "_"
+				<< std::setfill('0') << std::setw(2) << local_tm.tm_hour << "_"
+				<< std::setfill('0') << std::setw(2) << local_tm.tm_min << "_"
+				<< std::setfill('0') << std::setw(2) << local_tm.tm_sec
+				<< "." << extension;
+
+			return oss.str();
+		}
+
 		/// <summary>
-		/// Calcul une fusÈe initialisÈe de faÁon ‡ avoir la trajectoire optimale dans le systËme donnÈ.
+		/// Calcul une fus√©e initialis√©e de fa√ßon √† avoir la trajectoire optimale dans le syst√®me donn√©.
 		/// </summary>
 		/// <typeparam name="NbImpulsions"></typeparam>
-		/// <param name="filename"> le chemin d'accËs ‡ un fichier de sauvergarde. </param>
-		/// <param name="system"> le systËme dans lequel Èvolue une fusÈe. </param>
+		/// <param name="filename"> le chemin d'acc√®s √† un fichier de sauvergarde. </param>
+		/// <param name="system"> le syst√®me dans lequel √©volue une fus√©e. </param>
 		/// <returns> </returns>
 		template <size_t NbImpulsions>
-		SimuCore::Structures::Rocket getBestRocket(const char* filename, SimuCore::Systems::AdaptedSystem system,
+		SimuCore::Structures::Rocket getBestRocket(const char* filename, const SimuCore::Systems::AdaptedSystem system,
 			genetic::CrossoverType cross_type, bool elitism, bool auto_adapt,
 			size_t population_size = 100, size_t max_generation = 5000,
-			size_t print_interval=100)
+			size_t print_interval=100, bool verbose=false, size_t snapshot_interval=10)
 		{
-			using ConfigType = genetic::Config<double, uint64_t, 2*NbImpulsions + 1, 3>;
+			using ConfigType = genetic::Config<double, uint16_t, 2*NbImpulsions + 1, 3>;
 			ConfigType config;
 
-			config.dimension = 3;									// on travaille dans l'espace.
-			config.number_of_vectors = 2 * NbImpulsions + 1;		// p0, v0
+			config.dimension = 3;									// on travaille dans l'espace
+			config.number_of_vectors = 2 * NbImpulsions + 1;		// un vecteur = un g√®ne
 
-			config.enable_saving = false;							// dÈsactive la sauvegarde dans les fichiers car ce n'est pas encore implÈmentÈ.
+			config.enable_saving = false;							// d√©sactive la sauvegarde dans les fichiers car ce n'est pas encore impl√©ment√©
 
-			config.population_size = population_size;				// paramËtre ‡ ajuster
-			config.max_generations = max_generation;				// paramËtre ‡ ajuster
+			config.population_size = population_size;				// param√®tre √† ajuster
+			config.max_generations = max_generation;				// param√®tre √† ajuster
 			config.print_interval  = print_interval;
 
 
 
 			{
-				// gÈnÈrer des rÈels tels que |x| < epaisseur de l'anneau  --> dans [-5, 5] pour Èviter les problËmes de l'algo gÈnÈtique
-
+				// g√©n√©rer des r√©els tels que |x| < epaisseur de l'anneau
 				config.max_real = system.RingSize_meter();
 				config.min_real = -config.max_real;
 			}
@@ -50,33 +81,97 @@ namespace SimuCore {
 
 			using Real = ConfigType::real_type;
 			using Integer = ConfigType::integer_type;
+
+			// associe √† un g√©nome un score
 			auto fitness = [&](const std::vector<std::vector<Real>>& vecs) -> Real {
-				// vec[0] --> un vecteur ‡ 3 dimension, Èquivalent ‡ la position initiale
-				// vec[1] --> un vecteur ‡ 3 dimension, Èquivalent ‡ la vitesse initiale
+				// vec[0] --> un vecteur √† 3 dimension, √©quivalent √† la position initiale
+				// vec[1] --> un vecteur √† 3 dimension, √©quivalent √† l'impulsion initiale
+				// vec[2] --> un vecteur √† 3 dimension, dont on n'utilise que la premi√®re composante, √©quivalent √† l'instant de la 1ere impulsion
+				// etc...
 
-				thread_local SimuCore::Systems::AdaptedSystem local_system = system;
+				SimuCore::Systems::AdaptedSystem local_system = system; // on copie le syst√®me (probl√®me de concurrence)
 
-				//local_system.Reset();					// On rÈinitialise le systËme pour que les individus commenÁent tous dans les mÍmes confitions initiales.
-				// On n'a pas besoin de rÈinitialiser car la fonction Score le fait dÈj‡.
+				//local_system.Reset();		// On r√©initialise le syst√®me pour que les individus commen√ßent tous dans les m√™mes confitions initiales.
+				// On n'a pas besoin de r√©initialiser car la fonction Score le fait d√©j√†.
 				return local_system.Score(vecs);		// A VERIFIER !!!!! OK ?
+			};
+
+			genetic::GeneticAlgorithm<ConfigType> ga(config, fitness); // cr√©ation d'un algorithme g√©n√©tique
+
+
+			using Ind = typename genetic::Individu<ConfigType>;
+			using Pop = typename std::vector<Ind>;
+
+
+			std::string filename_save = generate_snapshot_filename("h5");
+			HDF5WriterAsync snapshot_sink(filename_save); // nom de fichier adapt√©
+			GenerationAccumulator accumulator(NbImpulsions);
+			double last_best_score = -std::numeric_limits<double>::infinity();
+
+			auto callback =
+				[
+					&accumulator,
+					&system,
+					snapshot_interval,
+					&last_best_score,
+					&snapshot_sink
+				]
+				(
+					size_t gen,
+					double best_fit, const auto& best_ind,
+					double worst_fit, const auto& /*worst_ind*/,
+					const auto& population
+					)
+				{
+					if (gen % snapshot_interval != 0) return;
+
+					// D√©tecter si on a un nouveau meilleur score
+					bool is_new_best = std::abs(best_fit - last_best_score) > SimuCore::constants::epsilon;
+					last_best_score = best_fit;
+
+					// --- Accumuler population compl√®te (avec validit√©) ---
+					accumulator.push_population(population, system);
+
+					// --- Finalisation du snapshot ---
+					dataExport::Snapshot snapshot = accumulator.finalize(
+						gen,
+						dataExport::BestIndividualUpdate{} // sera mis √† jour si n√©cessaire
+					);
+
+					// Mettre √† jour les scores globaux
+					snapshot.stats.best_score = best_fit;
+					snapshot.stats.worst_score = worst_fit;
+
+					// --- Mettre √† jour la trajectoire du meilleur si nouveau meilleur ---
+					if (is_new_best) {
+						snapshot.best_update.is_new_best = true;
+						snapshot.best_update.trajectory = calculate_trajectory(best_ind, system);
+					}
+
+					// --- Envoi vers le writer asynchrone ---
+					snapshot_sink.enqueue(std::make_shared<dataExport::Snapshot>(std::move(snapshot)));
 				};
 
-			genetic::GeneticAlgorithm<ConfigType> ga(config, fitness); // crÈation d'un algorithme gÈnÈtique
 
-			ga.reset(config);
-			ga.run(true, nullptr);	// on lance l'algorithme en affichant des logs dans la console. Il n'y a pas encore de fonction de callback pour le moment.
+
+
+			ga.reset(config); // initialisation de l'algo g√©n√©tique
+			//genetic::Individu<ConfigType> best = ga.run(verbose, callback);	// on lance l'algorithme en affichant des logs dans la console
+			genetic::Individu<ConfigType> best = ga.run(verbose, nullptr);	// on lance l'algorithme en affichant des logs dans la console
 
 
 
 			// *** ----> pas besoin de la suite pour le moment. Juste un exemple d'utilisation futur.
 			/*
-			/// changement de la configuration de l'algo gÈnÈtique.
+			/// changement de la configuration de l'algo g√©n√©tique.
 			config.enable_elitism = false;
-			ga.reset(config);				// on met ‡ jour la config pour l'algo gÈnÈtique.
+			ga.reset(config);				// on met √† jour la config pour l'algo g√©n√©tique.
 			ga.run(true, nullptr);			// on lance l'algo de nouveau.
 			*/
 
-			return SimuCore::Structures::Rocket(0, std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(), 500, 5.4);
+			SimuCore::Systems::AdaptedSystem copy = system;
+			auto [rocket, gen_state] = SimuCore::IndividualToRocket(best.to_real_vectors(), copy);
+			return rocket;
 		}
 				
 	}

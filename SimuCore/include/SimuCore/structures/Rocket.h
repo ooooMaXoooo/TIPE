@@ -42,6 +42,19 @@ namespace SimuCore {
 				: Entity(m, p0, v0), lifetime(daysInSeconds(_lifetime)), m_Impulsions(impulsions), acceleration(0), m_Vitesse_ejection_gaz (vitesse_ejection_gaz) {
 			}
 
+			Rocket& operator=(const Rocket& other) {
+				if (this != &other) {
+					// Appeler l'opérateur d'affectation de la classe de base
+					Entity::operator=(other);
+					// Copier les membres spécifiques de Rocket
+					this->lifetime = other.lifetime;
+					this->acceleration = other.acceleration;
+					this->m_Impulsions = other.m_Impulsions;
+					this->m_Vitesse_ejection_gaz = other.m_Vitesse_ejection_gaz;
+				}
+				return *this;
+			}
+
 			virtual void UpdateFirstPart(double dt) override {
 				glm::dvec3 acceleration = forces / mass;
 				velocity += 0.5f * dt * acceleration;

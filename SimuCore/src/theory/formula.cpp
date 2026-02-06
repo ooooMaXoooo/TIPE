@@ -134,9 +134,28 @@ std::vector<double> orbit::lambert_batch(
                 continue;
             }
 
-            double norm_v1 = std::sqrt(v1[0] * v1[0] + v1[1] * v1[1] + v1[2] * v1[2]);
-            double norm_v2 = std::sqrt(v2[0] * v2[0] + v2[1] * v2[1] + v2[2] * v2[2]);
-            deltaV[idx] = norm_v1 + norm_v2;
+            auto norme = [](const std::array<double, 3>& u) -> double {
+                return std::sqrt(u[0] * u[0] + u[1] * u[1] + u[2] * u[2]);
+            };
+
+            auto substract = [](const std::array<double, 3>& u, const std::array<double, 3>& v) {
+                return std::array<double, 3>{u[0] - v[0], u[1] - v[1], u[2] - v[2] };
+            };
+
+            auto calcul_vecteur_cercle = [norme, mu](const std::array<double, 3>& r1) {
+                std::array<double, 3> v = { -r1[1], r1[0], r1[2] };
+                auto norme_voulu = std::sqrt(mu / norme(r1)) / norme(r1);
+                for (int i = 0; i < 3; i++) { v[i] *= norme_voulu; }
+                return v;
+            };
+            
+            std::array<double, 3> vecteur_vitesse_orbite_depart = calcul_vecteur_cercle(r1);
+            std::array<double, 3> vecteur_vitesse_orbite_fin = calcul_vecteur_cercle(r2);
+
+            
+
+
+            deltaV[idx] = norme(substract(v1, vecteur_vitesse_orbite_depart)) + norme(substract(vecteur_vitesse_orbite_fin, v2));
         }
         catch (...) {
             // en cas d'exception, garder NaN
