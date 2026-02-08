@@ -160,39 +160,48 @@ namespace SimuCore::Systems {
 			// on veut que la borne inf soit 0
 			// on veut que la borne sup soit 1/m_CstScore
 			return (1 / (m_CstScore + glm::length(m_rocket.velocity))); // TODO : ajuster la formule
+			break;
 		case RocketState::DEAD_TOUCH_START_PLANET_LOW_SPEED:
 			// on veut que la borne inf soit 1/m_CstScore
 			// on veut que la borne sup soit 2/m_CstScore
 			return (1 / (m_CstScore + glm::length(m_rocket.velocity))) + (1 / m_CstScore); // TODO : ajuster la formule
+			break;
 		case RocketState::DEAD_TOUCH_SUN_HIGH_SPEED:
 			// on veut que la borne inf soit 2/m_CstScore
 			// on veut que la borne sup soit 3/m_CstScore
 			return (1 / (m_CstScore + glm::length(m_rocket.velocity))) + (2 / m_CstScore); // TODO : ajuster la formule
+			break;
 		case RocketState::DEAD_TOUCH_SUN_LOW_SPEED:
 			// on veut que la borne inf soit 3/m_CstScore
 			// on veut que la borne sup soit 4/m_CstScore
 			return (1 / (m_CstScore + glm::length(m_rocket.velocity))) + (3 / m_CstScore); // TODO : ajuster la formule
+			break;
 		case RocketState::DEAD_ACCELERATION_TOO_HIGH:
 			// on veut que la borne inf soit 4/m_CstScore
 			// on veut que la borne sup soit 5/m_CstScore
 			return (1 / (m_CstScore + m_rocket.acceleration)) + (4 / m_CstScore); // TODO : ajuster la formule
+			break;
 		case RocketState::DEAD_TOUCH_FINAL_PLANET_HIGH_SPEED:
 			// on veut que la borne inf soit 5/m_CstScore
 			// on veut que la borne sup soit 6/m_CstScore
 			return (1 / (m_CstScore + glm::length(m_rocket.velocity))) + (5 / m_CstScore); // TODO : ajuster la formule
+			break;
 		case RocketState::DEAD_TOUCH_FINAL_PLANET_LOW_SPEED:
 			// on veut que la borne inf soit 6/m_CstScore
 			// on veut que la borne sup soit 7/m_CstScore
 			return (1 / (m_CstScore + glm::length(m_rocket.velocity))) + (6 / m_CstScore); // TODO : ajuster la formule
+			break;
 		case RocketState::NEUTRAL:
 			// on veut que la borne inf soit 7/m_CstScore
 			// on veut que la borne sup soit 8/m_CstScore
 			return HandleScoreNeutralState(); // TODO : ajuster la formule pour que le score soit dans l'intervalle souhaité
+			break;
 
 		case RocketState::VALID:
 			// on veut que la borne inf soit 8/m_CstScore
 			// on veut que la borne sup soit 9/m_CstScore
 			return HandleScoreValidState(); // TODO : ajuster la formule pour que le score soit dans l'intervalle souhaité
+			break;
 		
 		default:
 			throw std::runtime_error("Unknown RocketState encountered in Score calculation.");
@@ -204,7 +213,7 @@ namespace SimuCore::Systems {
 	/// La taille de l'anneau dans lequel les fusées sont générées
 	/// </summary>
 	/// <returns>en km</returns>
-	AdaptedSystem::Real AdaptedSystem::RingSize_meter() const {
+	AdaptedSystem::Real AdaptedSystem::RingSize_meter() const noexcept {
 		const auto& start_planet = getPlanetFromName(m_start_planet);
 		return start_planet.maxOrbitRadius() - start_planet.minOrbitRadius();
 	} // RingSize_meter
@@ -322,7 +331,7 @@ namespace SimuCore::Systems {
 
 			// std::cbrt -> racine cubique
 
-			influence_position = 0.75 / (std::cbrt(distance_to_ring) + m_CstScore); // On veut que l'influence diminue quand on s'éloigne de la distance cible
+			influence_position = 0.75 / ((distance_to_ring) + m_CstScore); // On veut que l'influence diminue quand on s'éloigne de la distance cible
 		}
 		else {
 			influence_position = 0.75 / m_CstScore; // On veut que l'influence soit maximale quand on est dans la zone cible, mais qu'elle reste inférieure à la borne inf du score neutre pour les positions hors de la zone cible

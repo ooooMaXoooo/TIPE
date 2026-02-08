@@ -121,7 +121,7 @@ public:
             };
 
         for (size_t gen = 0; gen < m_config.max_generations; gen++) {
-            step(gen);
+            step(static_cast<int>(gen));
 
             if (verbose && (gen % m_config.print_interval == 0 || gen == m_config.max_generations - 1)) {
                 std::cout << "Generation " << gen + 1 << "/" << m_config.max_generations;

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 
 #include <pch.h>
@@ -21,7 +21,7 @@ namespace SimuCore {
 	};
 
 	namespace Systems {
-		enum PlanetsName : uint8_t { /// l'indexation suppose que m_planets est initialisé dans le bon ordre
+		enum PlanetsName : uint8_t { /// l'indexation suppose que m_planets est initialisÃ© dans le bon ordre
 			Mercure = 1,
 			Venus,
 			Terre,
@@ -35,8 +35,8 @@ namespace SimuCore {
 		struct PlanetInfo {
 			double distance_to_sun = 0; // en UA
 			double angular_velocity = 0; // en rad/s
-			double muPlanet = 0; // en m^3/s²
-			size_t nb_iterations_orbit = 0; // nombre d'itérations pour faire une orbite complète (en fonction du pas de temps)
+			double muPlanet = 0; // en m^3/sÂ²
+			size_t nb_iterations_orbit = 0; // nombre d'itÃ©rations pour faire une orbite complÃ¨te (en fonction du pas de temps)
 		};
 
 		SimuCore::Structures::Planet getPlanetFromName(PlanetsName name);
@@ -69,10 +69,10 @@ namespace SimuCore {
 			size_t m_start_planet_start_indice = 0;
 			size_t m_final_planet_start_indice = 0;
 
-			static inline bool s_initialized = false; // pour éviter de réinitialiser les positions des planètes à chaque fois que le constructeur est appelé, ce qui est coûteux en temps de calcul
+			static inline bool s_initialized = false; // pour Ã©viter de rÃ©initialiser les positions des planÃ¨tes Ã  chaque fois que le constructeur est appelÃ©, ce qui est coÃ»teux en temps de calcul
 
-			/* Pas implémenté pour le moment, mais pourrait être utile pour faire du multi-objective optimization ou pour faire du curriculum learning --> pas mon commentaire, se renseigner
-			* Intéressant à faire pour que la gestion du score soit plus claire et plus facile à faire évoluer.
+			/* Pas implÃ©mentÃ© pour le moment, mais pourrait Ãªtre utile pour faire du multi-objective optimization ou pour faire du curriculum learning --> pas mon commentaire, se renseigner
+			* IntÃ©ressant Ã  faire pour que la gestion du score soit plus claire et plus facile Ã  faire Ã©voluer.
 			struct ScoreComponents {
 				double distance_to_final_planet = 0;
 				double speed_at_final_planet = 0;
@@ -89,9 +89,9 @@ namespace SimuCore {
 		public:
 			using Real = double;
 			inline static constexpr double m_LowestScore = -1e9;
-			inline static constexpr double m_CstScore = 1;
+			inline static constexpr double m_CstScore = 1e2;
 
-			inline static constexpr uint8_t m_NbPlanets = 9; // soleil + 8 planètes
+			inline static constexpr uint8_t m_NbPlanets = 9; // soleil + 8 planÃ¨tes
 			static const std::array<Planet, m_NbPlanets> m_planets;
 
 			const enum class RocketState : uint8_t {
@@ -123,28 +123,28 @@ namespace SimuCore {
 			AdaptedSystem& operator=(const AdaptedSystem& sys) = delete;
 
 			/// <summary>
-			/// Effectue l'initialisation nécessaire pour préparer le composant ou le système à l'utilisation.
+			/// Effectue l'initialisation nÃ©cessaire pour prÃ©parer le composant ou le systÃ¨me Ã  l'utilisation.
 			/// </summary>
 			void Initialize();
 
 			/**
-			* @brief Simule le système à partir de son état courant
+			* @brief Simule le systÃ¨me Ã  partir de son Ã©tat courant
 			*
-			* @param state Une fonction booléenne, prenant en paramètre une fusée, et indiquant si son état est valide
-			* @return l'état de la fusée à la fin de la simulation
+			* @param state Une fonction boolÃ©enne, prenant en paramÃ¨tre une fusÃ©e, et indiquant si son Ã©tat est valide
+			* @return l'Ã©tat de la fusÃ©e Ã  la fin de la simulation
 			*/
 			RocketState Run(std::function<RocketState()> state); // TODO : Revoir la fonction de simulation pour modification
 
 			/// <summary>
-			/// Réinitialise le système à l'état à un instant donné, qui deviendra l'instant initial de la simulation.
-			/// Ainsi, à la première mise à jour, le système sera à l'instant t, et m_time vaudra 0.
+			/// RÃ©initialise le systÃ¨me Ã  l'Ã©tat Ã  un instant donnÃ©, qui deviendra l'instant initial de la simulation.
+			/// Ainsi, Ã  la premiÃ¨re mise Ã  jour, le systÃ¨me sera Ã  l'instant t, et m_time vaudra 0.
 			/// </summary>
-			/// <param name="t">l'instant auquel le système sera réinitialisé (en jours) </param>
+			/// <param name="t">l'instant auquel le systÃ¨me sera rÃ©initialisÃ© (en jours) </param>
 			void Reset(double t);
 
 			Real Score(const std::vector<std::vector<Real>>& individu);
 
-			Real RingSize_meter() const;
+			Real RingSize_meter() const noexcept;
 
 
 			///////////////////////////////////////////////////////
@@ -152,57 +152,60 @@ namespace SimuCore {
 			///////////////////////////////////////////////////////
 
 
-			const Planet& getStartPlanet() const { return m_planets[static_cast<size_t>(m_start_planet)]; }
-			const Planet& getFinalPlanet() const { return m_planets[static_cast<size_t>(m_final_planet)]; }
-			const Planet& getSun() const { return m_planets[0]; }
+			const Planet& getStartPlanet() const noexcept { return m_planets[static_cast<size_t>(m_start_planet)]; }
+			const Planet& getFinalPlanet() const noexcept { return m_planets[static_cast<size_t>(m_final_planet)]; }
+			const Planet& getSun() const noexcept  { return m_planets[0]; }
 
 			/// <summary>
-			/// Renvoie une référence constante au delta_time
+			/// Renvoie une rÃ©fÃ©rence constante au delta_time
 			/// </summary>
 			/// <returns> en secondes </returns>
-			const double& getDeltaTime() const { return s_deltaTime; }
+			const double& getDeltaTime() const noexcept { return s_deltaTime; }
 
 			/// <summary>
-			/// Renvoie une référence constante à la durée maximale de la simulation.
+			/// Renvoie une rÃ©fÃ©rence constante Ã  la durÃ©e maximale de la simulation.
 			/// </summary>
 			/// <returns> en jours </returns>
-			const double& getMaxTime() const { return s_MaxTime; }
+			const double& getMaxTime() const noexcept { return s_MaxTime; }
 
 			/// <summary>
-			/// Renvoie une référence constante à la date courante de la simulation.
+			/// Renvoie une rÃ©fÃ©rence constante Ã  la date courante de la simulation.
 			/// </summary>
 			/// <returns> en jours </returns>
-			const double& getCurrentTime() const { return m_time; }
+			const double& getCurrentTime() const noexcept { return m_time; }
 
 			
 			/// <summary>
-			/// Renvoie la vitesse angulaire de la planète de départ.
+			/// Renvoie la vitesse angulaire de la planÃ¨te de dÃ©part.
 			/// </summary>
 			/// <returns>rad/s</returns>
-			double getStartPlanetAngularVelocity() const { return s_start_planet_info.angular_velocity; }
+			double getStartPlanetAngularVelocity() const noexcept { return s_start_planet_info.angular_velocity; }
 
 			/// <summary>
-			/// Renvoie la vitesse angulaire de la planète d'arrivée.
+			/// Renvoie la vitesse angulaire de la planÃ¨te d'arrivÃ©e.
 			/// </summary>
 			/// <returns>rad/s</returns>
-			double getFinalPlanetAngularVelocity() const { return s_final_planet_info.angular_velocity; }
+			double getFinalPlanetAngularVelocity() const noexcept { return s_final_planet_info.angular_velocity; }
 
 			/// <summary>
-			/// Retourne une référence constante vers le vecteur contenant les positions de la planète de départ.
+			/// Retourne une rÃ©fÃ©rence constante vers le vecteur contenant les positions de la planÃ¨te de dÃ©part.
 			/// </summary>
 			/// <returns>UA</returns>
 			static const std::vector<vecteur>& getStartPlanetPositions() { return s_startPlanet_positions; }
 
 			/// <summary>
-			/// Retourne une référence constante vers le vecteur contenant les positions de la planète d'arrivée.
+			/// Retourne une rÃ©fÃ©rence constante vers le vecteur contenant les positions de la planÃ¨te d'arrivÃ©e.
 			/// </summary>
 			/// <returns>UA</returns>
 			static const std::vector<vecteur>& getFinalPlanetPositions() { return s_finalPlanet_positions; }
 
-			static const PlanetInfo& getStartPlanetInfo() { return s_start_planet_info; }
-			static const PlanetInfo& getFinalPlanetInfo() { return s_final_planet_info; }
+			static const PlanetInfo& getStartPlanetInfo() noexcept { return s_start_planet_info; }
+			static const PlanetInfo& getFinalPlanetInfo() noexcept { return s_final_planet_info; }
 
-			static bool IsInitialized() { return s_initialized; }
+			size_t getStartPlanetStartIndice() const noexcept { return m_start_planet_start_indice; }
+			size_t getFinalPlanetStartIndice() const noexcept { return m_final_planet_start_indice; }
+
+			static bool IsInitialized() noexcept { return s_initialized; }
 			
 			///////// other
 
@@ -225,13 +228,13 @@ namespace SimuCore {
 			///////////////////////////////////////////////////////
 
 			/// <summary>
-			/// Calcul la trajectoire d'un astre à une distance d du soleil, à une vitesse angulaire w
+			/// Calcul la trajectoire d'un astre Ã  une distance d du soleil, Ã  une vitesse angulaire w
 			/// </summary>
 			/// <param name="w">rad/s</param>
 			/// <param name="d">UA</param>
 			/// <param name="roll">the angle around the x-axis (rad) </param>
 			/// <param name="picth">the angle around the z-axis (rad)</param>
-			/// <param name="positions">le tableau dans lequel écrire les positions</param>
+			/// <param name="positions">le tableau dans lequel Ã©crire les positions</param>
 			void Calculate_planet_trajectory(
 				double w, double d,
 				double roll, double pitch,
@@ -276,72 +279,91 @@ namespace SimuCore {
 		const std::vector<std::vector<Real>>& individu,
 		SimuCore::Systems::AdaptedSystem& system
 	) {
-		// vérifier que Real est bien un type flottant
+		// vÃ©rifier que Real est bien un type flottant
 		static_assert(std::is_floating_point_v<Real>,
 			"Real type must be a floating-point type (float, double, long double)");
 
 		if (!Systems::AdaptedSystem::IsInitialized()) {
-			std::runtime_error("Le système doit être initialisé avant de pouvoir convertir un individu en fusée.");
+			std::runtime_error("Le systÃ¨me doit Ãªtre initialisÃ© avant de pouvoir convertir un individu en fusÃ©e.");
 			std::abort();
 		}
 
 		SimuCore::Structures::Rocket rocket(0, std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(), 700000, 4.5);
 
-		// Comme les individus sont codés dans des vecteurs de coordonnées comprise entre 
-		// [-system.RingSize_meter(), system.RingSize_meter()], on créer une fonction pour convertir
+		// Comme les individus sont codÃ©s dans des vecteurs de coordonnÃ©es comprise entre 
+		// [-system.RingSize_meter(), system.RingSize_meter()], on crÃ©er une fonction pour convertir
 		//  cet intervalle en un intervalle [min, max]
 
 		const double max_reels_genes = system.RingSize_meter(); // en km
 
 		auto convert = [max_reels_genes](double min, double max) {
 			return [max_reels_genes, min, max](double x) {
-				return convertIntervals(-max_reels_genes, max_reels_genes, -max, max, x);
+				return convertIntervals(-max_reels_genes, max_reels_genes, min, max, x);
 				};
 			};
 		// la fonction convert est une fonction qui :
-		// - prend en paramètre min et max
-		// - retourne une fonction qui prend en paramètre x
+		// - prend en paramÃ¨tre min et max
+		// - retourne une fonction qui prend en paramÃ¨tre x
 		//		et qui convertit x de [-max_reels_genes, max_reels_genes] en [min, max]
 		//
-		// Autrement dit, elle sert à convertir les gènes de l'individu en des valeurs réelles comprises entre min et max.
+		// Autrement dit, elle sert Ã  convertir les gÃ¨nes de l'individu en des valeurs rÃ©elles comprises entre min et max.
 
-		///
-		auto convert_to_sphere_radius_1 = [max_reels_genes](glm::dvec3 cartesian_vec) -> glm::dvec3 {
-			const double inf = -max_reels_genes;
-			const double sup = max_reels_genes;
-
-			cartesian_vec = (cartesian_vec - glm::dvec3(inf, inf, inf)) * (sup - inf);
-			
-			const double r = std::cbrt(cartesian_vec[0]);
-			const double theta = std::acos(2 * cartesian_vec[1] - 1);
-			const double phi = 2 * constants::PI * cartesian_vec[2];
-
-			const double sin_theta = std::sin(theta);
-			const double cos_theta = std::cos(theta);
-			const double sin_phi = std::sin(phi);
-			const double cos_phi = std::cos(phi);
-
-			return glm::dvec3(
-				r * sin_theta * cos_phi,
-				r * sin_theta * sin_phi,
-				r * cos_theta
-			);
-
+		// ramÃ¨ne un gÃ¨ne dans [0, 1] |   norm01 = convert(0, 1) ?
+		/*auto norm01 = [max_reels_genes](double x) {
+			return (x + max_reels_genes) / (2.0 * max_reels_genes);
 			};
+			*/
+		auto norm01 = convert(0, 1);
 
+		///  --> Ã  vÃ©rifier (Ok ?)
+		auto convert_to_sphere_radius_1 = [norm01](
+			const glm::dvec3& gene
+			) {
+				
+				double u = norm01(gene.x); // ~~> correspond Ã  r
+				double v = norm01(gene.y); // ~~> correspond Ã  theta
+				double w = norm01(gene.z); // ~~> correspond Ã  phi
 
+				double r = std::cbrt(u);
+				double costh = 2.0 * v - 1.0;
+				double sinth = std::sqrt(1.0 - costh * costh);
+				double phi = 2.0 * constants::PI * w;
+
+				return glm::dvec3(
+					r * sinth * std::cos(phi),
+					r * sinth * std::sin(phi),
+					r * costh
+				);
+			};
+		
+
+		auto convert_to_circle_radius_1 = [norm01](
+			const glm::dvec2& gene
+			) -> glm::dvec2 {
+				// gene.x correspond Ã  r et est gÃ©nÃ©rÃ© uniformÃ©ment
+				// gene.y correspond Ã  theta est est gÃ©nÃ©rÃ© uniformÃ©ment
+
+				const double test = norm01(gene[0]);
+				const double r = std::sqrt(test);
+				const double theta = 2 * constants::PI * norm01(gene[1]);
+
+				return glm::dvec2(
+					r * std::cos(theta),
+					r * std::sin(theta)
+				);
+			};
 
 
 		/**
 
-		Comme on force la première impulsion à t=0s, mais que l'on souhaite quand même pouvoir explorer différentes configurations
-		initiales, on code les temps des impulsions suivantes comme des écarts de temps entre chaque impulsion.
-		De plus, cela implique qu'il faut faire en sorte que le système soit réinitialisé à la bonne configuration initiale.
+		Comme on force la premiÃ¨re impulsion Ã  t=0s, mais que l'on souhaite quand mÃªme pouvoir explorer diffÃ©rentes configurations
+		initiales, on code les temps des impulsions suivantes comme des Ã©carts de temps entre chaque impulsion.
+		De plus, cela implique qu'il faut faire en sorte que le systÃ¨me soit rÃ©initialisÃ© Ã  la bonne configuration initiale.
 		**/
 
-		// On réinitialise le système à l'intant t1 ("t1 devient 0").
+		// On rÃ©initialise le systÃ¨me Ã  l'intant t1 ("t1 devient 0").
 
-		// pour cela, on met le temps t1 entre 0 et <le temps qu'il faut aux deux planètes pour revenir à la même configuration (on reste en 2D pour le moment)>
+		// pour cela, on met le temps t1 entre 0 et <le temps qu'il faut aux deux planÃ¨tes pour revenir Ã  la mÃªme configuration (on reste en 2D pour le moment)>
 		double temps_1ere_impulsion = individu[2][0]; // en jours
 		{
 			const SimuCore::Structures::Planet& sun = system.getSun();
@@ -366,35 +388,35 @@ namespace SimuCore {
 
 
 		/**		gestion de la position initiale qui va conditionner la transformation des vecteurs en impulsions
-			En effet, on souhaite que la vitesse initiale (i.e la première impulsion) soit
-			de norme supérieure à la vitesse de libération de la planète de départ.
-			Et cette dernière dépend de la position de la fusée, qui est la position initiale,
-			à l'instant initial.
+			En effet, on souhaite que la vitesse initiale (i.e la premiÃ¨re impulsion) soit
+			de norme supÃ©rieure Ã  la vitesse de libÃ©ration de la planÃ¨te de dÃ©part.
+			Et cette derniÃ¨re dÃ©pend de la position de la fusÃ©e, qui est la position initiale,
+			Ã  l'instant initial.
 		*/
 
-		// On récupère la position initiale encore codée dans l'individu, qui est donc différente de
-		// la position initiale réelle.
+		// On rÃ©cupÃ¨re la position initiale encore codÃ©e dans l'individu, qui est donc diffÃ©rente de
+		// la position initiale rÃ©elle.
 
 		
-		glm::dvec3 position_initiale = convert_to_sphere_radius_1( // en km
-			glm::dvec3( 
+		glm::dvec2 position_initiale = convert_to_circle_radius_1( // en km
+			glm::dvec2( 
 				individu[0][0],
-				individu[0][1],
-				0 // 2D
+				individu[0][1]
 			)
 		);
 
 		// Pour des raisons de non-priorisation de certaines directions, on impose que la position initiale soit dans un anneau (3D)
-		//  (dont le rayon minimal est l'altitude de l'exosphère de la planète de départ
-		//	 et dont le rayon maximal est l'altitude maximale autorisée par la planète de départ).
+		//  (dont le rayon minimal est l'altitude de l'exosphÃ¨re de la planÃ¨te de dÃ©part
+		//	 et dont le rayon maximal est l'altitude maximale autorisÃ©e par la planÃ¨te de dÃ©part).
 
-		{ // check pour enlever les cas dégénérés
+		{ // check pour enlever les cas dÃ©gÃ©nÃ©rÃ©s
 			double norme_position_initiale = glm::length(position_initiale);
 			if (norme_position_initiale < SimuCore::constants::epsilon
 				|| norme_position_initiale > 1 // n'arrive normalement jamais
 				) {
-				// On retourne une fusée "invalide" et un indicateur pour annoncer que l'individu est invalide car la position initiale
-				// n'est pas dans la sphère.
+				// On retourne une fusÃ©e "invalide" et un indicateur pour annoncer que l'individu est invalide car la position initiale
+				// n'est pas dans la sphÃ¨re.
+				if (norme_position_initiale > 1) { std::abort(); }
 
 				return { rocket, GenerationState::INVALID_GENES_OUT_OF_BOUNDS_POSITION };
 			}
@@ -403,53 +425,52 @@ namespace SimuCore {
 
 
 		const auto& start_planet = system.getStartPlanet();
-		
 
 		// On souhaite que les futurs positions soient dans un anneau de largeur maxOrbitRadius - minOrbitRadius.
-		// Pour mettre la fusée sur l'anneau, la position initiale donnée doit être ajoutée avec 
-		//	un vecteur colinéaire à lui même, de norme égale au rayon minimal de l'anneau.
-		// On fera attention à mettre la bonne largeur dès le début
+		// Pour mettre la fusÃ©e sur l'anneau, la position initiale donnÃ©e doit Ãªtre ajoutÃ©e avec 
+		//	un vecteur colinÃ©aire Ã  lui mÃªme, de norme Ã©gale au rayon minimal de l'anneau.
+		// On fera attention Ã  mettre la bonne largeur dÃ¨s le dÃ©but
 
 		// transformation 1er vecteur en position initiale
 		{
-			glm::dvec3 direction = position_initiale;
+			glm::dvec2 direction = glm::normalize(position_initiale);
 			position_initiale *= start_planet.maxOrbitRadius() - start_planet.minOrbitRadius();
 			position_initiale += start_planet.minOrbitRadius() * direction;
 		}
 
-		// A cet instant, la position initiale est dans l'anneau, mais elle n'est pas encore centrée sur la planète de départ.
+		// A cet instant, la position initiale est dans l'anneau, mais elle n'est pas encore centrÃ©e sur la planÃ¨te de dÃ©part.
 		// On profite de ce moment pour faire la transformation sur la vitesse initiale, qui a besoin de la distance entre la
-		// planète de départ et la position initiale pour calculer la vitesse de libération, et ainsi s'assurer que la vitesse
+		// planÃ¨te de dÃ©part et la position initiale pour calculer la vitesse de libÃ©ration, et ainsi s'assurer que la vitesse
 		// initiale soit dans le bon anneau.
-		// Si on faisait la transformation de la vitesse initiale après avoir centré la position initiale sur la planète de
-		// départ, on aurait un problème : le vecteur position_initiale serait la position de la fusée par rapport au soleil
-		// et non pas par rapport à la planète de départ.
+		// Si on faisait la transformation de la vitesse initiale aprÃ¨s avoir centrÃ© la position initiale sur la planÃ¨te de
+		// dÃ©part, on aurait un problÃ¨me : le vecteur position_initiale serait la position de la fusÃ©e par rapport au soleil
+		// et non pas par rapport Ã  la planÃ¨te de dÃ©part.
 
 
-		/**		gestion de la vitesse initiale (1ère impulsion)
-			La vitesse initiale doit être de norme supérieure à la vitesse de libération
-			de la planète de départ, pour que la fusée puisse s'échapper de l'attraction de la planète.
-			Et ainsi, on peut au moins espérer atteindre la planète d'arrivée.
+		/**		gestion de la vitesse initiale (1Ã¨re impulsion)
+			La vitesse initiale doit Ãªtre de norme supÃ©rieure Ã  la vitesse de libÃ©ration
+			de la planÃ¨te de dÃ©part, pour que la fusÃ©e puisse s'Ã©chapper de l'attraction de la planÃ¨te.
+			Et ainsi, on peut au moins espÃ©rer atteindre la planÃ¨te d'arrivÃ©e.
 
-			De plus, pour les mêmes raisons que pour la position initiale, on souhaite que la vitesse initiale soit
-			distribuée uniformément dans l'espace (3D ou 2D).
+			De plus, pour les mÃªmes raisons que pour la position initiale, on souhaite que la vitesse initiale soit
+			distribuÃ©e uniformÃ©ment dans l'espace (3D ou 2D).
 		**/
 
-		glm::dvec3 vitesse_initiale = convert_to_sphere_radius_1( // km/s
-			glm::dvec3(
+		glm::dvec2 vitesse_initiale = convert_to_circle_radius_1( // km/s
+			glm::dvec2(
 				individu[1][0],
-				individu[1][1],
-				0 // 2D
+				individu[1][1]
 			)
 		);
 
-		{ // traitement des cas dégénérés
+		{ // traitement des cas dÃ©gÃ©nÃ©rÃ©s
 			double norme_vitesse_initiale = glm::length(vitesse_initiale);
 			if (norme_vitesse_initiale < SimuCore::constants::epsilon
 				|| norme_vitesse_initiale > 1) {
 
-				// On retourne une fusée "invalide" et un indicateur pour annoncer que l'individu est invalide car la vitesse initiale
-				// n'est pas dans la sphère.
+				// On retourne une fusÃ©e "invalide" et un indicateur pour annoncer que l'individu est invalide car la vitesse initiale
+				// n'est pas dans la sphÃ¨re.
+				if (norme_vitesse_initiale > 1) { std::abort(); }
 
 				return { rocket, GenerationState::INVALID_GENES_OUT_OF_BOUNDS_VELOCITY };
 			}
@@ -457,34 +478,50 @@ namespace SimuCore {
 		
 
 		// On s'assure que la vitesse initiale soit dans un anneau (3D ou 2D) dont le rayon minimal
-		// est la vitesse de libération de la planète de départ.
+		// est la vitesse de libÃ©ration de la planÃ¨te de dÃ©part.
+
+		// vescâ€‹(r) â‰¤âˆ¥v0â€‹âˆ¥â‰¤ 2vescâ€‹(r)
 		{
-			vitesse_initiale *= start_planet.extractionVelocity(glm::length(position_initiale));
+			glm::dvec2 direction = glm::normalize(vitesse_initiale);
+
+			const double v_liberation = start_planet.extractionVelocity(glm::length(position_initiale)); // km/s
+			vitesse_initiale *= v_liberation;
+			vitesse_initiale += direction * v_liberation;
 		}
 
-		// maintenant que la vitesse initiale est dans le bon anneau, on peut la mettre dans la fusée.
-		// Cepedant, la vitesse initiale va être ajouté grâce à la première impulsion de la fusée.
-		// Nous allons donc simplement préparer cette impulsion, puis elle sera appliquée lors du lancement de la fusée.
+		// maintenant que la vitesse initiale est dans le bon anneau, on peut la mettre dans la fusÃ©e.
+		// Cepedant, la vitesse initiale va Ãªtre ajoutÃ© grÃ¢ce Ã  la premiÃ¨re impulsion de la fusÃ©e.
+		// Nous allons donc simplement prÃ©parer cette impulsion, puis elle sera appliquÃ©e lors du lancement de la fusÃ©e.
 
-		// Toutefois, il faut penser à ajouter la vitesse de la planète de départ pour avoir la vitesse absolue dans le système.
-		
-		////// ------>>>> N'importe quoi ..., réfléchir quelle vitesse ajouter TODO
-		rocket.velocity = start_planet.velocity; // on ajoute la vitesse de la planète de départ pour avoir la vitesse absolue.
+		// Toutefois, il faut penser Ã  ajouter la vitesse de la planÃ¨te de dÃ©part pour avoir la vitesse absolue dans le systÃ¨me.
 
+		const glm::dvec3& start_planet_initial_position = // en UA
+			system.getStartPlanetPositions()[system.getStartPlanetStartIndice()];
 
+		const glm::dvec3 start_planet_initial_velocity = glm::length(start_planet.velocity) * glm::normalize( // km/s
+			glm::dvec3(
+				- start_planet_initial_position[1],
+				start_planet_initial_position [0],
+				0 // 2D
+			)
+		);
 
-
-
-		// maintenant que la vitesse initiale est dans son anneau, on peut finaliser la position initiale de la fusée.
-		// il suffit de translater l'anneau autour de la planète de départ
-
-		////// ------>>>> N'importe quoi ..., réfléchir quelle position ajouter TODO
-		position_initiale += static_cast<double>(1.0_AU_to_km) * start_planet.position; // anneau centré sur la planète initiale
-
-		// le calcul de la position initiale est terminé. On peut la mettre dans la fusée.
-		rocket.position = static_cast<double>(1.0_km_to_AU) * position_initiale;
+		rocket.velocity = start_planet_initial_velocity; // on ajoute la vitesse de la planÃ¨te de dÃ©part pour avoir la vitesse absolue.
 
 
+		// maintenant que la vitesse initiale est dans son anneau, on peut finaliser la position initiale de la fusÃ©e.
+		// il suffit de translater l'anneau autour de la planÃ¨te de dÃ©part
+		position_initiale += static_cast<double>(1.0_AU_to_km) * glm::dvec2(
+			start_planet_initial_position.x,
+			start_planet_initial_position.y
+		); // anneau centrÃ© sur la planÃ¨te initiale
+
+		// le calcul de la position initiale est terminÃ©. On peut la mettre dans la fusÃ©e.
+		rocket.position = static_cast<double>(1.0_km_to_AU) * glm::dvec3(
+			position_initiale.x,
+			position_initiale.y,
+			0
+		);
 
 
 
@@ -493,79 +530,96 @@ namespace SimuCore {
 		size_t nombre_impulsions = (individu.size() - 1) / 2; // c.f. cahier TIPE (2 vecteurs par impulsion + 1 vecteur pour p0)
 		std::vector<std::pair<Structures::Impulsion, double>> toutes_les_impulsions; // km/s et en jours
 		toutes_les_impulsions.reserve(nombre_impulsions);
-		toutes_les_impulsions.emplace_back(Structures::Impulsion(vitesse_initiale), constants::epsilon); // la première impulsion est toujours appliquée à t=0s. On met un temps très proche de 0 pour éviter les problèmes numériques.
+		toutes_les_impulsions.emplace_back(Structures::Impulsion(glm::dvec3(
+			position_initiale.x,
+			position_initiale.y,
+			0
+		)), constants::epsilon); // la premiÃ¨re impulsion est toujours appliquÃ©e Ã  t=0s. On met un temps trÃ¨s proche de 0 pour Ã©viter les problÃ¨mes numÃ©riques.
 
 		
 
 
 		// On peut maintenant traiter et ajouter les autres impulsions
-		// Les individus sont composés de vecteurs générés aléatoirement dans un pavé droit, où chaque composante
+		// Les individus sont composÃ©s de vecteurs gÃ©nÃ©rÃ©s alÃ©atoirement dans un pavÃ© droit, oÃ¹ chaque composante
 		// est comprise entre [min_real, max_real].
-		// Or on souhaite que les impulsions de la fusée soient de "direction aléatoire uniforme" (sphère != pavé droit)
-		// Il va donc falloir utiliser la même méthode que précédemment pour la vitesse et la position.
+		// Or on souhaite que les impulsions de la fusÃ©e soient de "direction alÃ©atoire uniforme" (sphÃ¨re != pavÃ© droit)
+		// Il va donc falloir utiliser la mÃªme mÃ©thode que prÃ©cÃ©demment pour la vitesse et la position.
 		//
-		// De plus, d'une part, une impulsion est la donnée d'un vecteur vitesse à ajouter au vecteur vitesse de notre fusée, 
-		// et de l'instant auquel on souhaite que cette impulsion soit effectuée.
-		// et d'autre part, les impulsions sont ordonnées.
-		// Cela nous a poussé à ce que l'individu ne stocke pas directement les impulsions, mais des écarts de temps entre chaque impulsion.
+		// De plus, d'une part, une impulsion est la donnÃ©e d'un vecteur vitesse Ã  ajouter au vecteur vitesse de notre fusÃ©e, 
+		// et de l'instant auquel on souhaite que cette impulsion soit effectuÃ©e.
+		// et d'autre part, les impulsions sont ordonnÃ©es.
+		// Cela nous a poussÃ© Ã  ce que l'individu ne stocke pas directement les impulsions, mais des Ã©carts de temps entre chaque impulsion.
 		//
-		// Cependant, à cause de cette contrainte d'ordre, il est possible que la somme des écarts de temps soit plus grande que le temps 
-		// de simulation maximal autorisé.
-		// Pour pallier ce problème, on va changer la signification des écarts de temps :
-		// au lieu d'être des écarts de temps absolus, ils seront des écarts de temps "relatifs", c'est-à-dire
-		// qu'on convertira l'écart de temps i, noté dt_i, en une nouvelle valeur, notée dt'_i, telle que :
+		// Cependant, Ã  cause de cette contrainte d'ordre, il est possible que la somme des Ã©carts de temps soit plus grande que le temps 
+		// de simulation maximal autorisÃ©.
+		// Pour pallier ce problÃ¨me, on va changer la signification des Ã©carts de temps :
+		// au lieu d'Ãªtre des Ã©carts de temps absolus, ils seront des Ã©carts de temps "relatifs", c'est-Ã -dire
+		// qu'on convertira l'Ã©cart de temps i, notÃ© dt_i, en une nouvelle valeur, notÃ©e dt'_i, telle que :
 		//		dt'_i = convert(0, m_MaxTime - somme_{j=1}^{i-1} dt'_j)(dt_i)
-		// Ainsi, on s'assure que la somme des écarts de temps est toujours inférieure à m_MaxTime, que 
-		// l'on garde le bon nombre d'impulsions, et que l'ordre des impulsions est respecté.
+		// Ainsi, on s'assure que la somme des Ã©carts de temps est toujours infÃ©rieure Ã  m_MaxTime, que 
+		// l'on garde le bon nombre d'impulsions, et que l'ordre des impulsions est respectÃ©.
 		// 
-		// Cela permet donc de ne pas à renvoyer une fusée invalide si la somme des écarts de temps dépasse m_MaxTime.
-		// Et cela a pour conséquence directe que la fonction de score sera beacoup moins plate, et donc plus facile à optimiser.
-		// En effet, avant cette modification, si la somme des écarts de temps dépassait m_MaxTime,
-		// la fusée était invalide, et donc le score était toujours le même (score très faible).
+		// Cela permet donc de ne pas Ã  renvoyer une fusÃ©e invalide si la somme des Ã©carts de temps dÃ©passe m_MaxTime.
+		// Et cela a pour consÃ©quence directe que la fonction de score sera beacoup moins plate, et donc plus facile Ã  optimiser.
+		// En effet, avant cette modification, si la somme des Ã©carts de temps dÃ©passait m_MaxTime,
+		// la fusÃ©e Ã©tait invalide, et donc le score Ã©tait toujours le mÃªme (score trÃ¨s faible).
 
 
 		{
-			double somme_des_temps = 0; // ~~> somme_{j=1}^{i-1} dt'_j (en jours)
+			double somme_des_temps = 0; // ~~> somme_{j=1}^{i-1} dt'_j   |   (en jours)
 
 			for (size_t i = 1; i < nombre_impulsions; i++) {
-				// individu[2 * i + 2][0] correspond à l'écart de temps entre l'impulsion i et i-1
+				// individu[2 * i + 2][0] correspond Ã  l'Ã©cart de temps entre l'impulsion i et i-1
 				// on remet instant entre 0 et (m_MaxTime - somme_des_temps)
-				double instant = convert(0, system.getMaxTime() - somme_des_temps)(individu[2 * i + 2][0]) + constants::epsilon; // ~~> dt'_i et on ajoute une petite valeur epsilon pour éviter les problèmes numériques (en jours)
-				somme_des_temps += instant; // mise à jour de la somme des temps
+				double instant = convert(0, system.getMaxTime() - somme_des_temps)(individu[2 * i + 2][0]) + constants::epsilon; // ~~> dt'_i et on ajoute une petite valeur epsilon pour Ã©viter les problÃ¨mes numÃ©riques (en jours)
+				somme_des_temps += instant; // mise Ã  jour de la somme des temps
 
-				glm::dvec3 impulsion = convert_to_sphere_radius_1(
-					glm::dvec3(
+				glm::dvec2 impulsion = convert_to_circle_radius_1( // en km/s
+					glm::dvec2(
 						individu[2 * i + 1][0],
-						individu[2 * i + 1][1],
-						0 // 2D
+						individu[2 * i + 1][1]
 					)
 				); // en km/s
 
-				// on s'assure que l'impulsion impulsion est généré dans la sphère :
+				// on s'assure que l'impulsion impulsion est gÃ©nÃ©rÃ© dans la sphÃ¨re :
 				if (glm::length(impulsion) > 1) {
-					// On retourne une fusée "invalide" et un indicateur pour annoncer que l'individu est invalide car une impulsion
-					// n'est pas dans la sphère.
+					// On retourne une fusÃ©e "invalide" et un indicateur pour annoncer que l'individu est invalide car une impulsion
+					// n'est pas dans la sphÃ¨re.
 
 					return { rocket, GenerationState::INVALID_GENES_OUT_OF_BOUNDS_IMPULSION };
 				}
 
+				{
+					double r0 = AU_to_meters(glm::length(start_planet_initial_position)); // m
+					double v_orb = std::sqrt(constants::G * system.getSun().mass / r0); // m/s
 
-				//// TODO, trouver dans quelle shpere on veut que les impulsions soient générées
+					double alpha = std::clamp(0.3 / nombre_impulsions, 0.02, 0.15);
 
+					/*
+					Plus le coef alpha est grand, plus les impulsions pourront Ãªtre forte. Ainsi la formulate reflÃ¨te :
+						des manoeuvres grosses mais rares, ou petites mais nombreuses.
+					*/
+
+
+					double dv_max = alpha * meters_per_seconds_to_kilometers_per_seconds(v_orb); // km/s
+
+					impulsion *= dv_max; /*TODO : vÃ©rifier qu'Homman est faisable*/
+				}
 
 				const auto& [impul_precedente, temps_precedent] = toutes_les_impulsions[i - 1]; // impul_prec en km/s et temps_prec en jours
 				instant += temps_precedent; // on convertit la variable instant en temps absolu
 
-				toutes_les_impulsions.emplace_back(Structures::Impulsion(impulsion), instant);
+				toutes_les_impulsions.emplace_back(Structures::Impulsion(glm::dvec3(
+					impulsion.x,
+					impulsion.y,
+					0
+				)), instant);
 			}
 		}
 
 		rocket.setImpulsions(toutes_les_impulsions);
-		rocket.acceleration = 0; // une acceleration valide pour que le RocketState initial soit sûr d'être valide. (Pas utiliser dans les calculs)
+		rocket.acceleration = 0; // une acceleration valide pour que le RocketState initial soit sÃ»r d'Ãªtre valide. (Pas utiliser dans les calculs)
 		
 		return { rocket, GenerationState::VALID };
 	}
 }; // namespace SimuCore
-
-
-

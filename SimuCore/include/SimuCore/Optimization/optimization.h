@@ -55,10 +55,10 @@ namespace SimuCore {
 			size_t population_size = 100, size_t max_generation = 5000,
 			size_t print_interval=100, bool verbose=false, size_t snapshot_interval=10)
 		{
-			using ConfigType = genetic::Config<double, uint16_t, 2*NbImpulsions + 1, 3>;
+			using ConfigType = genetic::Config<double, uint32_t, 2*NbImpulsions + 1, 2>;
 			ConfigType config;
 
-			config.dimension = 3;									// on travaille dans l'espace
+			config.dimension = 2;									// on travaille dans l'espace
 			config.number_of_vectors = 2 * NbImpulsions + 1;		// un vecteur = un gène
 
 			config.enable_saving = false;							// désactive la sauvegarde dans les fichiers car ce n'est pas encore implémenté
@@ -106,54 +106,54 @@ namespace SimuCore {
 			using Pop = typename std::vector<Ind>;
 
 
-			std::string filename_save = generate_snapshot_filename("h5");
-			HDF5WriterAsync snapshot_sink(filename_save); // nom de fichier adapté
-			GenerationAccumulator accumulator(NbImpulsions);
-			double last_best_score = -std::numeric_limits<double>::infinity();
+			//std::string filename_save = generate_snapshot_filename("h5");
+			//HDF5WriterAsync snapshot_sink(filename_save); // nom de fichier adapté
+			//GenerationAccumulator accumulator(NbImpulsions);
+			//double last_best_score = -std::numeric_limits<double>::infinity();
 
-			auto callback =
-				[
-					&accumulator,
-					&system,
-					snapshot_interval,
-					&last_best_score,
-					&snapshot_sink
-				]
-				(
-					size_t gen,
-					double best_fit, const auto& best_ind,
-					double worst_fit, const auto& /*worst_ind*/,
-					const auto& population
-					)
-				{
-					if (gen % snapshot_interval != 0) return;
+			//auto callback =
+			//	[
+			//		&accumulator,
+			//		&system,
+			//		snapshot_interval,
+			//		&last_best_score,
+			//		&snapshot_sink
+			//	]
+			//	(
+			//		size_t gen,
+			//		double best_fit, const auto& best_ind,
+			//		double worst_fit, const auto& /*worst_ind*/,
+			//		const auto& population
+			//		)
+			//	{
+			//		if (gen % snapshot_interval != 0) return;
 
-					// Détecter si on a un nouveau meilleur score
-					bool is_new_best = std::abs(best_fit - last_best_score) > SimuCore::constants::epsilon;
-					last_best_score = best_fit;
+			//		// Détecter si on a un nouveau meilleur score
+			//		bool is_new_best = std::abs(best_fit - last_best_score) > SimuCore::constants::epsilon;
+			//		last_best_score = best_fit;
 
-					// --- Accumuler population complète (avec validité) ---
-					accumulator.push_population(population, system);
+			//		// --- Accumuler population complète (avec validité) ---
+			//		accumulator.push_population(population, system);
 
-					// --- Finalisation du snapshot ---
-					dataExport::Snapshot snapshot = accumulator.finalize(
-						gen,
-						dataExport::BestIndividualUpdate{} // sera mis à jour si nécessaire
-					);
+			//		// --- Finalisation du snapshot ---
+			//		dataExport::Snapshot snapshot = accumulator.finalize(
+			//			gen,
+			//			dataExport::BestIndividualUpdate{} // sera mis à jour si nécessaire
+			//		);
 
-					// Mettre à jour les scores globaux
-					snapshot.stats.best_score = best_fit;
-					snapshot.stats.worst_score = worst_fit;
+			//		// Mettre à jour les scores globaux
+			//		snapshot.stats.best_score = best_fit;
+			//		snapshot.stats.worst_score = worst_fit;
 
-					// --- Mettre à jour la trajectoire du meilleur si nouveau meilleur ---
-					if (is_new_best) {
-						snapshot.best_update.is_new_best = true;
-						snapshot.best_update.trajectory = calculate_trajectory(best_ind, system);
-					}
+			//		// --- Mettre à jour la trajectoire du meilleur si nouveau meilleur ---
+			//		if (is_new_best) {
+			//			snapshot.best_update.is_new_best = true;
+			//			snapshot.best_update.trajectory = calculate_trajectory(best_ind, system);
+			//		}
 
-					// --- Envoi vers le writer asynchrone ---
-					snapshot_sink.enqueue(std::make_shared<dataExport::Snapshot>(std::move(snapshot)));
-				};
+			//		// --- Envoi vers le writer asynchrone ---
+			//		snapshot_sink.enqueue(std::make_shared<dataExport::Snapshot>(std::move(snapshot)));
+			//	};
 
 
 
@@ -163,9 +163,9 @@ namespace SimuCore {
 				]
 				(
 					size_t gen,
-					double best_fit, const auto& best_ind,
-					double worst_fit, const auto& /*worst_ind*/,
-					const auto& population
+					double best_fit, const genetic::Individu<ConfigType>& best_ind,
+					double worst_fit, const genetic::Individu<ConfigType>& /*worst_ind*/,
+					const std::vector<genetic::Individu<ConfigType>>& population
 					)
 				{
 					if (gen % print_interval == 0 || gen == max_generation - 1) {
@@ -173,12 +173,15 @@ namespace SimuCore {
 						size_t count_valid = 0;
 						for (auto& ind : population) {
 							double fitness = ind.get_fitness();
-							if (fitness > 0) {
+							if (fitness > -1) {
 								count_valid++;
 								count_defined++;
 							}
 							else if (fitness > SimuCore::Systems::AdaptedSystem::m_LowestScore) {
 								count_defined++;
+							}
+							else if (gen != 0){
+								std::abort();
 							}
 						}
 
@@ -199,6 +202,8 @@ namespace SimuCore {
 							distance_to_final_planet_best /= 0.75;
 							distance_to_final_planet_best = 1 / distance_to_final_planet_best;
 							distance_to_final_planet_best -= SimuCore::Systems::AdaptedSystem::m_CstScore;
+							//distance_to_final_planet_best = distance_to_final_planet_best * distance_to_final_planet_best * distance_to_final_planet_best;
+
 
 							std::cout << "\tBest distance to target: "
 								<< AU_to_kilometers(distance_to_final_planet_best) << " (km) = "
