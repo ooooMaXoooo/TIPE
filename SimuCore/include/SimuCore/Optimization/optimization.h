@@ -67,6 +67,9 @@ namespace SimuCore {
 			config.max_generations = max_generation;				// paramètre à ajuster
 			config.print_interval  = print_interval;
 
+			config.initial_mutation_probability = 0.2;				// paramètre à ajuster
+			config.initial_self_adaptation_probability = 0.8;		// paramètre à ajuster
+
 
 
 			{
@@ -154,10 +157,59 @@ namespace SimuCore {
 
 
 
+			auto callback_2 =
+				[print_interval,
+				max_generation
+				]
+				(
+					size_t gen,
+					double best_fit, const auto& best_ind,
+					double worst_fit, const auto& /*worst_ind*/,
+					const auto& population
+					)
+				{
+					if (gen % print_interval == 0 || gen == max_generation - 1) {
+						size_t count_defined = 0;
+						size_t count_valid = 0;
+						for (auto& ind : population) {
+							double fitness = ind.get_fitness();
+							if (fitness > 0) {
+								count_valid++;
+								count_defined++;
+							}
+							else if (fitness > SimuCore::Systems::AdaptedSystem::m_LowestScore) {
+								count_defined++;
+							}
+						}
+
+						std::cout << "\tValid individuals: " << count_valid << "/" << population.size()
+							<< " (" << (100.0 * static_cast<double>(count_valid) / population.size()) << "%)\n";
+						std::cout << "\tDefined individuals: " << count_defined << "/" << population.size()
+							<< " (" << (100.0 * static_cast<double>(count_defined) / population.size()) << "%)\n";
+
+						constexpr double cste = 1.0 / SimuCore::Systems::AdaptedSystem::m_CstScore;
+						if (
+							best_fit < 7.751 * cste
+							&& 
+							best_fit > 7 * cste
+							) 
+						{
+
+							double distance_to_final_planet_best = (best_fit - 7*cste);
+							distance_to_final_planet_best /= 0.75;
+							distance_to_final_planet_best = 1 / distance_to_final_planet_best;
+							distance_to_final_planet_best -= SimuCore::Systems::AdaptedSystem::m_CstScore;
+
+							std::cout << "\tBest distance to target: "
+								<< AU_to_kilometers(distance_to_final_planet_best) << " (km) = "
+								<< distance_to_final_planet_best << " (AU)\n";
+						}
+					}
+				};
 
 			ga.reset(config); // initialisation de l'algo génétique
 			//genetic::Individu<ConfigType> best = ga.run(verbose, callback);	// on lance l'algorithme en affichant des logs dans la console
-			genetic::Individu<ConfigType> best = ga.run(verbose, nullptr);	// on lance l'algorithme en affichant des logs dans la console
+			genetic::Individu<ConfigType> best = ga.run(verbose, callback_2);	// on lance l'algorithme en affichant des logs dans la console
 
 
 

@@ -169,6 +169,11 @@
     <ClInclude Include="include\SimuCore\structures\Rocket.h" />
     <ClInclude Include="include\SimuCore\structures\structures.h" />
     <ClInclude Include="include\SimuCore\structures\System.h" />
+    <ClInclude Include="include\SimuCore\Units\all.h" />
+    <ClInclude Include="include\SimuCore\Units\distances.h" />
+    <ClInclude Include="include\SimuCore\Units\masses.h" />
+    <ClInclude Include="include\SimuCore\Units\speeds.h" />
+    <ClInclude Include="include\SimuCore\Units\times.h" />
     <ClInclude Include="include\SimuCore\utility.h" />
     <ClInclude Include="include\SimuCore\theory\formula.h" />
   </ItemGroup>

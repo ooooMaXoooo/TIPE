@@ -9,7 +9,7 @@
 #pragma comment(lib, "SimuCore.lib")
 
 #include <SimuCore/Optimization/optimization.h>
-
+#include <SimuCore/Units/all.h>
 
 
 static void rosenbrock_tests() {
@@ -311,16 +311,27 @@ int main(int argc, char** argv) {
 
     
 	double lifetime = 500; // durée de simulation en jours
-	SimuCore::Systems::AdaptedSystem sy(SimuCore::Systems::PlanetsName::Terre, SimuCore::Systems::PlanetsName::Mars, 0, 0, SimuCore::Structures::Rocket(lifetime, std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(), 700000, 4.5), lifetime, 3600);
+	SimuCore::Systems::AdaptedSystem sy(
+        SimuCore::Systems::PlanetsName::Terre,
+        SimuCore::Systems::PlanetsName::Mars,
+        SimuCore::Structures::Rocket(
+			lifetime, // -> durée de vie de la fusée en jours
+            std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(),
+            700._ton_to_kg,
+            4.5),
+		lifetime, // durée de simulation en jours
+		3600); // -> pas de temps en secondes (1 heure)
+
+	sy.Initialize();
 
     genetic::CrossoverType cross_type = genetic::CrossoverType::UNIFORM_BIT_LEVEL;
     bool elitism = true;
     bool auto_adapt = true;
-    size_t population_size =  1000;
-    size_t max_generation  =  2000;
-    size_t print_interval  =  100;
+    size_t population_size =  10000;
+    size_t max_generation  =  1e6;
+    size_t print_interval  =  500;
     bool verbose = true;
-	size_t snapshot_interval = 30;
+	size_t snapshot_interval = max_generation * 2;
 
 	SimuCore::Optimization::getBestRocket<2>("", sy,
         cross_type, elitism, auto_adapt,
