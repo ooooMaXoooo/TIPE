@@ -16,6 +16,12 @@
 # Mono auto generated files
 mono_crash.*
 
+# On autorise Git à entrer dans la structure pour HDF5
+!external/
+!external/HDF5/
+!external/HDF5/2.0.0/
+!external/HDF5/2.0.0/bin/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -27,11 +33,19 @@ x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
+
 [Bb]in/
+!external/HDF5/2.0.0/bin/
+
+# Maintenant on définit les règles précises pour ce dossier bin spécifique
+external/HDF5/2.0.0/bin/*
+!external/HDF5/2.0.0/bin/**/*.dll
+
 [Oo]bj/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
+
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
