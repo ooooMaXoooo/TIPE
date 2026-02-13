@@ -85,6 +85,8 @@ namespace SimuCore {
 			static PlanetInfo s_start_planet_info;
 			static PlanetInfo s_final_planet_info;
 
+			constexpr static double m_max_acceleration = 5 * constants::g;
+
 
 		public:
 			using Real = double;
@@ -95,15 +97,15 @@ namespace SimuCore {
 			static const std::array<Planet, m_NbPlanets> m_planets;
 
 			const enum class RocketState : uint8_t {
-				VALID,
-				NEUTRAL,
 				DEAD_TOUCH_START_PLANET_HIGH_SPEED,
 				DEAD_TOUCH_START_PLANET_LOW_SPEED,
-				DEAD_TOUCH_FINAL_PLANET_HIGH_SPEED,
-				DEAD_TOUCH_FINAL_PLANET_LOW_SPEED,
 				DEAD_TOUCH_SUN_HIGH_SPEED,
 				DEAD_TOUCH_SUN_LOW_SPEED,
-				DEAD_ACCELERATION_TOO_HIGH
+				DEAD_ACCELERATION_TOO_HIGH,
+				DEAD_TOUCH_FINAL_PLANET_HIGH_SPEED,
+				DEAD_TOUCH_FINAL_PLANET_LOW_SPEED,
+				NEUTRAL,
+				VALID
 			};
 
 			AdaptedSystem();
@@ -142,8 +144,12 @@ namespace SimuCore {
 			/// <param name="t">l'instant auquel le système sera réinitialisé (en jours) </param>
 			void Reset(double t);
 
-			Real Score(const std::vector<std::vector<Real>>& individu);
+			Real Score(const std::vector<std::vector<Real>>& genome);
 
+			/// <summary>
+			/// La taille de l'anneau dans lequel les fusées sont générées
+			/// </summary>
+			/// <returns>en km</returns>
 			Real RingSize_meter() const noexcept;
 
 
@@ -205,7 +211,12 @@ namespace SimuCore {
 			size_t getStartPlanetStartIndice() const noexcept { return m_start_planet_start_indice; }
 			size_t getFinalPlanetStartIndice() const noexcept { return m_final_planet_start_indice; }
 
+			size_t getStartPlanetPositionIndice() const noexcept { return static_cast<size_t>(daysInSeconds(m_time) / s_deltaTime) % s_start_planet_info.nb_iterations_orbit; }
+			size_t getFinalPlanetPositionIndice() const noexcept { return static_cast<size_t>(daysInSeconds(m_time) / s_deltaTime) % s_final_planet_info.nb_iterations_orbit; }
+
 			static bool IsInitialized() noexcept { return s_initialized; }
+
+			void SetRocket(Rocket rocket) { m_rocket = rocket; }
 			
 			///////// other
 
@@ -213,8 +224,12 @@ namespace SimuCore {
 
 			RocketState Rocket_state() const;
 
-			friend RocketState GetRocketState(const Rocket& rocket, AdaptedSystem& system);
+			const char* TypeOfTrajectory(double score) const;
+			const char* TypeOfTrajectory(RocketState state) const;
 
+			void GetRocketTrajectory(std::vector<glm::dvec3>&) const;
+
+			friend RocketState GetRocketState(const Rocket& rocket, AdaptedSystem& system);
 
 		private:
 			void InitPlanet(bool is_start_planet, PlanetsName name); // TODO AMELIORER L'IMPLEM
@@ -233,7 +248,7 @@ namespace SimuCore {
 			/// <param name="w">rad/s</param>
 			/// <param name="d">UA</param>
 			/// <param name="roll">the angle around the x-axis (rad) </param>
-			/// <param name="picth">the angle around the z-axis (rad)</param>
+			/// <param name="picth">the angle around the y-axis (rad)</param>
 			/// <param name="positions">le tableau dans lequel écrire les positions</param>
 			void Calculate_planet_trajectory(
 				double w, double d,
@@ -249,6 +264,17 @@ namespace SimuCore {
 			Real HandleScoreValidState() const;
 			Real HandleScoreNeutralState() const;
 			Real HandleScoreInvalidGenerationState(GenerationState gen_state) const;
+
+			/*
+			* attractor_pos : position de l'attracteur (en UA)
+			* attractor_mu : paramètre gravitationnel de l'attracteur (en m^3/s²)
+			* object_pos : position d'un objet attiré gravitationnellement par l'attracteur (en UA)
+			* object_mass : en kg
+			*
+			* Renvoi des kN (kg*km/s²)
+			*/
+			glm::dvec3 ComputeAttractionForce(glm::dvec3 attractor_pos, double attractor_mu,
+				glm::dvec3 object_pos, double object_mass) const;
 
 		}; // class AdaptedSystem
 
@@ -276,7 +302,7 @@ namespace SimuCore {
 
 	template <typename Real>
 	std::pair<SimuCore::Structures::Rocket, GenerationState> IndividualToRocket(
-		const std::vector<std::vector<Real>>& individu,
+		const std::vector<std::vector<Real>>& genome,
 		SimuCore::Systems::AdaptedSystem& system
 	) {
 		// vérifier que Real est bien un type flottant
@@ -284,7 +310,7 @@ namespace SimuCore {
 			"Real type must be a floating-point type (float, double, long double)");
 
 		if (!Systems::AdaptedSystem::IsInitialized()) {
-			std::runtime_error("Le système doit être initialisé avant de pouvoir convertir un individu en fusée.");
+			std::runtime_error("Le système doit être initialisé avant de pouvoir convertir un genome en fusée.");
 			std::abort();
 		}
 
@@ -343,9 +369,9 @@ namespace SimuCore {
 				// gene.x correspond à r et est généré uniformément
 				// gene.y correspond à theta est est généré uniformément
 
-				const double test = norm01(gene[0]);
+				const double test = norm01(gene.x);
 				const double r = std::sqrt(test);
-				const double theta = 2 * constants::PI * norm01(gene[1]);
+				const double theta = 2 * constants::PI * norm01(gene.y);
 
 				return glm::dvec2(
 					r * std::cos(theta),
@@ -364,7 +390,7 @@ namespace SimuCore {
 		// On réinitialise le système à l'intant t1 ("t1 devient 0").
 
 		// pour cela, on met le temps t1 entre 0 et <le temps qu'il faut aux deux planètes pour revenir à la même configuration (on reste en 2D pour le moment)>
-		double temps_1ere_impulsion = individu[2][0]; // en jours
+		double temps_1ere_impulsion = -1; // en jours
 		{
 			const SimuCore::Structures::Planet& sun = system.getSun();
 			double omega_planete_initiale = system.getStartPlanetAngularVelocity();		// rad/s
@@ -372,7 +398,7 @@ namespace SimuCore {
 			double temps_1ere_impulsion_max = std::abs(2 * constants::PI / (omega_planete_initiale - omega_planete_finale)); // en secondes
 
 			// on veut remplacer l'intervalle [min_real, max_real] en [0, temps_1ere_impulsion_max]
-			temps_1ere_impulsion = convert(0, seconds_to_days(temps_1ere_impulsion_max))(temps_1ere_impulsion);
+			temps_1ere_impulsion = convert(0, seconds_to_days(temps_1ere_impulsion_max))(genome[2][0]);
 		}
 
 		system.Reset(temps_1ere_impulsion);
@@ -400,8 +426,8 @@ namespace SimuCore {
 		
 		glm::dvec2 position_initiale = convert_to_circle_radius_1( // en km
 			glm::dvec2( 
-				individu[0][0],
-				individu[0][1]
+				genome[0][0],
+				genome[0][1]
 			)
 		);
 
@@ -434,8 +460,8 @@ namespace SimuCore {
 		// transformation 1er vecteur en position initiale
 		{
 			glm::dvec2 direction = glm::normalize(position_initiale);
-			position_initiale *= start_planet.maxOrbitRadius() - start_planet.minOrbitRadius();
-			position_initiale += start_planet.minOrbitRadius() * direction;
+			position_initiale *= (start_planet.maxOrbitRadius() - start_planet.minOrbitRadius());
+			position_initiale += (start_planet.minOrbitRadius() * direction);
 		}
 
 		// A cet instant, la position initiale est dans l'anneau, mais elle n'est pas encore centrée sur la planète de départ.
@@ -458,8 +484,8 @@ namespace SimuCore {
 
 		glm::dvec2 vitesse_initiale = convert_to_circle_radius_1( // km/s
 			glm::dvec2(
-				individu[1][0],
-				individu[1][1]
+				genome[1][0],
+				genome[1][1]
 			)
 		);
 
@@ -486,14 +512,15 @@ namespace SimuCore {
 
 			const double v_liberation = start_planet.extractionVelocity(glm::length(position_initiale)); // km/s
 			vitesse_initiale *= v_liberation;
-			vitesse_initiale += direction * v_liberation;
+			vitesse_initiale += (direction * v_liberation);
 		}
 
 		// maintenant que la vitesse initiale est dans le bon anneau, on peut la mettre dans la fusée.
 		// Cepedant, la vitesse initiale va être ajouté grâce à la première impulsion de la fusée.
 		// Nous allons donc simplement préparer cette impulsion, puis elle sera appliquée lors du lancement de la fusée.
 
-		// Toutefois, il faut penser à ajouter la vitesse de la planète de départ pour avoir la vitesse absolue dans le système.
+		// Toutefois, il faut penser à ajouter la vitesse de la planète de départ pour avoir la vitesse dans le référentiel héliocentrique.
+		// De plus, il faut aussi prendre en compte le fait que la fusée est supposée en orbite circulaire à l'instant 0- TODO
 
 		const glm::dvec3& start_planet_initial_position = // en UA
 			system.getStartPlanetPositions()[system.getStartPlanetStartIndice()];
@@ -506,33 +533,55 @@ namespace SimuCore {
 			)
 		);
 
-		rocket.velocity = start_planet_initial_velocity; // on ajoute la vitesse de la planète de départ pour avoir la vitesse absolue.
+		glm::dvec3 orbit_velocity = glm::dvec3(0); // km/s
+
+		{
+			// on récupère la position de la fusée autour de la planète de départ.
+			// on en déduit le vecteur u_theta
+			const glm::dvec3 u_theta = glm::normalize(glm::dvec3(
+					- position_initiale.y,
+					position_initiale.x,
+					0
+				)
+			);
+
+			// d'après la cahier de TIPE, on connait la norme de la vitesse d'un objet en orbite circulaire autour d'un astre.
+			const double norme = meters_per_seconds_to_kilometers_per_seconds(1) * std::sqrt( // en km/s
+				start_planet.getMu() / kilometers_to_meters(
+					glm::length(position_initiale)
+				)
+			);
+
+			orbit_velocity = norme * u_theta;
+		}
+
+		rocket.velocity = start_planet_initial_velocity + orbit_velocity; // on ajoute la vitesse de la planète de départ pour avoir la vitesse absolue. TODO
 
 
 		// maintenant que la vitesse initiale est dans son anneau, on peut finaliser la position initiale de la fusée.
 		// il suffit de translater l'anneau autour de la planète de départ
-		position_initiale += static_cast<double>(1.0_AU_to_km) * glm::dvec2(
+		position_initiale += (static_cast<double>(1.0_AU_to_km) * glm::dvec2(
 			start_planet_initial_position.x,
 			start_planet_initial_position.y
-		); // anneau centré sur la planète initiale
+		)); // anneau centré sur la planète initiale
 
 		// le calcul de la position initiale est terminé. On peut la mettre dans la fusée.
-		rocket.position = static_cast<double>(1.0_km_to_AU) * glm::dvec3(
+		rocket.position = (static_cast<double>(1.0_km_to_AU) * glm::dvec3(
 			position_initiale.x,
 			position_initiale.y,
 			0
-		);
+		));
 
 
 
 
 
-		size_t nombre_impulsions = (individu.size() - 1) / 2; // c.f. cahier TIPE (2 vecteurs par impulsion + 1 vecteur pour p0)
+		size_t nombre_impulsions = (genome.size() - 1) / 2; // c.f. cahier TIPE (2 vecteurs par impulsion + 1 vecteur pour p0)
 		std::vector<std::pair<Structures::Impulsion, double>> toutes_les_impulsions; // km/s et en jours
 		toutes_les_impulsions.reserve(nombre_impulsions);
 		toutes_les_impulsions.emplace_back(Structures::Impulsion(glm::dvec3(
-			position_initiale.x,
-			position_initiale.y,
+			vitesse_initiale.x,
+			vitesse_initiale.y,
 			0
 		)), constants::epsilon); // la première impulsion est toujours appliquée à t=0s. On met un temps très proche de 0 pour éviter les problèmes numériques.
 
@@ -569,15 +618,15 @@ namespace SimuCore {
 			double somme_des_temps = 0; // ~~> somme_{j=1}^{i-1} dt'_j   |   (en jours)
 
 			for (size_t i = 1; i < nombre_impulsions; i++) {
-				// individu[2 * i + 2][0] correspond à l'écart de temps entre l'impulsion i et i-1
+				// genome[2 * i + 2][0] correspond à l'écart de temps entre l'impulsion i et i-1
 				// on remet instant entre 0 et (m_MaxTime - somme_des_temps)
-				double instant = convert(0, system.getMaxTime() - somme_des_temps)(individu[2 * i + 2][0]) + constants::epsilon; // ~~> dt'_i et on ajoute une petite valeur epsilon pour éviter les problèmes numériques (en jours)
+				double instant = convert(0, system.getMaxTime() - somme_des_temps)(genome[2 * i + 2][0]) + constants::epsilon; // ~~> dt'_i et on ajoute une petite valeur epsilon pour éviter les problèmes numériques (en jours)
 				somme_des_temps += instant; // mise à jour de la somme des temps
 
 				glm::dvec2 impulsion = convert_to_circle_radius_1( // en km/s
 					glm::dvec2(
-						individu[2 * i + 1][0],
-						individu[2 * i + 1][1]
+						genome[2 * i + 1][0],
+						genome[2 * i + 1][1]
 					)
 				); // en km/s
 

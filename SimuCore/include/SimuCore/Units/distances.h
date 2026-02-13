@@ -19,7 +19,7 @@ constexpr long double operator""_km_to_m(long double d) noexcept {
 }
 
 constexpr long double operator""_km_to_AU(long double d) noexcept {
-	return d * 1.496e-8;
+	return d / 1.496e+8;
 }
 
 constexpr long double operator""_AU_to_km(long double d) noexcept {
@@ -48,5 +48,5 @@ constexpr inline double AU_to_kilometers(double d_AU) noexcept {
 }
 
 constexpr inline double kilometers_to_AU(double d_km) noexcept {
-	return d_km * 1.496e-8;
+	return d_km / 1.496e+8;
 }

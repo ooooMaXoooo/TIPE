@@ -26,6 +26,12 @@ namespace SimuCore {
 			/// </summary>
 			/// <returns>La norme du vecteur velocity, retournée comme double. (en km/s) </returns>
 			double Length() const { return glm::length(velocity); }
+
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <returns> km/s </returns>
+			const glm::dvec3& GetDeltaV_vec() const noexcept { return velocity; }
 		};
 
 		struct Rocket : public Entity {
@@ -83,7 +89,7 @@ namespace SimuCore {
 			virtual void UpdateFirstPart(double dt) override {
 				glm::dvec3 acceleration = forces / mass;	// F en kN (kg*km/s²)   |  m en kg       = a en km/s²
 				velocity += 0.5f * dt * acceleration;		// a en km/s²		    | dt en s        = a*dt en km/s
-				position += static_cast<double>(1.0_km_to_AU * dt) * velocity; // dt en s, v en km/s, position en AU
+				position += static_cast<double>(1.0_km_to_AU) * dt * velocity; // dt en s, v en km/s, position en AU
 
 				//std::cout << __FUNCSIG__ << '\n';
 
@@ -112,6 +118,8 @@ namespace SimuCore {
 
 			/// <summary>
 			/// Seconde partie de l'intégration de la position et de la vitesse de l'entité, selon le schéma de Verlet à 2 étapes.
+			/// 
+			/// Attention les forces doivent être RECALCULEE après UpdateFirstPart
 			/// </summary>
 			/// <param name="dt">pas de temps en s</param>
 			virtual void UpdateSecondPart(double dt) override {
@@ -163,6 +171,12 @@ namespace SimuCore {
 			void setImpulsions(const std::vector<std::pair<Impulsion, double>>& impulsions) {
 				m_Impulsions = impulsions;
 			}
+
+			/// <summary>
+			/// Renvoi une référence constante au tableau des impulsions
+			/// </summary>
+			/// <returns> km/s et jours </returns>
+			const std::vector<std::pair<Impulsion, double>>& getImpulsions() const noexcept { return m_Impulsions; }
 		};
 	};
 };

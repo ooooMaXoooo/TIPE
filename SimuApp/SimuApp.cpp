@@ -324,17 +324,22 @@ int main(int argc, char** argv) {
 
 	sy.Initialize();
 
-    genetic::CrossoverType cross_type = genetic::CrossoverType::UNIFORM_BIT_LEVEL;
+    genetic::CrossoverType cross_type = genetic::CrossoverType::SINGLE_POINT_BIT_LEVEL;
     bool elitism = true;
     bool auto_adapt = true;
-    size_t population_size =  10000;
-    size_t max_generation  =  1e6;
-    size_t print_interval  =  500;
+    size_t population_size =  500;
+    size_t max_generation  =  300;
+    size_t print_interval  =  5;
+    /*size_t population_size = 4;
+    size_t max_generation = 20;
+    size_t print_interval = 1;*/
     bool verbose = true;
-	size_t snapshot_interval = max_generation * 2;
+	size_t snapshot_interval = print_interval*10;
+    bool save_in_file = false;
 
-	SimuCore::Optimization::getBestRocket<2>("", sy,
+	SimuCore::Optimization::getBestRocket<2>(sy,
         cross_type, elitism, auto_adapt,
         population_size, max_generation,
-        print_interval, verbose, snapshot_interval);
+        print_interval, verbose,
+        snapshot_interval, save_in_file);
 }
