@@ -69,7 +69,8 @@ namespace SimuCore::Systems {
 	AdaptedSystem::RocketState AdaptedSystem::Run(std::function<RocketState()> state) {	
 		// on simule jusqu'à m_MaxTime ou la mort de la fusée ou son succès
 		const size_t MAX_ITERATIONS = static_cast<const size_t>(daysInSeconds(s_MaxTime) / s_deltaTime);
-		RocketState current_state = state();
+		//RocketState current_state = state();
+		RocketState current_state = Rocket_state();
 		size_t iteration = 0;
 		size_t start_planet_index = m_start_planet_start_indice;
 		size_t final_planet_index = m_final_planet_start_indice;
@@ -124,7 +125,8 @@ namespace SimuCore::Systems {
 
 			m_rocket.UpdateSecondPart(s_deltaTime);
 
-			current_state = state();
+			//current_state = state();
+			current_state = Rocket_state();
 			m_time += seconds_to_days(s_deltaTime);
 			iteration++;
 			start_planet_index = (start_planet_index + 1) % s_start_planet_info.nb_iterations_orbit;
@@ -202,25 +204,31 @@ namespace SimuCore::Systems {
 			// on veut que la borne sup soit 5/m_CstScore
 			return (1 / (m_CstScore + m_rocket.acceleration)) + (4 / m_CstScore); // TODO : ajuster la formule
 			break;
-		case RocketState::DEAD_TOUCH_FINAL_PLANET_HIGH_SPEED:
+		case RocketState::DEAD_GET_TOO_FAR:
 			// on veut que la borne inf soit 5/m_CstScore
 			// on veut que la borne sup soit 6/m_CstScore
-			return (1 / (m_CstScore + glm::length(m_rocket.velocity))) + (5 / m_CstScore); // TODO : ajuster la formule
+			return (1 / (m_CstScore + (glm::length(m_rocket.position) * glm::length(m_rocket.velocity)))) + (5 / m_CstScore);
 			break;
-		case RocketState::DEAD_TOUCH_FINAL_PLANET_LOW_SPEED:
+
+		case RocketState::DEAD_TOUCH_FINAL_PLANET_HIGH_SPEED:
 			// on veut que la borne inf soit 6/m_CstScore
 			// on veut que la borne sup soit 7/m_CstScore
 			return (1 / (m_CstScore + glm::length(m_rocket.velocity))) + (6 / m_CstScore); // TODO : ajuster la formule
 			break;
-		case RocketState::NEUTRAL:
+		case RocketState::DEAD_TOUCH_FINAL_PLANET_LOW_SPEED:
 			// on veut que la borne inf soit 7/m_CstScore
 			// on veut que la borne sup soit 8/m_CstScore
+			return (1 / (m_CstScore + glm::length(m_rocket.velocity))) + (7 / m_CstScore); // TODO : ajuster la formule
+			break;
+		case RocketState::NEUTRAL:
+			// on veut que la borne inf soit 8/m_CstScore
+			// on veut que la borne sup soit 9/m_CstScore
 			return HandleScoreNeutralState(); // TODO : ajuster la formule pour que le score soit dans l'intervalle souhaité
 			break;
 
 		case RocketState::VALID:
-			// on veut que la borne inf soit 8/m_CstScore
-			// on veut que la borne sup soit 9/m_CstScore
+			// on veut que la borne inf soit 9/m_CstScore
+			// on veut que la borne sup soit 10/m_CstScore
 			return HandleScoreValidState(); // TODO : ajuster la formule pour que le score soit dans l'intervalle souhaité
 			break;
 		
@@ -309,7 +317,7 @@ namespace SimuCore::Systems {
 		// On peut donc renvoyer un score parfait ou presque (en fonction du coût énergétique et du temps)
 		// Il reste à déterminer ce qu'est un score parfait. Il nous faut un meilleur score que dans le cas neutre. C'est à dire un majorant du score neutre.
 		
-		constexpr Real Majorant_etat_neutre = 8 / m_CstScore;
+		constexpr Real Majorant_etat_neutre = 9 / m_CstScore;
 
 
 		Real cout_energetique = m_rocket.getDeltaM();
@@ -365,11 +373,11 @@ namespace SimuCore::Systems {
 			// on prend la racine de la vitesse pour que l'influence de la vitesse soit grandit d'autant plus
 			// que le vitesse finale est faible.
 		}
-		// on veut que la borne inf soit 7/epsilon, donc on ajoute 7 / epsilon
-		// donc la borne sup est 1/epsilon + 7/epsilon = 8/epsilon
+		// on veut que la borne inf soit 8/epsilon, donc on ajoute 8 / epsilon
+		// donc la borne sup est 1/epsilon + 8/epsilon = 9/epsilon
 
 		// TODO : vérifier avec des assertions que les influences sont bien dans les bornes attendues.
-		return influence_position + 7/m_CstScore;
+		return influence_position + 8/m_CstScore;
 	} // HandleScoreNeutralState
 
 	AdaptedSystem::Real AdaptedSystem::HandleScoreInvalidGenerationState(GenerationState gen_state) const {
@@ -463,6 +471,12 @@ namespace SimuCore::Systems {
 	}
 
 	AdaptedSystem::RocketState AdaptedSystem::Rocket_state() const {
+		// on check la postion
+		if (glm::length(m_rocket.position) > m_SolarSystemBound) {
+			return RocketState::DEAD_GET_TOO_FAR;
+		}
+
+
 		// on check l'acceleration
 		Real acceleration = m_rocket.acceleration * 1.0_km_to_m; // en m/s²
 		if (acceleration > m_max_acceleration) {
@@ -574,12 +588,13 @@ namespace SimuCore::Systems {
 			//constexpr double cste = 1 / m_CstScore;
 			score *= m_CstScore; // <=> /= cste
 
-			const char* kinds[9] = {
+			const char* kinds[10] = {
 				"Dead : Collision start panet with high speed",
 				"Dead : Collision start panet with low speed",
 				"Dead : Collision sun with high speed",
 				"Dead : Collision sun with low speed",
 				"Dead : Acceleration too high",
+				"Dead : Rocket get too far in the system",
 				"Dead : Collision final panet with high speed",
 				"Dead : Collision final panet with low speed",
 				"Alive : Neutral",
@@ -594,12 +609,13 @@ namespace SimuCore::Systems {
 	}
 	const char* AdaptedSystem::TypeOfTrajectory(RocketState state) const
 	{
-		constexpr const char* kinds[9] = {
+		constexpr const char* kinds[10] = {
 			"Dead : Collision start panet with high speed",
 			"Dead : Collision start panet with low speed",
 			"Dead : Collision sun with high speed",
 			"Dead : Collision sun with low speed",
 			"Dead : Acceleration too high",
+			"Dead : Rocket get too far in the system",
 			"Dead : Collision final panet with high speed",
 			"Dead : Collision final panet with low speed",
 			"Alive : Neutral",
@@ -608,7 +624,8 @@ namespace SimuCore::Systems {
 
 		return kinds[static_cast<uint8_t>(state)];
 	}
-	void AdaptedSystem::GetRocketTrajectory(std::vector<glm::dvec3>& trajectory) const
+
+	void AdaptedSystem::GetRocketTrajectory(std::vector<glm::dvec3>& trajectory)
 	{
 		// on simule jusqu'à m_MaxTime ou la mort de la fusée ou son succès
 		const size_t MAX_ITERATIONS = static_cast<const size_t>(daysInSeconds(s_MaxTime) / s_deltaTime);
@@ -617,67 +634,67 @@ namespace SimuCore::Systems {
 		size_t start_planet_index = m_start_planet_start_indice;
 		size_t final_planet_index = m_final_planet_start_indice;
 
-		Rocket rocket = m_rocket;
-
 		trajectory.reserve(MAX_ITERATIONS + 1);
 
 		while (current_state == RocketState::NEUTRAL && iteration < MAX_ITERATIONS) {
 			// on calcul les forces gravitationnelles agissant sur la fusée
-			trajectory.push_back(rocket.position);
+			trajectory.push_back(m_rocket.position);
 
-			rocket.forces = glm::dvec3(0);
-			rocket.forces += ComputeAttractionForce(
+			m_rocket.forces = glm::dvec3(0);
+			m_rocket.forces += ComputeAttractionForce(
 				s_startPlanet_positions[start_planet_index],
 				s_start_planet_info.muPlanet,
-				rocket.position,
-				rocket.mass
+				m_rocket.position,
+				m_rocket.mass
 			);
 
-			rocket.forces += ComputeAttractionForce(
+			m_rocket.forces += ComputeAttractionForce(
 				s_finalPlanet_positions[final_planet_index],
 				s_final_planet_info.muPlanet,
-				rocket.position,
-				rocket.mass
+				m_rocket.position,
+				m_rocket.mass
 			);
 
-			rocket.forces += ComputeAttractionForce(glm::dvec3(0), getSun().getMu(), rocket.position, rocket.mass);
+			m_rocket.forces += ComputeAttractionForce(glm::dvec3(0), getSun().getMu(), m_rocket.position, m_rocket.mass);
 
-			rocket.UpdateFirstPart(s_deltaTime);
+			m_rocket.UpdateFirstPart(s_deltaTime);
 
 			// recalcul des forces pour l'intégrateur
 			{
-				rocket.forces += ComputeAttractionForce(
+				m_rocket.forces += ComputeAttractionForce(
 					s_startPlanet_positions[start_planet_index],
 					s_start_planet_info.muPlanet,
-					rocket.position,
-					rocket.mass
+					m_rocket.position,
+					m_rocket.mass
 				);
 
-				rocket.forces += ComputeAttractionForce(
+				m_rocket.forces += ComputeAttractionForce(
 					s_finalPlanet_positions[final_planet_index],
 					s_final_planet_info.muPlanet,
-					rocket.position,
-					rocket.mass
+					m_rocket.position,
+					m_rocket.mass
 				);
 
-				rocket.forces += ComputeAttractionForce(glm::dvec3(0), getSun().getMu(), rocket.position, rocket.mass);
+				m_rocket.forces += ComputeAttractionForce(glm::dvec3(0), getSun().getMu(), m_rocket.position, m_rocket.mass);
 			}
 
-			glm::dvec3 velocity_before = rocket.velocity;
-			rocket.ApplyImpulsions(m_time, s_deltaTime);
-			if (glm::length(rocket.velocity - velocity_before) / s_deltaTime >= m_max_acceleration) {
+			glm::dvec3 velocity_before = m_rocket.velocity;
+			m_rocket.ApplyImpulsions(m_time, s_deltaTime);
+			if (glm::length(m_rocket.velocity - velocity_before) / s_deltaTime >= m_max_acceleration) {
 				current_state = RocketState::DEAD_ACCELERATION_TOO_HIGH;
 				break;
 			}
 
-			rocket.UpdateSecondPart(s_deltaTime);
+			m_rocket.UpdateSecondPart(s_deltaTime);
 
 			current_state = Rocket_state();
 			iteration++;
+			m_time += seconds_to_days(s_deltaTime);
 			start_planet_index = (start_planet_index + 1) % s_start_planet_info.nb_iterations_orbit;
 			final_planet_index = (final_planet_index + 1) % s_final_planet_info.nb_iterations_orbit;
 
 		}
-		trajectory.push_back(rocket.position);
+
+		trajectory.push_back(m_rocket.position);
 	}
 }; // namespace SimuCore::Systems

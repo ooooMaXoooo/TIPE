@@ -328,16 +328,18 @@ int main(int argc, char** argv) {
     bool elitism = true;
     bool auto_adapt = true;
     size_t population_size =  500;
-    size_t max_generation  =  300;
-    size_t print_interval  =  5;
+    size_t max_generation  =  500;
+    size_t print_interval  =  10;
     /*size_t population_size = 4;
     size_t max_generation = 20;
     size_t print_interval = 1;*/
     bool verbose = true;
-	size_t snapshot_interval = print_interval*10;
-    bool save_in_file = false;
+	size_t snapshot_interval = print_interval*5;
+    bool save_in_file = true;
 
-	SimuCore::Optimization::getBestRocket<2>(sy,
+    constexpr size_t nombre_d_impulsions = 5;
+
+	SimuCore::Optimization::getBestRocket<nombre_d_impulsions>(sy,
         cross_type, elitism, auto_adapt,
         population_size, max_generation,
         print_interval, verbose,

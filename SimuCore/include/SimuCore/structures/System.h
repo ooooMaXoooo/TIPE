@@ -87,6 +87,8 @@ namespace SimuCore {
 
 			constexpr static double m_max_acceleration = 5 * constants::g;
 
+			double m_SolarSystemBound = 25; // en UA
+
 
 		public:
 			using Real = double;
@@ -102,6 +104,7 @@ namespace SimuCore {
 				DEAD_TOUCH_SUN_HIGH_SPEED,
 				DEAD_TOUCH_SUN_LOW_SPEED,
 				DEAD_ACCELERATION_TOO_HIGH,
+				DEAD_GET_TOO_FAR,
 				DEAD_TOUCH_FINAL_PLANET_HIGH_SPEED,
 				DEAD_TOUCH_FINAL_PLANET_LOW_SPEED,
 				NEUTRAL,
@@ -227,7 +230,7 @@ namespace SimuCore {
 			const char* TypeOfTrajectory(double score) const;
 			const char* TypeOfTrajectory(RocketState state) const;
 
-			void GetRocketTrajectory(std::vector<glm::dvec3>&) const;
+			void GetRocketTrajectory(std::vector<glm::dvec3>&);
 
 			friend RocketState GetRocketState(const Rocket& rocket, AdaptedSystem& system);
 

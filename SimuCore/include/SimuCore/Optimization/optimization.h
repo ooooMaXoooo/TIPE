@@ -217,13 +217,13 @@ namespace SimuCore {
 						{
 							constexpr double cste = 1.0 / SimuCore::Systems::AdaptedSystem::m_CstScore;
 							if (
-								best_fit < 7.75 * cste
+								best_fit < 8.75 * cste
 								&&
-								best_fit > 7 * cste
+								best_fit > 8 * cste
 								)
 							{
 
-								double distance_to_final_planet_best = (best_fit - 7 * cste);
+								double distance_to_final_planet_best = (best_fit - 8 * cste);
 								distance_to_final_planet_best /= 0.75;
 								distance_to_final_planet_best = 1 / distance_to_final_planet_best;
 								distance_to_final_planet_best -= SimuCore::Systems::AdaptedSystem::m_CstScore;
@@ -235,9 +235,9 @@ namespace SimuCore {
 									<< distance_to_final_planet_best << " (AU)\n";
 							}
 							else if (
-								best_fit < 9 * cste
+								best_fit < 10 * cste
 								&&
-								best_fit > 7.75 * cste
+								best_fit > 8.75 * cste
 								) {
 								std::cout << "\tBest distance to target: " << 0 << '\n';
 							}
