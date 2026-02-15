@@ -23,9 +23,9 @@ def init_liste(nom, x, y):
                 x.append(float(x_val))
                 y.append(float(y_val))
                 
-init_liste("simulation_data/simu_13_02_2026_23_21_29_gen_1_final.txt", x_depart, y_depart)
-init_liste("simulation_data/simu_13_02_2026_23_21_29_gen_1_start.txt", x_finale, y_finale)
-init_liste("simulation_data/simu_13_02_2026_23_23_04_gen_401_rocket.txt", x_fusee, y_fusee)
+init_liste("simulation_data/simu_14_02_2026_00_12_04_gen_1_start.txt", x_depart, y_depart)
+init_liste("simulation_data/simu_14_02_2026_00_12_04_gen_1_final.txt", x_finale, y_finale)
+init_liste("simulation_data/simu_14_02_2026_04_49_45_gen_2601_rocket.txt", x_fusee, y_fusee)
 
 # simu_jour_mois_annee_heure_minute_seconde_gen_id_rocket.txt
 

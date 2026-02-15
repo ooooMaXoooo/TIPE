@@ -48,8 +48,8 @@ namespace SimuCore {
 
 			Rocket m_rocket;
 
-			inline static PlanetsName m_start_planet = PlanetsName::Terre;
-			inline static PlanetsName m_final_planet = PlanetsName::Mars;
+			inline static PlanetsName s_start_planet = PlanetsName::Terre;
+			inline static PlanetsName s_final_planet = PlanetsName::Mars;
 
 			double m_time = 0;							// en jours
 			inline static double s_MaxTime = 50;		// en jours
@@ -87,7 +87,7 @@ namespace SimuCore {
 
 			constexpr static double m_max_acceleration = 5 * constants::g;
 
-			double m_SolarSystemBound = 25; // en UA
+			double m_SolarSystemBound = 55; // en UA
 
 
 		public:
@@ -161,8 +161,8 @@ namespace SimuCore {
 			///////////////////////////////////////////////////////
 
 
-			const Planet& getStartPlanet() const noexcept { return m_planets[static_cast<size_t>(m_start_planet)]; }
-			const Planet& getFinalPlanet() const noexcept { return m_planets[static_cast<size_t>(m_final_planet)]; }
+			const Planet& getStartPlanet() const noexcept { return m_planets[static_cast<size_t>(s_start_planet)]; }
+			const Planet& getFinalPlanet() const noexcept { return m_planets[static_cast<size_t>(s_final_planet)]; }
 			const Planet& getSun() const noexcept  { return m_planets[0]; }
 
 			/// <summary>

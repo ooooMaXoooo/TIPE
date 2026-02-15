@@ -48,9 +48,13 @@ namespace SimuCore::Systems {
 		m_rocket(rocket),
 		m_time(0)
 	{
-		if (s_initialized && (m_start_planet != start_planet || m_final_planet != final_planet)) {
+		if (s_initialized && (s_start_planet != start_planet || s_final_planet != final_planet)) {
+			std::cerr << "Error creating a system !" << std::endl;
 			std::abort();
 		}
+
+		s_start_planet = start_planet;
+		s_final_planet = final_planet;
 
 		s_MaxTime = max_duration;
 		s_deltaTime = dt_seconds;
@@ -240,7 +244,7 @@ namespace SimuCore::Systems {
 
 	
 	AdaptedSystem::Real AdaptedSystem::RingSize_meter() const noexcept {
-		const auto& start_planet = getPlanetFromName(m_start_planet);
+		const auto& start_planet = getPlanetFromName(s_start_planet);
 		return start_planet.maxOrbitRadius() - start_planet.minOrbitRadius();
 	} // RingSize_meter
 
@@ -251,8 +255,8 @@ namespace SimuCore::Systems {
 			std::abort();
 		}
 
-		InitPlanet(true, m_start_planet);
-		InitPlanet(false, m_final_planet);
+		InitPlanet(true, s_start_planet);
+		InitPlanet(false, s_final_planet);
 		
 		s_initialized = true;
 	} // Initialize
@@ -342,7 +346,7 @@ namespace SimuCore::Systems {
 
 		Real influence_position = 0;
 
-		Planet final_planet = getPlanetFromName(m_final_planet);
+		Planet final_planet = getPlanetFromName(s_final_planet);
 
 		const glm::dvec3 final_planet_position = s_finalPlanet_positions[getFinalPlanetPositionIndice()]; // en UA
 
@@ -428,13 +432,13 @@ namespace SimuCore::Systems {
 			break;
 
 		case ObjectName::START :
-			object_pos = getPlanetFromName(m_start_planet).position;
-			object_radius = getPlanetFromName(m_start_planet).getRadius();
+			object_pos = getPlanetFromName(s_start_planet).position;
+			object_radius = getPlanetFromName(s_start_planet).getRadius();
 			break;
 
 		case ObjectName::FINAL :
-			object_pos = getPlanetFromName(m_final_planet).position;
-			object_radius = getPlanetFromName(m_final_planet).getRadius();
+			object_pos = getPlanetFromName(s_final_planet).position;
+			object_radius = getPlanetFromName(s_final_planet).getRadius();
 			break;
 
 		default:
@@ -486,8 +490,8 @@ namespace SimuCore::Systems {
 		// check les collisions --> brute force car seulement 3 comparaisons
 		// TODO : Corriger les erreurs : des fonctions membre utilisent m_rocket au lieu de rocket passé en
 
-		Planet start_planet = getPlanetFromName(m_start_planet);
-		Planet final_planet = getPlanetFromName(m_final_planet);
+		Planet start_planet = getPlanetFromName(s_start_planet);
+		Planet final_planet = getPlanetFromName(s_final_planet);
 
 		bool collided = rocket_collide_with(ObjectName::SUN) || rocket_collide_with(ObjectName::START) || rocket_collide_with(ObjectName::FINAL);
 

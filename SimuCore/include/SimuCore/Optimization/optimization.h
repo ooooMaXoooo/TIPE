@@ -277,9 +277,9 @@ namespace SimuCore {
 								}
 							}
 
-							///////// Position Terre
+							///////// Position planete depart
 							{
-								std::cout << "\tTerre :\n";
+								std::cout << "\tStart planet :\n";
 								std::cout << "\t\tPosition : ";
 								print_vec(copy_system.getStartPlanetPositions()[
 									copy_system.getStartPlanetStartIndice()
@@ -287,9 +287,9 @@ namespace SimuCore {
 								std::cout << " (unit : AU)\n";
 							}
 
-							///////// Position Mars
+							///////// Position planete arrive
 							{
-								std::cout << "\tMars :\n";
+								std::cout << "\Final planet :\n";
 								std::cout << "\t\tPosition : ";
 								print_vec(copy_system.getFinalPlanetPositions()[
 									copy_system.getFinalPlanetStartIndice()
