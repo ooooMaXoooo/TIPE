@@ -7,11 +7,6 @@
 #include <SimuCore\integrator\integrator.h>
 
 #include <Galib/genetic.hpp>
-#include <DataExport\Snapshot.h>
-#include <DataExport\HDF5WriterAsync.h>
-#include <DataExport\GenerationStats.h>
-#include <DataExport\TrajectorySoA.h>
-#include <DataExport\Accumulators.h>
 
 namespace SimuCore {
 	namespace Optimization {
@@ -27,7 +22,7 @@ namespace SimuCore {
 			}
 		}
 
-		inline std::string generate_snapshot_filename(const std::string& extension = "h5", int id=0, const char* suffix = "") {
+		inline std::string generate_snapshot_directory() {
 			// Récupérer le temps actuel
 			auto now = std::chrono::system_clock::now();
 			std::time_t t_now = std::chrono::system_clock::to_time_t(now);
@@ -39,7 +34,7 @@ namespace SimuCore {
 			localtime_r(&t_now, &local_tm);  // Linux / macOS
 #endif
 
-			// Construire le nom sous la forme simu_jour_mois_annee_heure_minute_seconde.extension
+			// Construire le nom sous la forme simu_jour_mois_annee_heure_minute_seconde
 			std::ostringstream oss;
 			oss << "simu_"
 				<< std::setfill('0') << std::setw(2) << local_tm.tm_mday << "_"
@@ -47,8 +42,14 @@ namespace SimuCore {
 				<< local_tm.tm_year + 1900 << "_"
 				<< std::setfill('0') << std::setw(2) << local_tm.tm_hour << "_"
 				<< std::setfill('0') << std::setw(2) << local_tm.tm_min << "_"
-				<< std::setfill('0') << std::setw(2) << local_tm.tm_sec
-				<< "_gen_" << id
+				<< std::setfill('0') << std::setw(2) << local_tm.tm_sec;
+
+			return oss.str();
+		}
+
+		inline std::string generate_snapshot_filename(const std::string& extension = "h5", int id=0, const char* suffix = "") {
+			std::ostringstream oss;
+			oss << "gen_" << id
 				<< "_" << suffix
 				<< "." << extension;
 
@@ -121,65 +122,22 @@ namespace SimuCore {
 			using Pop = typename std::vector<Ind>;
 
 
-			//std::string filename_save = generate_snapshot_filename("h5");
-			//HDF5WriterAsync snapshot_sink(filename_save); // nom de fichier adapté
-			//GenerationAccumulator accumulator(NbImpulsions);
-			//double last_best_score = -std::numeric_limits<double>::infinity();
+			std::filesystem::path file_directory =
+				std::filesystem::absolute(std::filesystem::current_path()) /
+				"simulation_data/" /
+				generate_snapshot_directory();
 
-			//auto callback =
-			//	[
-			//		&accumulator,
-			//		&system,
-			//		snapshot_interval,
-			//		&last_best_score,
-			//		&snapshot_sink
-			//	]
-			//	(
-			//		size_t gen,
-			//		double best_fit, const auto& best_ind,
-			//		double worst_fit, const auto& /*worst_ind*/,
-			//		const auto& population
-			//		)
-			//	{
-			//		if (gen % snapshot_interval != 0) return;
+			std::filesystem::create_directories(file_directory);
 
-			//		// Détecter si on a un nouveau meilleur score
-			//		bool is_new_best = std::abs(best_fit - last_best_score) > SimuCore::constants::epsilon;
-			//		last_best_score = best_fit;
-
-			//		// --- Accumuler population complète (avec validité) ---
-			//		accumulator.push_population(population, system);
-
-			//		// --- Finalisation du snapshot ---
-			//		dataExport::Snapshot snapshot = accumulator.finalize(
-			//			gen,
-			//			dataExport::BestIndividualUpdate{} // sera mis à jour si nécessaire
-			//		);
-
-			//		// Mettre à jour les scores globaux
-			//		snapshot.stats.best_score = best_fit;
-			//		snapshot.stats.worst_score = worst_fit;
-
-			//		// --- Mettre à jour la trajectoire du meilleur si nouveau meilleur ---
-			//		if (is_new_best) {
-			//			snapshot.best_update.is_new_best = true;
-			//			snapshot.best_update.trajectory = calculate_trajectory(best_ind, system);
-			//		}
-
-			//		// --- Envoi vers le writer asynchrone ---
-			//		snapshot_sink.enqueue(std::make_shared<dataExport::Snapshot>(std::move(snapshot)));
-			//	};
-
-
-
-			auto callback_2 =
+			auto callback =
 				[
 				max_generation,
 				&system,
 				print_interval,
 				snapshot_interval,
 				saving_in_file,
-				verbose
+				verbose,
+				file_directory
 				]
 				(
 					size_t gen,
@@ -299,28 +257,34 @@ namespace SimuCore {
 						}						
 					}
 
-					if (gen == 0 && saving_in_file) {
-						// on ecrit les données des trajectoires des planètes dans un fichier
-						std::string filename_start = "simulation_data/" + generate_snapshot_filename("txt", gen + 1, "start"); // a revoir
-						std::string filename_final = "simulation_data/" + generate_snapshot_filename("txt", gen + 1, "final"); // a revoir
+					if (saving_in_file) {
+						if (gen == 0) {
+							std::filesystem::path filepath_start = file_directory / "start_planet.txt";
+							std::filesystem::path filepath_final = file_directory / "final_planet.txt";
 
-						std::ofstream file_start(filename_start);
-						std::ofstream file_final(filename_final);
+							// on ecrit les données des trajectoires des planètes dans un fichier
+							std::string filename_start = filepath_start.string();
+							std::string filename_final = filepath_final.string();
 
-						writeTrajectory(file_start, system.getStartPlanetPositions());
-						writeTrajectory(file_final, system.getFinalPlanetPositions());
+							std::ofstream file_start(filename_start);
+							std::ofstream file_final(filename_final);
 
-						file_start.close();
-						file_final.close();
-					}
+							writeTrajectory(file_start, system.getStartPlanetPositions());
+							writeTrajectory(file_final, system.getFinalPlanetPositions());
 
-					if (gen % snapshot_interval == 0 || gen == max_generation - 1) {
-						if (saving_in_file) {
+							file_start.close();
+							file_final.close();
+						}
+
+						if (gen % snapshot_interval == 0 || gen == max_generation - 1) {
 							SimuCore::Systems::AdaptedSystem copy_system = system;
 							///////// Envoi des données
 							{
-								std::string filename = "simulation_data/" + generate_snapshot_filename("txt", gen + 1, "rocket");
+								std::filesystem::path filepath =
+									file_directory /
+									generate_snapshot_filename("txt", gen + 1, "rocket");
 
+								std::string filename = filepath.string();
 								std::ofstream file(filename);
 
 								auto [rocket, state] = SimuCore::IndividualToRocket(best_ind.to_real_vectors(), copy_system);
@@ -336,8 +300,7 @@ namespace SimuCore {
 				};
 
 			ga.reset(config); // initialisation de l'algo génétique
-			//genetic::Individu<ConfigType> best = ga.run(verbose, callback);	// on lance l'algorithme en affichant des logs dans la console
-			genetic::Individu<ConfigType> best = ga.run(verbose, callback_2);	// on lance l'algorithme en affichant des logs dans la console
+			genetic::Individu<ConfigType> best = ga.run(verbose, callback);	// on lance l'algorithme en affichant des logs dans la console
 
 
 

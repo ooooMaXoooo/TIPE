@@ -157,7 +157,7 @@ struct Config {
 
     // ========== Paramètre spécifique à la méthode de coisement uniforme ==========
 
-    /// probabilité de donner le bit du parent 1 à l'enfant 1
+    /// probabilité de donner le bit du parent 1 à l'enfant 1 (n'est pas une proba de mutation)
     double uniform_crossover_probability = 0.5;  // NOLINT (cppcoreguidelines-avoid-magic-numbers)
 
     // ========== Paramètres de sauvegarde ==========
@@ -299,9 +299,10 @@ struct Config {
         os << "Auto-adaptation: " << (config.enable_auto_adaptation ? "true" : "false") << '\n';
         if (!config.enable_auto_adaptation) {
             os << "\tProbability across all chromosomes: " << config.get_fixed_proba() << '\n';
+        } else {
+            os << "Initial mutation probability: " << config.initial_mutation_probability << '\n';
+            os << "Initial self adaptation probability: " << config.initial_self_adaptation_probability << '\n';
         }
-        os << "Initial mutation probability: " << config.initial_mutation_probability << '\n';
-        os << "Initial self adaptation probability: " << config.initial_self_adaptation_probability << '\n';
 
         os << "Crossover method: ";
         switch (config.crossover_method) {

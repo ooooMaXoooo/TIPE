@@ -150,16 +150,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\DataExport\Accumulators.h" />
-    <ClInclude Include="include\DataExport\HDF5WriterAsync.h" />
+    <ClInclude Include="include\DataExport\Bases\AsyncWriter.h" />
+    <ClInclude Include="include\DataExport\Bases\Writable.h" />
+    <ClInclude Include="include\DataExport\Writables\GenerationSnapshot.h" />
+    <ClInclude Include="include\DataExport\Writers\HDF5AsyncWriter.h" />
+    <ClInclude Include="include\DataExport\Writers\SimulationAsyncWriter.h" />
     <ClInclude Include="include\GaLib\genetic.hpp" />
     <ClInclude Include="include\GaLib\genetic_algorithm.hpp" />
     <ClInclude Include="include\GaLib\genetic_config.hpp" />
     <ClInclude Include="include\GaLib\genetic_individu.hpp" />
     <ClInclude Include="include\GaLib\genetic_utils.hpp" />
-    <ClInclude Include="include\DataExport\GenerationStats.h" />
-    <ClInclude Include="include\DataExport\Snapshot.h" />
-    <ClInclude Include="include\DataExport\TrajectorySoA.h" />
     <ClInclude Include="include\SimuCore\integrator\integrator.h" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\SimuCore\constants.h" />
@@ -179,20 +179,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\SimuCore.h" />
-    <ClCompile Include="src\DataExport\Accumulators.cpp" />
-    <ClCompile Include="src\integrator\integrator.cpp" />
-    <ClCompile Include="src\Optimization\optimization.cpp" />
+    <ClCompile Include="src\DataExport\Writers\SimulationAsyncWriter.cpp" />
+    <ClCompile Include="src\DataExport\Bases\AsyncWriter.cpp" />
+    <ClCompile Include="src\DataExport\Writers\HDF5AsyncWriter.cpp" />
+    <ClCompile Include="src\SimuCore\integrator\integrator.cpp" />
+    <ClCompile Include="src\SimuCore\Optimization\optimization.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\structures\Entity.cpp" />
-    <ClCompile Include="src\structures\Planet.cpp" />
-    <ClCompile Include="src\structures\Rocket.cpp" />
-    <ClCompile Include="src\structures\System.cpp" />
-    <ClCompile Include="src\theory\formula.cpp" />
+    <ClCompile Include="src\SimuCore\structures\Entity.cpp" />
+    <ClCompile Include="src\SimuCore\structures\Planet.cpp" />
+    <ClCompile Include="src\SimuCore\structures\Rocket.cpp" />
+    <ClCompile Include="src\SimuCore\structures\System.cpp" />
+    <ClCompile Include="src\SimuCore\theory\formula.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

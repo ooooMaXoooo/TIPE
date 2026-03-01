@@ -8,6 +8,7 @@
 
 // === Bibliothèques externes ===
 #include <glm/glm.hpp>
+#include <H5Cpp.h>
 
 
 #define WIN32_LEAN_AND_MEAN             // Exclure les en-têtes Windows rarement utilisés
@@ -29,7 +30,6 @@
 #include <sstream>
 #include <chrono>
 #include <algorithm>
-#include <H5Cpp.h>
 #include <thread>
 #include <queue>
 #include <mutex>

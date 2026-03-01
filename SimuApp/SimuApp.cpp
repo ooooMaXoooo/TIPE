@@ -20,8 +20,8 @@ static void rosenbrock_tests() {
     config.max_generations = 10000;  // NOLINT (cppcoreguidlines-avoid-magic-numbers)
     config.number_of_vectors = 1;   // Un seul vecteur
     config.dimension = 2;           // 2D: (x, y)
-    config.min_real = -1e10;         // NOLINT (cppcoreguidlines-avoid-magic-numbers)
-    config.max_real = 1e10;          // NOLINT (cppcoreguidlines-avoid-magic-numbers)
+    config.min_real = -5;         // NOLINT (cppcoreguidlines-avoid-magic-numbers)
+    config.max_real = 5;          // NOLINT (cppcoreguidlines-avoid-magic-numbers)
     config.integer_bits = 32;       // NOLINT (cppcoreguidlines-avoid-magic-numbers)
     config.print_interval = 1000;    // NOLINT (cppcoreguidlines-avoid-magic-numbers)
     config.tournament_size = 2;
@@ -291,13 +291,13 @@ static void test_algo_bornes() {
 
 
 int main(int argc, char** argv) {
-    /*
-    genetic::print_info();
+    
+/*    genetic::print_info();
     std::cout << '\n';
 
     try {
-        //rosenbrock_tests();
-        test_algo_bornes();
+        rosenbrock_tests();
+        //test_algo_bornes();
     }
     catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << '\n';
@@ -306,14 +306,14 @@ int main(int argc, char** argv) {
 
     std::cout << "Appuyez sur une touche pour continuer ...";
     std::cin.get();
-    return 0;
-    */
+    return 0;*/
+    
 
     
-	double lifetime = 20000; // durée de simulation en jours
+	double lifetime = 300; // durée de simulation en jours
 	SimuCore::Systems::AdaptedSystem sy(
-        SimuCore::Systems::PlanetsName::Terre,
-        SimuCore::Systems::PlanetsName::Saturne,
+        SimuCore::Systems::PlanetsName::Terre,   // planète de départ
+        SimuCore::Systems::PlanetsName::Mars,  // planète d'arrivée
         SimuCore::Structures::Rocket(
 			lifetime, // -> durée de vie de la fusée en jours
             std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(),
@@ -327,17 +327,14 @@ int main(int argc, char** argv) {
     genetic::CrossoverType cross_type = genetic::CrossoverType::UNIFORM_BIT_LEVEL;
     bool elitism = true;
     bool auto_adapt = true;
-    size_t population_size =  500;
-    size_t max_generation  =  1e5;
-    size_t print_interval  =  5;
-    /*size_t population_size = 4;
-    size_t max_generation = 20;
-    size_t print_interval = 1;*/
+    size_t population_size =  1000;
+    size_t max_generation  =  1e6;
+    size_t print_interval  =  50;
     bool verbose = true;
     size_t snapshot_interval = 100;
     bool save_in_file = true;
 
-    constexpr size_t nombre_d_impulsions = 4;
+    constexpr size_t nombre_d_impulsions = 2;
 
 	SimuCore::Optimization::getBestRocket<nombre_d_impulsions>(sy,
         cross_type, elitism, auto_adapt,
