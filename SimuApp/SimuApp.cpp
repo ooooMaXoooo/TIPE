@@ -210,10 +210,6 @@ static void rosenbrock_tests() {
     print_info_end_algo();
 }
 
-
-
-
-
 static void test_algo_bornes() {
     // Configuration pour Rosenbrock (minimum global en (1, 1))
     using ConfigType = genetic::Config<double, uint64_t, 1, 2>;

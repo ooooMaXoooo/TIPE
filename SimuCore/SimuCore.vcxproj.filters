@@ -81,19 +81,16 @@
     <ClInclude Include="include\SimuCore\Units\masses.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\DataExport\Bases\AsyncWriter.h">
+    <ClInclude Include="include\DataExport\AsyncDataExporter.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\DataExport\Bases\Writable.h">
+    <ClInclude Include="include\DataExport\GeneticData.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\DataExport\Writers\HDF5AsyncWriter.h">
+    <ClInclude Include="include\DataExport\TrajectoryData.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\DataExport\Writers\SimulationAsyncWriter.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\DataExport\Writables\GenerationSnapshot.h">
+    <ClInclude Include="include\DataExport\PhysicsData.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
@@ -129,6 +126,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\DataExport\Writers\SimulationAsyncWriter.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DataExport\AsyncDataExporter.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
