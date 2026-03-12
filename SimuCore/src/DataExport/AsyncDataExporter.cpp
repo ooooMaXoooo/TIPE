@@ -18,9 +18,6 @@ AsyncDataExporter::~AsyncDataExporter() {
 }
 
 void AsyncDataExporter::enqueue(std::shared_ptr<Writable> data, std::filesystem::path path) {
-    if (!std::filesystem::is_regular_file(path)) {
-        throw std::invalid_argument("path is not a regular filepath");
-    }
     std::filesystem::create_directories(path.parent_path());
 
     {
@@ -41,8 +38,6 @@ void AsyncDataExporter::process() {
 
             if (m_stop && m_queue.empty())
                 break;
-
-             
 
             data = m_queue.front().first;
             file = std::make_shared<std::ofstream>(m_queue.front().second);

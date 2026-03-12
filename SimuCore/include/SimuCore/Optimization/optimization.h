@@ -8,6 +8,9 @@
 
 #include <Galib/genetic.hpp>
 
+#include <DataExport/AsyncDataExporter.h>
+#include <DataExport/TrajectoryData.h>
+
 namespace SimuCore {
 	namespace Optimization {
 
@@ -124,10 +127,12 @@ namespace SimuCore {
 
 			std::filesystem::path file_directory =
 				std::filesystem::absolute(std::filesystem::current_path()) /
-				"simulation_data/" /
+				"simulation_data" /
 				generate_snapshot_directory();
 
 			std::filesystem::create_directories(file_directory);
+
+			AsyncDataExporter generationalExporter;
 
 			auto callback =
 				[
@@ -137,7 +142,8 @@ namespace SimuCore {
 				snapshot_interval,
 				saving_in_file,
 				verbose,
-				file_directory
+				file_directory,
+				&generationalExporter
 				]
 				(
 					size_t gen,
@@ -247,7 +253,7 @@ namespace SimuCore {
 
 							///////// Position planete arrive
 							{
-								std::cout << "\Final planet :\n";
+								std::cout << "\tFinal planet :\n";
 								std::cout << "\t\tPosition : ";
 								print_vec(copy_system.getFinalPlanetPositions()[
 									copy_system.getFinalPlanetStartIndice()
@@ -263,17 +269,33 @@ namespace SimuCore {
 							std::filesystem::path filepath_final = file_directory / "final_planet.txt";
 
 							// on ecrit les données des trajectoires des planètes dans un fichier
-							std::string filename_start = filepath_start.string();
-							std::string filename_final = filepath_final.string();
+							//std::string filename_start = filepath_start.string();
+							//std::string filename_final = filepath_final.string();
 
-							std::ofstream file_start(filename_start);
-							std::ofstream file_final(filename_final);
+							//std::ofstream file_start(filename_start);
+							//std::ofstream file_final(filename_final);
 
-							writeTrajectory(file_start, system.getStartPlanetPositions());
-							writeTrajectory(file_final, system.getFinalPlanetPositions());
+							AsyncDataExporter planetsDataExporter;
+							TrajectoryData traj_data_start(system.getStartPlanetPositions(), 2);
+							TrajectoryData traj_data_final(system.getFinalPlanetPositions(), 2);
 
-							file_start.close();
-							file_final.close();
+							try
+							{
+								planetsDataExporter.enqueue(std::make_shared<TrajectoryData>(traj_data_start), filepath_start);
+								planetsDataExporter.enqueue(std::make_shared<TrajectoryData>(traj_data_final), filepath_final);
+							}
+							catch (const std::exception& e)
+							{
+								std::cerr << "\n\n" << e.what() << std::endl;
+								exit(EXIT_FAILURE);
+							}
+
+
+							//writeTrajectory(file_start, system.getStartPlanetPositions());
+							//writeTrajectory(file_final, system.getFinalPlanetPositions());
+
+							//file_start.close();
+							//file_final.close();
 						}
 
 						if (gen % snapshot_interval == 0 || gen == max_generation - 1) {
@@ -284,16 +306,27 @@ namespace SimuCore {
 									file_directory /
 									generate_snapshot_filename("txt", gen + 1, "rocket");
 
-								std::string filename = filepath.string();
-								std::ofstream file(filename);
+								//std::string filename = filepath.string();
+								//std::ofstream file(filename);
 
 								auto [rocket, state] = SimuCore::IndividualToRocket(best_ind.to_real_vectors(), copy_system);
 								copy_system.SetRocket(rocket);
 								std::vector<glm::dvec3> trajectory;
 								copy_system.GetRocketTrajectory(trajectory);
-								writeTrajectory(file, trajectory);
 
-								file.close();
+								TrajectoryData trajectoryData{ trajectory, 2 };
+								try {
+									generationalExporter.enqueue(std::make_shared<TrajectoryData>(trajectoryData), filepath);
+								}
+								catch (const std::exception& e) {
+									std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
+									exit(EXIT_FAILURE);
+								}
+
+
+								//writeTrajectory(file, trajectory);
+
+								//file.close();
 							}
 						}
 					}
