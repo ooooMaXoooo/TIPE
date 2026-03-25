@@ -5,6 +5,22 @@
 
 class PhysicsData : public Writable {
 public:
+
+	/// <summary>
+	/// Classe pour empacter les données physiques utiles à une simulation
+	/// </summary>
+	/// <param name="simulation_time"> en jours </param>
+	/// <param name="time_step"> en secondes </param>
+	/// <param name="start_planet_index"> uint8_t </param>
+	/// <param name="final_planet_index"> uint8_t </param>
+	/// <param name="start_planet_start_position"> en UA </param>
+	/// <param name="final_planet_start_position"> en UA </param>
+	/// <param name="start_planet_final_position"> en UA </param>
+	/// <param name="final_planet_final_position"> en UA </param>
+	/// <param name="final_rocket_velocity"> en km/s </param>
+	/// <param name="impulse_times"> jours </param>
+	/// <param name="impulse_vectors"> km/s </param>
+	/// <param name="dimension"> uint16_t </param>
 	PhysicsData(
 		double simulation_time,
 		double time_step,
@@ -17,7 +33,8 @@ public:
 		const glm::dvec3& final_rocket_velocity,
 		const std::vector<double>& impulse_times,
 		const std::vector<glm::dvec3>& impulse_vectors,
-		int dimension = 2) :
+		uint16_t dimension = 2) :
+
 		m_dimension(dimension),
 		m_simulation_time(simulation_time),
 		m_time_step(time_step),
@@ -41,7 +58,7 @@ public:
 	std::string string() const override {
 		std::ostringstream oss;
 
-		/* On veut afficher :
+		/* On veut envoyer :
 		*	- Position de départ de la planète de départ
 		*	- Position de départ de la planète d'arrivée
 		*	

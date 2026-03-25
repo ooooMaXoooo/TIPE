@@ -7,6 +7,14 @@ class GeneticData : public Writable {
 	GeneticData() = default;
 
 	std::string string() const override {
+		/* On veut envoyer :
+		*	- numero generation
+		*	- taille population
+		*	- nombre genes
+		*	- meilleur genes
+		*	- meilleur score
+		*/
+
 		return "Genetic data string representation";
 	}
 

@@ -27,7 +27,7 @@ def init_liste(nom, x, y):
 
 simu_name = "simu_28_02_2026_15_15_28"
 
-gen = 15001
+gen = 120701
 #gen = 120701
 
 init_liste("./simulation_data/" + simu_name + "/start_planet.txt", x_depart, y_depart)

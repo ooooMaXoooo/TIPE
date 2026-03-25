@@ -50,7 +50,7 @@ namespace SimuCore {
 			return oss.str();
 		}
 
-		inline std::string generate_snapshot_filename(const std::string& extension = "h5", int id=0, const char* suffix = "") {
+		inline std::string generate_snapshot_filename(const std::string& extension = "txt", int id=0, const char* suffix = "") {
 			std::ostringstream oss;
 			oss << "gen_" << id
 				<< "_" << suffix
