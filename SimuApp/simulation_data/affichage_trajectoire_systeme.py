@@ -10,8 +10,8 @@ import graphics
 from Donnees_astres import *
 
 
-dossier = "simu_26_03_2026_17_03_34"
-generation = 79201
+dossier = "simu_27_03_2026_14_57_29"
+generation = 2301
 
 
 
@@ -77,14 +77,11 @@ x_finale, y_finale = convert_list_to_km(x_finale, y_finale)
 x_fusee, y_fusee = convert_list_to_km(x_fusee, y_fusee)
 
 # Affichage de l'orbite
-fig, ax = plt.subplots(figsize=(8, 8))
+fig, ax = plt.subplots(figsize=(6, 6))
 
 ax.plot(x_depart, y_depart, '-', color='blue',label='Trajectoire planète départ')
-
 ax.plot(x_finale, y_finale, '-', color='red',label='Trajectoire planète finale')
-
 ax.plot(x_fusee, y_fusee, '-', color='#07b00a',label='Trajectoire fusée')
-
 ax.plot(0, 0, 'yo', label='Soleil')  # centre
 
 graphics.DrawRing(planete_depart, k, ax, "Anneau_planete_depart_position_initiale", "skyblue", pos_init_depart)
@@ -94,7 +91,7 @@ graphics.DrawRing(planete_arrivee, k, ax, "Anneau_planete_finale_position_finale
 
 
 # Affichage impulsions
-"""
+
 for t, dv in impulsions:
     index = int((t * 86400) / dt)
 
@@ -106,14 +103,23 @@ for t, dv in impulsions:
         ax.plot(x, y, 'ko')  # point noir
 
         # vecteur impulsion
-        scale = 1  # facteur pour rendre visible (à ajuster)
-        ax.arrow(x, y, dv[0]*scale, dv[1]*scale,
-                 head_width=1e6, head_length=1e6,
-                 fc='green', ec='green')
+        scale = 1  # ajuste selon visibilité
+
+        ax.quiver(
+            x, y,
+            dv[0]*scale, dv[1]*scale,
+            angles='xy',
+            scale_units='xy',
+            color='green'
+        )
 
 ax.plot([], [], 'ko', label='Impulsions')
 ax.plot([], [], color='green', label='Delta-v')
-"""
+
+
+
+
+
 # Ajuster les limites pour afficher entièrement le grand cercle
 ax.set_aspect('equal')
 ax.set_title("Trajectoire des objets du système - gen " + str(generation))
