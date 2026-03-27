@@ -221,8 +221,8 @@ namespace SimuCore {
 
 			// commenter pour dire que ça renvoi l'indice de la planète dans son tableau des positions à l'instant m_time de l'appel.
 
-			size_t getStartPlanetPositionIndice() const noexcept { return static_cast<size_t>(daysInSeconds(m_time) / s_deltaTime) % s_start_planet_info.nb_iterations_orbit; }
-			size_t getFinalPlanetPositionIndice() const noexcept { return static_cast<size_t>(daysInSeconds(m_time) / s_deltaTime) % s_final_planet_info.nb_iterations_orbit; }
+			size_t getStartPlanetPositionIndice() const noexcept { return (static_cast<size_t>(daysInSeconds(m_time) / s_deltaTime) + getStartPlanetStartIndice()) % s_start_planet_info.nb_iterations_orbit; }
+			size_t getFinalPlanetPositionIndice() const noexcept { return (static_cast<size_t>(daysInSeconds(m_time) / s_deltaTime) + getFinalPlanetStartIndice()) % s_final_planet_info.nb_iterations_orbit; }
 
 
 			glm::dvec3 GetStartPlanet_CurrentPosition() const noexcept { return getStartPlanetPositions()[getStartPlanetPositionIndice()]; }
