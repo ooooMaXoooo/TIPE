@@ -21,7 +21,7 @@ namespace SimuCore {
 	};
 
 	namespace Systems {
-		enum PlanetsName : uint8_t { /// l'indexation suppose que m_planets est initialisé dans le bon ordre
+		enum PlanetsName : uint8_t { // l'indexation suppose que m_planets est initialisé dans le bon ordre
 			Mercure = 1,
 			Venus,
 			Terre,
@@ -214,12 +214,31 @@ namespace SimuCore {
 			size_t getStartPlanetStartIndice() const noexcept { return m_start_planet_start_indice; }
 			size_t getFinalPlanetStartIndice() const noexcept { return m_final_planet_start_indice; }
 
+
+			glm::dvec3 GetStartPlanet_StartPosition() const noexcept { return getStartPlanetPositions()[getStartPlanetStartIndice()]; }
+			glm::dvec3 GetFinalPlanet_StartPosition() const noexcept { return getFinalPlanetPositions()[getFinalPlanetStartIndice()]; }
+
+
+			// commenter pour dire que ça renvoi l'indice de la planète dans son tableau des positions à l'instant m_time de l'appel.
+
 			size_t getStartPlanetPositionIndice() const noexcept { return static_cast<size_t>(daysInSeconds(m_time) / s_deltaTime) % s_start_planet_info.nb_iterations_orbit; }
 			size_t getFinalPlanetPositionIndice() const noexcept { return static_cast<size_t>(daysInSeconds(m_time) / s_deltaTime) % s_final_planet_info.nb_iterations_orbit; }
+
+
+			glm::dvec3 GetStartPlanet_CurrentPosition() const noexcept { return getStartPlanetPositions()[getStartPlanetPositionIndice()]; }
+			glm::dvec3 GetFinalPlanet_CurrentPosition() const noexcept { return getFinalPlanetPositions()[getFinalPlanetPositionIndice()]; }
+
+
 
 			static bool IsInitialized() noexcept { return s_initialized; }
 
 			void SetRocket(Rocket rocket) { m_rocket = rocket; }
+
+			/// <summary>
+			/// donne la vitesse actuelle de la fusée en km/s
+			/// </summary>
+			/// <returns> en km/s </returns>
+			glm::dvec3 GetRocketVelocity() { return m_rocket.velocity; }
 			
 			///////// other
 
@@ -231,6 +250,9 @@ namespace SimuCore {
 			const char* TypeOfTrajectory(RocketState state) const;
 
 			void GetRocketTrajectory(std::vector<glm::dvec3>&);
+
+			static uint8_t GetStartPlanetID() { return static_cast<uint8_t>(s_start_planet); }
+			static uint8_t GetFinalPlanetID() { return static_cast<uint8_t>(s_final_planet); }
 
 			friend RocketState GetRocketState(const Rocket& rocket, AdaptedSystem& system);
 

@@ -10,6 +10,8 @@
 
 #include <DataExport/AsyncDataExporter.h>
 #include <DataExport/TrajectoryData.h>
+#include <DataExport/GeneticData.h>
+#include <DataExport/PhysicsData.h>
 
 namespace SimuCore {
 	namespace Optimization {
@@ -306,9 +308,6 @@ namespace SimuCore {
 									file_directory /
 									generate_snapshot_filename("txt", gen + 1, "rocket");
 
-								//std::string filename = filepath.string();
-								//std::ofstream file(filename);
-
 								auto [rocket, state] = SimuCore::IndividualToRocket(best_ind.to_real_vectors(), copy_system);
 								copy_system.SetRocket(rocket);
 								std::vector<glm::dvec3> trajectory;
@@ -324,9 +323,62 @@ namespace SimuCore {
 								}
 
 
-								//writeTrajectory(file, trajectory);
 
-								//file.close();
+								// envoi des données physiques
+
+								double tof = copy_system.getMaxTime();	// en jours
+								double dt = copy_system.getDeltaTime(); // en secondes
+
+								uint8_t startPlanetIndex = SimuCore::Systems::AdaptedSystem::GetStartPlanetID();
+								uint8_t finalPlanetIndex = SimuCore::Systems::AdaptedSystem::GetFinalPlanetID();
+
+								glm::dvec3 startPlanet_initialPosition		= copy_system.GetStartPlanet_StartPosition();
+								glm::dvec3 startPlanet_finalPosition		= copy_system.GetStartPlanet_CurrentPosition();
+								glm::dvec3 finalPlanet_initialPosition		= copy_system.GetFinalPlanet_StartPosition();
+								glm::dvec3 finalPlanet_finalPosition		= copy_system.GetFinalPlanet_CurrentPosition();
+
+								glm::dvec3 finalVelocity_rocket = copy_system.GetRocketVelocity(); // en km/s
+
+
+								std::vector<std::pair<SimuCore::Structures::Impulsion, double>> impulsions = rocket.getImpulsions();
+
+								std::vector<double> impulsions_times;
+								std::vector<glm::dvec3> impulsions_vectors;
+
+								impulsions_times.reserve(impulsions.size());
+								impulsions_vectors.reserve(impulsions.size());
+
+								for (auto& impuls : impulsions) {
+									auto& [vec, instant] = impuls;
+
+									impulsions_times.emplace_back(instant);
+									impulsions_vectors.emplace_back(vec.GetDeltaV_vec());
+								}
+
+								constexpr uint8_t dimension = 2;
+
+								PhysicsData phys_data{ tof, dt, startPlanetIndex, finalPlanetIndex,
+									startPlanet_initialPosition,
+									finalPlanet_initialPosition,
+									startPlanet_finalPosition,
+									finalPlanet_finalPosition,
+									finalVelocity_rocket,
+									impulsions_times,
+									impulsions_vectors,
+									dimension
+								};
+
+								std::filesystem::path filepath_physics_data =
+									file_directory /
+									generate_snapshot_filename("txt", gen + 1, "physics");
+
+								try {
+									generationalExporter.enqueue(std::make_shared<PhysicsData>(phys_data), filepath_physics_data);
+								}
+								catch (const std::exception& e) {
+									std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
+									exit(EXIT_FAILURE);
+								}
 							}
 						}
 					}
