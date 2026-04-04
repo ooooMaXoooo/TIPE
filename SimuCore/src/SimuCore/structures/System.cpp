@@ -3,6 +3,7 @@
 
 #include <SimuCore/constants.h>
 #include <SimuCore/Units/all.h>
+#include <SimuCore/theory/formula.h>
 
 namespace SimuCore::Systems {
 	static constexpr inline double convert_speed = static_cast<double>(1.0_m_per_s__to__km_per_s);
@@ -368,6 +369,18 @@ namespace SimuCore::Systems {
 		else {
 			influence_position = 0.75 / m_CstScore; // On veut que l'influence soit maximale quand on est dans la zone cible, mais qu'elle reste inférieure à la borne inf du score neutre pour les positions hors de la zone cible
 
+
+			// on va chercher à minimiser l'énergie mécanique de la fusée.
+			double norme_vitesse = glm::length(m_rocket.velocity - final_planet.velocity) * kilometers_per_seconds_to_meters_per_seconds(1.0); // en m/s
+			double kinetic_energy = 0.5 * m_rocket.mass * norme_vitesse * norme_vitesse; // en J = kg*m²/s²
+
+			distance_to_ring = kilometers_to_meters(distance_to_ring); // conversion en mètres
+			double potential_energy = -(final_planet.getMu() * m_rocket.mass) / distance_to_ring; // J = kg*m²/s²
+
+
+
+
+
 			// si on est dans ce cas, la fusée se trouve dans l'anneau, mais n'est pas en orbite stable.
 			// On peut donc ajouter la vitesse finale dans l'influence. Mais on souhaite toujours que 
 			// le score lorsqu'on est dans l'anneau soit supérieur au score lorsqu'on est hors de l'anneau.
@@ -543,45 +556,67 @@ namespace SimuCore::Systems {
 		glm::dvec3 position_dans_referentiel_planete = m_rocket.position - final_planet.position; // en UA, position de la fusée dans le référentiel de la planète finale
 		Real distance = glm::length(position_dans_referentiel_planete); // en UA, distance entre la fusée et la planète finale
 
-		distance = AU_to_kilometers(distance); // conversion en km pour le test de distance_ok
+		distance = AU_to_kilometers(distance); // conversion en km pour le test de distance_ok 
 		bool distance_ok = (final_planet.minOrbitRadius() <= distance && distance <= final_planet.maxOrbitRadius());
 
 		if (distance_ok) {
-			glm::dvec3 vecteur_vitesse_referentiel_planete_finale = m_rocket.velocity - final_planet.velocity; // en km/s, vitesse de la fusée dans le référentiel de la planète finale
-			Real norme_vitesse = glm::length(vecteur_vitesse_referentiel_planete_finale); // en km/s
 
-			/* CONVERSION EN USI */
+			// on calcul toutes les données nécessaires pour envoyer à la fonction calcul_perige_et_apoge, à savoir :
+			//	• la distance entre la fusée et la planète finale (en m)
+			//	• la masse de la fusée (en kg)
+			//	• mu de la planète finale (en m^3/s^2)
+			//	• la constante des aires (en m^2/s)
+			//	• l'énergie orbitale (en J, i.e kg * m^2 / s^2)
+
+			// la distance est déjà calculée, il reste à faire les conversions d'unités
 			distance = kilometers_to_meters(distance); // en m
-			norme_vitesse = kilometers_per_seconds_to_meters_per_seconds(norme_vitesse); // en m/s
 
+			// la masse de la fusée est déjà en kg
+			//m_rocket.mass; // en kg
+
+			// mu de la planète finale
+			//s_final_planet_info.muPlanet; // en m^3/s^2
+
+			// la constante des aires
 			position_dans_referentiel_planete *= AU_to_meters(1); // en m
+
+
+			glm::dvec3 vecteur_vitesse_referentiel_planete_finale = m_rocket.velocity - final_planet.velocity; // en km/s, vitesse de la fusée dans le référentiel de la planète finale
 			vecteur_vitesse_referentiel_planete_finale *= kilometers_per_seconds_to_meters_per_seconds(1); // en m/s
-			/* fin de la conversion */
-
-			// Toute la suite des calculs se fait en USI
-
-			// TODO check les formules
-			double energie_orbitale = 0.5 * norme_vitesse * norme_vitesse - final_planet.getMu() / distance;
-
-			if (energie_orbitale >= 0 - constants::epsilon) return RocketState::NEUTRAL; // vérifier qu'on enleve pas trop de trajectoires
-
 
 			glm::dvec3 presque_moment_cinetique = glm::cross(position_dans_referentiel_planete, vecteur_vitesse_referentiel_planete_finale);
 			double constante_des_aires = glm::length(presque_moment_cinetique);
 
-			double demi_grand_axe = -0.5 * final_planet.getMu() / energie_orbitale;
-			double excentricite = std::sqrt(1 + (2 * energie_orbitale * (constante_des_aires / final_planet.getMu()) * (constante_des_aires / final_planet.getMu())));
+			// energie orbitale
+			double norme_vitesse = glm::length(vecteur_vitesse_referentiel_planete_finale); // en m/s
+			double energie_cinetique = 0.5 * m_rocket.mass * norme_vitesse * norme_vitesse; // en J
+			double energie_potentielle = -(s_final_planet_info.muPlanet * m_rocket.mass) / distance; // en J
+			double energie_orbitale = energie_cinetique + energie_potentielle; // en J
 
-			double perige = demi_grand_axe * (1 - excentricite);
-			double apogee = demi_grand_axe * (1 + excentricite);
 
-			// on reste dans l'anneau si le perigé est plus grand que l'orbite min et que l'apogée est plus petit que l'orbite min
-			// car si on dépasse, le soleil a une forte influences
-			bool vitesse_ok = (perige >= final_planet.minOrbitRadius()) && (apogee <= final_planet.maxOrbitRadius());
+			bool is_trajectory_elliptic = false;
 
-			return vitesse_ok ? RocketState::VALID : RocketState::NEUTRAL;
+			auto [perige, apogee] = calcul_perige_et_apoge(
+										distance,
+										m_rocket.mass,
+										s_final_planet_info.muPlanet,
+										constante_des_aires,
+										energie_orbitale,
+										&is_trajectory_elliptic
+									);
+
+			
+			if (!is_trajectory_elliptic) {
+				// si la trajectoire n'est pas elliptique, alors la fusée n'est pas en orbite stable autour de la planète finale, et on considère que c'est un échec (état neutre)
+				return RocketState::NEUTRAL;
+			}
+			else {
+				// on reste dans l'anneau si le perigé est plus grand que l'orbite min et que l'apogée est plus petit que l'orbite min
+				// car si on dépasse, le soleil a une forte influences
+				bool ellipse_inscrite_dans_l_anneau = (perige >= final_planet.minOrbitRadius()) && (apogee <= final_planet.maxOrbitRadius());
+				return ellipse_inscrite_dans_l_anneau ? RocketState::VALID : RocketState::NEUTRAL;
+			}
 		}
-
 		else {
 			return RocketState::NEUTRAL;
 		}

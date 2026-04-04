@@ -35,3 +35,23 @@ namespace orbit {
 };
 
 glm::dvec3 forceAttractionGrav(const SimuCore::Structures::Entity& from, const SimuCore::Structures::Entity& on);
+
+
+/// <summary>
+/// 
+/// </summary>
+/// <param name="distance_to_central_body"> en m </param>
+/// <param name="mass_of_system"> en kg </param>
+/// <param name="mu_central_body"> en USI, i.e m^3 / s^2 </param>
+/// <param name="constante_des_aires"> en USI, i.e m^2 / s </param>
+/// <param name="system_energy"> en J, kg * m^2 / s^2 </param>
+/// <param name="is_trajectory_elliptic"> un pointeur sur un booléen </param>
+/// <returns></returns>
+std::pair<double, double> calcul_perige_et_apoge(
+    double distance_to_central_body,
+    double mass_of_system,
+    double mu_central_body,
+    double constante_des_aires,
+    double system_energy,
+    bool* is_trajectory_elliptic
+);
