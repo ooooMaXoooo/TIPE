@@ -116,6 +116,8 @@ public:
 
     void set_mutation_proba(size_t index, Integer value) { m_mutation_probas[index] = value; }
 
+	void set_mutation_probas(const proba_array& probas) { m_mutation_probas = probas; }
+
     void set_config(const ConfigType* config) {
         m_config = config;
         m_num_vectors = config->number_of_vectors;

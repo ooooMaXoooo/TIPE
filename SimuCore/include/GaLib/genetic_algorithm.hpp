@@ -86,6 +86,10 @@ public:
         m_selected.resize(m_config.get_half_population_size());
     }
 
+    bool is_writting_enabled() const {
+        return m_config.enable_saving;
+	}
+
 
     /**
 	 * @brief Runs the complete genetic algorithm and returns the best individual found
@@ -292,6 +296,41 @@ private:
      * @brief Crossover between two parents at bit level
      */
     std::pair<Individual, Individual> crossover(const Individual& p1, const Individual& p2, std::mt19937& rng) {
+        //// ATTENTION, on va créer changer le crossover pour faire du UCLC, en conséquence de quoi le code actuel sera commenté.
+		////    Il faudrai cependant faire du refactoring pour éviter d'avoir du code mort, mais on vise quelque chose de rapide
+        ////    à implémenter.
+
+        Individual child1 = p1;
+		Individual child2 = p2;
+
+
+		const size_t num_vecs = m_config.number_of_vectors;
+
+		// Crossover des chromosomes de données
+        // Comme je n'ai pas de générateur de nombre alétoire binaire, on va utiliser celui de la population
+        for (size_t chromo = 0; chromo < num_vecs; chromo++) {
+			bool use_parent1_for_child1 = m_index_dist(rng) % 2 == 0; // 50% de chance d'utiliser le parent 1 pour l'enfant 1
+			child1.set_chromosome(chromo, use_parent1_for_child1 ? p1.get_chromosome(chromo) : p2.get_chromosome(chromo));
+			child2.set_chromosome(chromo, use_parent1_for_child1 ? p2.get_chromosome(chromo) : p1.get_chromosome(chromo)); // voir si il faut faire un tirage différent pour l'enfant 2 ou pas.
+        }
+
+		// Crossover des probabilités de mutation
+        if (m_config.enable_auto_adaptation) {
+			bool use_parent1_for_child1 = m_index_dist(rng) % 2 == 0; // 50% de chance d'utiliser le parent 1 pour l'enfant 1
+			child1.set_mutation_probas(use_parent1_for_child1 ? p1.get_mutation_probas() : p2.get_mutation_probas());
+			child2.set_mutation_probas(use_parent1_for_child1 ? p2.get_mutation_probas() : p1.get_mutation_probas());
+
+            // on pourrait faire du tirage par gène pour ce chromosome, a tester
+        }
+
+
+
+
+		return { child1, child2 };
+
+
+        /*
+
         Individual child1 = p1;
         Individual child2 = p2;
 
@@ -299,18 +338,18 @@ private:
 
         // Crossover des chromosomes de données
         for (size_t chromo = 0; chromo < num_vecs; chromo++) {
-            bit_level_crossover(p1, p2, child1, child2, chromo, rng);
+			bit_level_crossover(p1, p2, child1, child2, chromo, rng);
         }
 
         // Crossover des probabilités de mutation
         if (m_config.enable_auto_adaptation) {
-            bit_level_crossover_probas(p1, p2, child1, child2, rng);
+			bit_level_crossover_probas(p1, p2, child1, child2, rng);
         }
 
         child1.invalidate_fitness();
         child2.invalidate_fitness();
 
-        return {child1, child2};
+        return {child1, child2};*/
     }
 
     /**
@@ -483,7 +522,7 @@ private:
         // Créer des paires et faire crossover
         #pragma omp parallel
         {
-            std::mt19937 rng(m_seed + omp_get_thread_num() + gen);
+            thread_local std::mt19937 rng(m_seed + omp_get_thread_num() + gen);
 
             #pragma omp for
             for (int i = 0; i < half; i += 2) {

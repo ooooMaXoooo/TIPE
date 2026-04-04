@@ -238,7 +238,7 @@ namespace SimuCore {
 			/// donne la vitesse actuelle de la fusée en km/s
 			/// </summary>
 			/// <returns> en km/s </returns>
-			glm::dvec3 GetRocketVelocity() { return m_rocket.velocity; }
+			glm::dvec3 GetRocketVelocity() const { return m_rocket.velocity; }
 			
 			///////// other
 

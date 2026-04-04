@@ -322,13 +322,13 @@ int main(int argc, char** argv) {
 
     genetic::CrossoverType cross_type = genetic::CrossoverType::UNIFORM_BIT_LEVEL;
     bool elitism = true;
-    bool auto_adapt = true;
-    size_t population_size =  100;
+    bool auto_adapt = false;
+    size_t population_size =  10000;
     size_t max_generation  =  100000;
-    size_t print_interval  =  20;
+    size_t print_interval  =  10;
     bool verbose = true;
-    size_t snapshot_interval = 100;
-    bool save_in_file = true;
+    size_t snapshot_interval = 10;
+    bool save_in_file = false;
 
     constexpr size_t nombre_d_impulsions = 2;
 

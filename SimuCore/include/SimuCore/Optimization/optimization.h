@@ -87,8 +87,10 @@ namespace SimuCore {
 			config.max_generations = max_generation;				// paramètre à ajuster
 			config.print_interval  = print_interval;
 
-			config.initial_mutation_probability = 0.2;				// paramètre à ajuster
+			config.initial_mutation_probability = 0.8;				// paramètre à ajuster
 			config.initial_self_adaptation_probability = 0.8;		// paramètre à ajuster
+
+			config.custom_mutation_proba = -1;					// on prend la proba uniforme
 
 
 
@@ -132,7 +134,9 @@ namespace SimuCore {
 				"simulation_data" /
 				generate_snapshot_directory();
 
-			std::filesystem::create_directories(file_directory);
+			if (saving_in_file) {
+				std::filesystem::create_directories(file_directory);
+			}
 
 			AsyncDataExporter generationalExporter;
 
@@ -199,11 +203,23 @@ namespace SimuCore {
 								std::cout << "\tBest distance to target: "
 									<< AU_to_kilometers(distance_to_final_planet_best) << " (km) = "
 									<< distance_to_final_planet_best << " (AU)\n";
+							} 
+							else if (best_fit < 9 * cste && best_fit > 8.75 * cste) {
+								std::cout << "\tBest distance to target: " << 0 << '\n';
+								
+								long double final_velocity = best_fit - 8.75 * cste; // km/s
+								final_velocity *= 4;
+								final_velocity = 1 / final_velocity;
+								final_velocity -= SimuCore::Systems::AdaptedSystem::m_CstScore;
+								/*final_velocity = std::pow(final_velocity, 4);
+								final_velocity *= 1e5;*/
+
+								std::cout << "\tBest velocity at target: " << final_velocity << " (km/s)\n";
 							}
 							else if (
 								best_fit < 10 * cste
 								&&
-								best_fit > 8.75 * cste
+								best_fit > 9 * cste
 								) {
 								std::cout << "\tBest distance to target: " << 0 << '\n';
 							}

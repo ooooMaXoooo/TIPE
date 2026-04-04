@@ -14,8 +14,12 @@
 namespace genetic {
 
 enum class CrossoverType : uint8_t {  // On spécifie le type pour l'optimisation mémoire
-    SINGLE_POINT_BIT_LEVEL,
-    UNIFORM_BIT_LEVEL
+    SINGLE_POINT_BIT_LEVEL = 0,
+    UNIFORM_BIT_LEVEL,
+	SINGLE_POINT_GENE_LEVEL,
+	UNIFORM_GENE_LEVEL,
+	SINGLE_POINT_CHROMOSOME_LEVEL,
+	UNIFORM_CHROMOSOME_LEVEL
 };
 
 // todo Implémenter différents types de sélection
@@ -157,7 +161,7 @@ struct Config {
 
     // ========== Paramètre spécifique à la méthode de coisement uniforme ==========
 
-    /// probabilité de donner le bit du parent 1 à l'enfant 1 (n'est pas une proba de mutation)
+    /// probabilité de donner le bit du parent 1 à l'enfant 1 (n'est pas une proba de mutation). Valable uniquement si le crossover est sur du bit level
     double uniform_crossover_probability = 0.5;  // NOLINT (cppcoreguidelines-avoid-magic-numbers)
 
     // ========== Paramètres de sauvegarde ==========
@@ -270,8 +274,10 @@ struct Config {
         if (custom_mutation_proba < 0) {
             return 1 / static_cast<Real>(integer_bits * dimension * number_of_vectors);
         }
+        else {
+            return custom_mutation_proba > 1 ? 1 : custom_mutation_proba;
+        }
 
-        return custom_mutation_proba;
     }
 
     /**
