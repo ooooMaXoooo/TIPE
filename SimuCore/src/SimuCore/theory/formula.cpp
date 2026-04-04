@@ -93,11 +93,6 @@ std::pair<std::array<double, 3>, std::array<double, 3>> orbit::lambert_universal
 }
 
 
-
-
-
-
-
 std::vector<double> orbit::lambert_batch(
     const std::array<double, 3>& r1,
     const std::vector<std::array<double, 3>>& r2_list,
@@ -176,4 +171,45 @@ glm::dvec3 forceAttractionGrav(const SimuCore::Structures::Entity& from, const S
     const double F = SimuCore::constants::G * from.mass * on.mass / distSqr;
 
     return F / dist * r; // produit scalaire par une direction unitaire
+}
+
+
+
+std::pair<double, double> calcul_perige_et_apoge(
+    double distance_to_central_body,
+    double system_mass,
+    double mu_central_body,
+    double constante_des_aires,
+    double system_energy,
+    bool* is_trajectory_elliptic
+) {
+    if (system_energy >= 0) {
+        *is_trajectory_elliptic = false;
+        return { -1, -1 };
+    }
+
+    double C2 = constante_des_aires * constante_des_aires;
+    double mu2 = mu_central_body * mu_central_body;
+    double minimum_energie_effective = -0.5 * system_mass * (mu2 / C2);
+
+    if (system_energy < minimum_energie_effective) {
+        std::cerr << "Erreur, ce n'est pas cense etre possible physiquement | LIGNE :" << __LINE__ << "\t fichier :" << __FILE__ << std::endl;
+        std::abort();
+    }
+
+
+	double energy_times_2 = 2 * system_energy;
+    double delta = system_mass * (system_mass * mu2 + energy_times_2 * C2);
+	double sqrt_delta = std::sqrt(delta);
+    
+    double r1 = -1, r2 = -1;
+
+	double inverse_energy_times_2 = 1 / energy_times_2;
+	double moins_mu_fois_masse = - mu_central_body * system_mass;
+
+    double r_min = (moins_mu_fois_masse - sqrt_delta) * inverse_energy_times_2;
+    double r_max = (moins_mu_fois_masse + sqrt_delta) * inverse_energy_times_2;
+
+	*is_trajectory_elliptic = true;
+	return { r_min, r_max };
 }
