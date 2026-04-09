@@ -207,14 +207,14 @@ namespace SimuCore {
 							else if (best_fit < 9 * cste && best_fit > 8.75 * cste) {
 								std::cout << "\tBest distance to target: " << 0 << '\n';
 								
-								long double final_velocity = best_fit - 8.75 * cste; // km/s
-								final_velocity *= 4;
-								final_velocity = 1 / final_velocity;
-								final_velocity -= SimuCore::Systems::AdaptedSystem::m_CstScore;
-								/*final_velocity = std::pow(final_velocity, 4);
-								final_velocity *= 1e5;*/
+								long double mecanic_energy = best_fit - 8.75 * cste; // km/s
+								mecanic_energy *= 4;
+								mecanic_energy = 1 / mecanic_energy;
+								mecanic_energy -= SimuCore::Systems::AdaptedSystem::m_CstScore;
+								mecanic_energy *= 1e5;
+								mecanic_energy = mecanic_energy * mecanic_energy;
 
-								std::cout << "\tBest velocity at target: " << final_velocity << " (km/s)\n";
+								std::cout << "\tBest energy at target: " << mecanic_energy << " (J)\n";
 							}
 							else if (
 								best_fit < 10 * cste

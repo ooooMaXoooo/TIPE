@@ -254,6 +254,30 @@ namespace SimuCore {
 			static uint8_t GetStartPlanetID() { return static_cast<uint8_t>(s_start_planet); }
 			static uint8_t GetFinalPlanetID() { return static_cast<uint8_t>(s_final_planet); }
 
+			/// <summary>
+			/// calcul le perigé et l'apogée de la trajectoire de la fusée autour de la planète d'arrivée à la fin de la simulation, en m
+			/// </summary>
+			/// <returns> en m </returns>
+			std::pair <double, double> GetApsidesAroundFinalPlanet(bool* is_trajectory_elliptic) const;
+
+			/// <summary>
+			/// calcul l'énergie mécanique, en J
+			/// </summary>
+			/// <param name="distance"> en m </param>
+			/// <param name="speed"> en m/s </param>
+			/// <param name="mass"> en kg </param>
+			/// <param name="mu_planet"> en m^3 / s^2 </param>
+			/// <returns> J (Joule) </returns>
+			double RocketMecanicalEnergyAroundFinalPlanet(double distance, double speed, double mass, double mu_planet) const;
+
+			/// <summary>
+			/// Calcul la constante des aires de la trajectoire de la fusée autour de la planète d'arrivée
+			/// </summary>
+			/// <param name="position_referentiel_final"> en m </param>
+			/// <param name="speed_referentiel_final"> en m/s </param>
+			/// <returns> m^2 / s </returns>
+			double GetConstanteDesAires(glm::dvec3 position_referentiel_final, glm::dvec3 speed_referentiel_final) const;
+
 			friend RocketState GetRocketState(const Rocket& rocket, AdaptedSystem& system);
 
 		private:

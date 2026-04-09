@@ -262,6 +262,11 @@ namespace SimuCore::Systems {
 		s_initialized = true;
 	} // Initialize
 
+	double AdaptedSystem::GetConstanteDesAires(glm::dvec3 position_referentiel_final, glm::dvec3 speed_referentiel_final) const
+	{
+		return glm::length(glm::cross(position_referentiel_final, speed_referentiel_final));
+	}
+
 	void AdaptedSystem::InitPlanet(bool is_start_planet, PlanetsName name) {
 
 		const Planet& planet = getPlanetFromName(name);
@@ -352,7 +357,9 @@ namespace SimuCore::Systems {
 		const glm::dvec3 final_planet_position = s_finalPlanet_positions[getFinalPlanetPositionIndice()]; // en UA
 
 		glm::dvec3 projection_on_ring = final_planet.orbitRadius() * glm::normalize(m_rocket.position - final_planet_position); // en km
-		Real distance_to_ring = glm::length((m_rocket.position - final_planet_position) - (kilometers_to_AU(1) * projection_on_ring)); // en km
+
+		glm::dvec3 rocket_position_relative_to_planet = m_rocket.position - final_planet_position; // en UA
+		Real distance_to_ring = glm::length(rocket_position_relative_to_planet - (kilometers_to_AU(1) * projection_on_ring)); // en km
 		distance_to_ring = AU_to_kilometers(distance_to_ring); // conversion en km
 
 		
@@ -371,14 +378,31 @@ namespace SimuCore::Systems {
 
 
 			// on va chercher à minimiser l'énergie mécanique de la fusée.
-			double norme_vitesse = glm::length(m_rocket.velocity - final_planet.velocity) * kilometers_per_seconds_to_meters_per_seconds(1.0); // en m/s
-			double kinetic_energy = 0.5 * m_rocket.mass * norme_vitesse * norme_vitesse; // en J = kg*m²/s²
-
-			distance_to_ring = kilometers_to_meters(distance_to_ring); // conversion en mètres
-			double potential_energy = -(final_planet.getMu() * m_rocket.mass) / distance_to_ring; // J = kg*m²/s²
+			rocket_position_relative_to_planet *= 1._AU_to_m; // conversion en m
 
 
+			glm::dvec3 rocket_velocity_relative_to_planet = m_rocket.velocity - final_planet.velocity; // en m/s
+			rocket_velocity_relative_to_planet *= 1._km_per_s__to__m_per_s; // conversion en m/s
 
+			double mecanical_energy = RocketMecanicalEnergyAroundFinalPlanet(
+				glm::length(rocket_position_relative_to_planet),
+				glm::length(rocket_velocity_relative_to_planet),
+				m_rocket.mass,
+				final_planet.getMu()
+				);
+
+
+			// on ajoute le minimum que l'énergie potentielle effective peut-atteindre pour que l'énergie mécanique le soit aussi.
+			double constante_des_aires = GetConstanteDesAires(rocket_position_relative_to_planet, rocket_velocity_relative_to_planet);
+			double energy_offset = 0.5 * m_rocket.mass * std::pow(s_final_planet_info.muPlanet / constante_des_aires, 2);
+
+			mecanical_energy += energy_offset;
+
+
+			if (mecanical_energy <= 0) {
+				std::cout << "\n\n\n\tERREUR \n\n\n\n" << std::endl;
+				std::abort();
+			}
 
 
 			// si on est dans ce cas, la fusée se trouve dans l'anneau, mais n'est pas en orbite stable.
@@ -386,7 +410,7 @@ namespace SimuCore::Systems {
 			// le score lorsqu'on est dans l'anneau soit supérieur au score lorsqu'on est hors de l'anneau.
 			// on fait donc en sorte que l'influence de la vitesse soit au maximum de 0.25/m_CstScore, pour 
 			// faire en sorte qu'on balaye des score dont l'étendue en 1/m_CstScore
-			influence_position += 0.25 / (std::sqrt(glm::length(m_rocket.velocity)) + m_CstScore);
+			influence_position += 0.25 / ((std::sqrt(mecanical_energy) * 1e-5) + m_CstScore);
 			// on prend la racine de la vitesse pour que l'influence de la vitesse soit grandit d'autant plus
 			// que le vitesse finale est faible.
 		}
@@ -560,52 +584,9 @@ namespace SimuCore::Systems {
 		bool distance_ok = (final_planet.minOrbitRadius() <= distance && distance <= final_planet.maxOrbitRadius());
 
 		if (distance_ok) {
-
-			// on calcul toutes les données nécessaires pour envoyer à la fonction calcul_perige_et_apoge, à savoir :
-			//	• la distance entre la fusée et la planète finale (en m)
-			//	• la masse de la fusée (en kg)
-			//	• mu de la planète finale (en m^3/s^2)
-			//	• la constante des aires (en m^2/s)
-			//	• l'énergie orbitale (en J, i.e kg * m^2 / s^2)
-
-			// la distance est déjà calculée, il reste à faire les conversions d'unités
-			distance = kilometers_to_meters(distance); // en m
-
-			// la masse de la fusée est déjà en kg
-			//m_rocket.mass; // en kg
-
-			// mu de la planète finale
-			//s_final_planet_info.muPlanet; // en m^3/s^2
-
-			// la constante des aires
-			position_dans_referentiel_planete *= AU_to_meters(1); // en m
-
-
-			glm::dvec3 vecteur_vitesse_referentiel_planete_finale = m_rocket.velocity - final_planet.velocity; // en km/s, vitesse de la fusée dans le référentiel de la planète finale
-			vecteur_vitesse_referentiel_planete_finale *= kilometers_per_seconds_to_meters_per_seconds(1); // en m/s
-
-			glm::dvec3 presque_moment_cinetique = glm::cross(position_dans_referentiel_planete, vecteur_vitesse_referentiel_planete_finale);
-			double constante_des_aires = glm::length(presque_moment_cinetique);
-
-			// energie orbitale
-			double norme_vitesse = glm::length(vecteur_vitesse_referentiel_planete_finale); // en m/s
-			double energie_cinetique = 0.5 * m_rocket.mass * norme_vitesse * norme_vitesse; // en J
-			double energie_potentielle = -(s_final_planet_info.muPlanet * m_rocket.mass) / distance; // en J
-			double energie_orbitale = energie_cinetique + energie_potentielle; // en J
-
-
 			bool is_trajectory_elliptic = false;
+			auto [perige, apogee] = GetApsidesAroundFinalPlanet(&is_trajectory_elliptic);
 
-			auto [perige, apogee] = calcul_perige_et_apoge(
-										distance,
-										m_rocket.mass,
-										s_final_planet_info.muPlanet,
-										constante_des_aires,
-										energie_orbitale,
-										&is_trajectory_elliptic
-									);
-
-			
 			if (!is_trajectory_elliptic) {
 				// si la trajectoire n'est pas elliptique, alors la fusée n'est pas en orbite stable autour de la planète finale, et on considère que c'est un échec (état neutre)
 				return RocketState::NEUTRAL;
@@ -736,4 +717,63 @@ namespace SimuCore::Systems {
 
 		trajectory.push_back(m_rocket.position);
 	}
+	std::pair<double, double> AdaptedSystem::GetApsidesAroundFinalPlanet(bool* is_trajectory_elliptic) const
+	{
+		double distance_rocket_to_final_planet = 0; // en m
+		// double rocket_mass = 0; // en kg --> pas besoin de créer une varibale, on peut directement utiliser m_rocket.mass
+		// double mu_final_planet = 0; // en m^3/s^2 --> pas besoin de créer une varibale, on peut directement utiliser s_final_planet_info.muPlanet
+		double constante_des_aires = 0; // en m^2/s
+		double energie_orbitale = 0; // en J
+
+		{
+			Planet final_planet = getPlanetFromName(s_final_planet);
+
+			// calcul de la distance entre la fusée et la planète finale
+			{
+				distance_rocket_to_final_planet = glm::length(m_rocket.position - final_planet.position); // en UA
+				distance_rocket_to_final_planet = AU_to_meters(distance_rocket_to_final_planet); // conversion en m
+			}
+
+
+			glm::dvec3 position_dans_referentiel_planete = m_rocket.position - final_planet.position; // m, position de la fusée dans le référentiel de la planète finale
+			position_dans_referentiel_planete *= AU_to_meters(1); // conversion en m
+
+			glm::dvec3 vecteur_vitesse_referentiel_planete_finale = m_rocket.velocity - final_planet.velocity; // en m/s, vitesse de la fusée dans le référentiel de la planète finale
+			vecteur_vitesse_referentiel_planete_finale *= kilometers_per_seconds_to_meters_per_seconds(1); // conversion en m/s
+
+
+			// calcul constante des aires
+			{
+				glm::dvec3 moment_cinetique_sur_masse = glm::cross(position_dans_referentiel_planete, vecteur_vitesse_referentiel_planete_finale);
+				constante_des_aires = glm::length(moment_cinetique_sur_masse); // en m^2/s
+			}
+
+			// calcul énergie orbitale
+			{
+				energie_orbitale = RocketMecanicalEnergyAroundFinalPlanet(
+					distance_rocket_to_final_planet,
+					glm::length(vecteur_vitesse_referentiel_planete_finale),
+					m_rocket.mass,
+					s_final_planet_info.muPlanet
+				); // en J
+			}
+		}
+
+		auto [perige, apogee] = calcul_perige_et_apoge(
+			distance_rocket_to_final_planet,
+			m_rocket.mass,
+			s_final_planet_info.muPlanet,
+			constante_des_aires,
+			energie_orbitale,
+			is_trajectory_elliptic
+		);
+
+		return { perige, apogee };
+	} // GetApsidesAroundFinalPlanet
+
+	double AdaptedSystem::RocketMecanicalEnergyAroundFinalPlanet(double distance, double speed, double mass, double mu_planet) const
+	{
+		return mass * ((0.5 * speed * speed) - (mu_planet / distance));
+	} // RocketMecanicalEnergyAroundFinalPlanet
+
 }; // namespace SimuCore::Systems
