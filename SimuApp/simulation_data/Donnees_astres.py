@@ -1,5 +1,7 @@
 import numpy as np
 
+G = 6.67e-11
+
 #                           Soleil   Mercure    Venus      Terre     Mars     Jupiter   Saturne   Uranus   Neptune
 Masses               = [1.988E+30,   3.3E+23,  4.87E+24, 5.97E+24, 6.42E+23,  1.9E+27, 5.68E+26, 8.68E+25, 1.02E+26]    # en kg
 Rayons_astres        = [   696340,      2440,      6050,     6378,     3400,    71500,    60300,    25600,    24800]    # en km
@@ -32,3 +34,10 @@ def rayon_max(planete, k):  # en km
    Le résultat est en km.
    """
    return altitude_max(planete, k) + Rayons_astres[planete]
+
+
+def energie_potentielle_effective (planete : int, r : float, mass : float, constante_des_aires : float) :
+   un_sur_r = 1 / r
+   mu = G * Masses[planete]
+   C_a = constante_des_aires # norme de OM ^ v, dans le référentiel de la planète en question
+   return mass * ((0.5 * (C_a * C_a * un_sur_r)) - (mu * un_sur_r)) * un_sur_r
