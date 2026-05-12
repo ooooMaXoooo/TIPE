@@ -5,6 +5,7 @@
 #include <SimuCore/Units/all.h>
 #include <SimuCore/theory/formula.h>
 
+// k = 10
 namespace SimuCore::Systems {
 	static constexpr inline double convert_speed = static_cast<double>(1.0_m_per_s__to__km_per_s);
 
@@ -15,14 +16,14 @@ namespace SimuCore::Systems {
 		SimuCore::Structures::Planet("Soleil",  1.989e30, 696340, 0, -696340),
 
 		// Planètes avec Rayon Physique et Altitude Cible de 200 km (200e3 m)
-		SimuCore::Structures::Planet("Mercure", 3.3011e23, 2439.7,    0,     -75, glm::dvec3(  57.91e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 47.87e3, 0)),
-		SimuCore::Structures::Planet("Venus",   4.8675e24, 6051.8,  175,   10921, glm::dvec3( 108.21e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 35.02e3, 0)),
-		SimuCore::Structures::Planet("Terre",   5.9722e24, 6371.0,  450,   19611, glm::dvec3(  149.6e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 29.78e3, 0)),
-		SimuCore::Structures::Planet("Mars",    6.4171e23, 3389.5,  200,    9556, glm::dvec3( 227.92e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 24.13e3, 0)),
-		SimuCore::Structures::Planet("Jupiter", 1.8982e27,  69911, 2000, 2332435, glm::dvec3( 778.57e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 13.07e3, 0)),
-		SimuCore::Structures::Planet("Saturne", 5.6834e26,  58232, 3500, 2354450, glm::dvec3(1433.53e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0,  9.68e3, 0)),
-		SimuCore::Structures::Planet("Uranus",  8.6810e25,  25362, 6000, 1875176, glm::dvec3(2872.46e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0,  6.80e3, 0)),
-		SimuCore::Structures::Planet("Neptune", 1.0241e26,  24622, 3000, 3197294, glm::dvec3(4495.06e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0,  5.43e3, 0))
+		SimuCore::Structures::Planet("Mercure", 3.3011e23, 2439.7,    0,     5038, glm::dvec3(  57.91e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 47.87e3, 0)),
+		SimuCore::Structures::Planet("Venus",   4.8675e24, 6051.8,  175,    47600, glm::dvec3( 108.21e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 35.02e3, 0)),
+		SimuCore::Structures::Planet("Terre",   5.9722e24, 6371.0,  450,    75777, glm::dvec3(  149.6e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 29.78e3, 0)),
+		SimuCore::Structures::Planet("Mars",    6.4171e23, 3389.5,  200,    37565, glm::dvec3( 227.92e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 24.13e3, 0)),
+		SimuCore::Structures::Planet("Jupiter", 1.8982e27,  69911, 2000,  7480085, glm::dvec3( 778.57e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 13.07e3, 0)),
+		SimuCore::Structures::Planet("Saturne", 5.6834e26,  58232, 3500,  7548048, glm::dvec3(1433.53e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0,  9.68e3, 0)),
+		SimuCore::Structures::Planet("Uranus",  8.6810e25,  25362, 6000,  5976613, glm::dvec3(2872.46e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0,  6.80e3, 0)),
+		SimuCore::Structures::Planet("Neptune", 1.0241e26,  24622, 3000, 10148610, glm::dvec3(4495.06e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0,  5.43e3, 0))
 	};
 
 	PlanetInfo AdaptedSystem::s_start_planet_info = PlanetInfo();
@@ -394,9 +395,10 @@ namespace SimuCore::Systems {
 
 			// on ajoute le minimum que l'énergie potentielle effective peut-atteindre pour que l'énergie mécanique le soit aussi.
 			double constante_des_aires = GetConstanteDesAires(rocket_position_relative_to_planet, rocket_velocity_relative_to_planet);
-			double energy_offset = 0.5 * m_rocket.mass * std::pow(s_final_planet_info.muPlanet / constante_des_aires, 2);
+			double energy_offset = 0.5 * m_rocket.mass * std::pow(s_final_planet_info.muPlanet / constante_des_aires, 2); // le minimum de l'énergie potentielle effective en valeur absolue
 
 			mecanical_energy += energy_offset;
+			
 
 
 			if (mecanical_energy <= 0) {

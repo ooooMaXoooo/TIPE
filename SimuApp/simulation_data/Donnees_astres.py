@@ -9,7 +9,7 @@ Exobases             = [        0,         0,       175,      450,      200,    
 Distances_au_soleil  = [        0,   5.81E+07, 1.08E+08, 1.50E+08, 2.28E+08, 7.80E+08, 1.43E+09, 2.88E+09, 4.50E+09]    # en km
 
 
-k = 100 # facteur de domination : l'attraction d'une planète sur l'attraction du soleil
+k = 10 # facteur de domination : l'attraction d'une planète sur l'attraction du soleil
 
 
 
