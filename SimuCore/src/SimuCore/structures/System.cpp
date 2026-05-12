@@ -372,10 +372,10 @@ namespace SimuCore::Systems {
 
 			// std::cbrt -> racine cubique
 
-			influence_position = 0.75 / (std::cbrt(distance_to_ring) + m_CstScore); // On veut que l'influence diminue quand on s'éloigne de la distance cible
+			influence_position = 0.33 / (std::cbrt(distance_to_ring) + m_CstScore); // On veut que l'influence diminue quand on s'éloigne de la distance cible
 		}
 		else {
-			influence_position = 0.75 / m_CstScore; // On veut que l'influence soit maximale quand on est dans la zone cible, mais qu'elle reste inférieure à la borne inf du score neutre pour les positions hors de la zone cible
+			influence_position = 0.33 / m_CstScore; // On veut que l'influence soit maximale quand on est dans la zone cible, mais qu'elle reste inférieure à la borne inf du score neutre pour les positions hors de la zone cible
 
 
 			// on va chercher à minimiser l'énergie mécanique de la fusée.
@@ -393,28 +393,35 @@ namespace SimuCore::Systems {
 				);
 
 
-			// on ajoute le minimum que l'énergie potentielle effective peut-atteindre pour que l'énergie mécanique le soit aussi.
-			double constante_des_aires = GetConstanteDesAires(rocket_position_relative_to_planet, rocket_velocity_relative_to_planet);
-			double energy_offset = 0.5 * m_rocket.mass * std::pow(s_final_planet_info.muPlanet / constante_des_aires, 2); // le minimum de l'énergie potentielle effective en valeur absolue
+			if (mecanical_energy > - SimuCore::constants::epsilon) {
+				// si l'énergie mécanique est positive, la fusée n'est pas en orbite stable autour de la planète cible.
+				
 
-			mecanical_energy += energy_offset;
-			
-
-
-			if (mecanical_energy <= 0) {
-				std::cout << "\n\n\n\tERREUR \n\n\n\n" << std::endl;
-				std::abort();
-			}
+				influence_position += 0.33 / ((mecanical_energy * 1e-5) + m_CstScore); // borne max : 0.66 / m_CstScore
 
 
-			// si on est dans ce cas, la fusée se trouve dans l'anneau, mais n'est pas en orbite stable.
-			// On peut donc ajouter la vitesse finale dans l'influence. Mais on souhaite toujours que 
-			// le score lorsqu'on est dans l'anneau soit supérieur au score lorsqu'on est hors de l'anneau.
-			// on fait donc en sorte que l'influence de la vitesse soit au maximum de 0.25/m_CstScore, pour 
-			// faire en sorte qu'on balaye des score dont l'étendue en 1/m_CstScore
-			influence_position += 0.25 / ((std::sqrt(mecanical_energy) * 1e-5) + m_CstScore);
-			// on prend la racine de la vitesse pour que l'influence de la vitesse soit grandit d'autant plus
-			// que le vitesse finale est faible.
+			} else {
+				influence_position = 0.66 / m_CstScore;
+
+				// on ajoute le minimum que l'énergie potentielle effective peut-atteindre pour que l'énergie mécanique le soit aussi.
+				double constante_des_aires = GetConstanteDesAires(rocket_position_relative_to_planet, rocket_velocity_relative_to_planet);
+				double energy_offset = 0.5 * m_rocket.mass * std::pow(s_final_planet_info.muPlanet / constante_des_aires, 2); // le minimum de l'énergie potentielle effective en valeur absolue
+
+				mecanical_energy += energy_offset;
+
+
+
+				if (mecanical_energy <= 0) {
+					std::cout << "\n\n\n\tERREUR \n\n\n\n" << std::endl;
+					std::abort();
+				}
+
+
+				influence_position += 0.34 / (mecanical_energy + m_CstScore);
+				// on prend la racine de la vitesse pour que l'influence de la vitesse soit grandit d'autant plus
+				// que le vitesse finale est faible.
+
+			}			
 		}
 		// on veut que la borne inf soit 8/epsilon, donc on ajoute 8 / epsilon
 		// donc la borne sup est 1/epsilon + 8/epsilon = 9/epsilon

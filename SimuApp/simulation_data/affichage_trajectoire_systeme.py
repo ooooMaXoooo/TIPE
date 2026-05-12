@@ -10,8 +10,8 @@ import graphics
 from Donnees_astres import *
 
 
-dossier = "simu_11_05_2026_16_27_24"
-generation = 1501
+dossier = "simu_12_05_2026_17_29_40"
+generation = 1951
 
 
 
@@ -103,13 +103,14 @@ for t, dv in impulsions:
         ax.plot(x, y, 'ko')  # point noir
 
         # vecteur impulsion
-        scale = 1  # ajuste selon visibilité
+        scale = 1e7  # ajuste selon visibilité
 
         ax.quiver(
             x, y,
             dv[0]*scale, dv[1]*scale,
             angles='xy',
             scale_units='xy',
+            scale=1,
             color='green'
         )
 

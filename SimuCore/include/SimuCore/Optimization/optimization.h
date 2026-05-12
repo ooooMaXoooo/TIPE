@@ -187,14 +187,14 @@ namespace SimuCore {
 						{
 							constexpr double cste = 1.0 / SimuCore::Systems::AdaptedSystem::m_CstScore;
 							if (
-								best_fit < 8.75 * cste
+								best_fit < 8.33 * cste
 								&&
 								best_fit > 8 * cste
 								)
 							{
 
 								double distance_to_final_planet_best = (best_fit - 8 * cste);
-								distance_to_final_planet_best /= 0.75;
+								distance_to_final_planet_best /= 0.33;
 								distance_to_final_planet_best = 1 / distance_to_final_planet_best;
 								distance_to_final_planet_best -= SimuCore::Systems::AdaptedSystem::m_CstScore;
 								distance_to_final_planet_best = distance_to_final_planet_best * distance_to_final_planet_best * distance_to_final_planet_best;
@@ -204,16 +204,30 @@ namespace SimuCore {
 									<< AU_to_kilometers(distance_to_final_planet_best) << " (km) = "
 									<< distance_to_final_planet_best << " (AU)\n";
 							} 
-							else if (best_fit < 9 * cste && best_fit > 8.75 * cste) {
+							else if (best_fit < 8.66 * cste && best_fit > 8.33 * cste) {
 								std::cout << "\tBest distance to target: " << 0 << '\n';
 								
-								long double mecanic_energy = best_fit - 8.75 * cste; // km/s
-								mecanic_energy *= 4;
+								long double mecanic_energy = best_fit - 8.33 * cste; // km/s
+								mecanic_energy /= 0.33;
 								mecanic_energy = 1 / mecanic_energy;
 								mecanic_energy -= SimuCore::Systems::AdaptedSystem::m_CstScore;
 								mecanic_energy *= 1e5;
-								mecanic_energy = mecanic_energy * mecanic_energy;
+								//mecanic_energy = mecanic_energy * mecanic_energy;
 
+								// calcul du minimum de l'énergie potentielle effective en valeur absolue, qu'on enlève à mecanic_energy
+
+								std::cout << "\tEtat de diffusion\n";
+								std::cout << "\tBest energy at target: " << mecanic_energy << " (J)\n";
+							}
+							else if (best_fit < 9 * cste && best_fit > 8.66 * cste) {
+								std::cout << "\tBest distance to target: " << 0 << '\n';
+
+								long double mecanic_energy = best_fit - 8.66 * cste; // km/s
+								mecanic_energy /= 0.34;
+								mecanic_energy = 1 / mecanic_energy;
+								mecanic_energy -= SimuCore::Systems::AdaptedSystem::m_CstScore;
+
+								std::cout << "\tEtat lie\n";
 								std::cout << "\tBest energy at target: " << mecanic_energy << " (J)\n";
 							}
 							else if (

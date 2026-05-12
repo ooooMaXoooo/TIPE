@@ -12,6 +12,6 @@ namespace SimuCore {
 
 		constexpr double AU = 149597870700.0; // m
 
-		constexpr double epsilon = 1e-30;
+		constexpr double epsilon = 1e-15;
 	}
 };
