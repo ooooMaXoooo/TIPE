@@ -211,8 +211,8 @@ namespace SimuCore {
 								mecanic_energy /= 0.33;
 								mecanic_energy = 1 / mecanic_energy;
 								mecanic_energy -= SimuCore::Systems::AdaptedSystem::m_CstScore;
-								mecanic_energy *= 1e5;
-								//mecanic_energy = mecanic_energy * mecanic_energy;
+								mecanic_energy *= 1e24;
+								mecanic_energy = std::sqrt(mecanic_energy);
 
 								// calcul du minimum de l'énergie potentielle effective en valeur absolue, qu'on enlève à mecanic_energy
 
@@ -222,20 +222,30 @@ namespace SimuCore {
 							else if (best_fit < 9 * cste && best_fit > 8.66 * cste) {
 								std::cout << "\tBest distance to target: " << 0 << '\n';
 
-								long double mecanic_energy = best_fit - 8.66 * cste; // km/s
-								mecanic_energy /= 0.34;
-								mecanic_energy = 1 / mecanic_energy;
-								mecanic_energy -= SimuCore::Systems::AdaptedSystem::m_CstScore;
+								long double ratio = best_fit - 8.66 * cste;
+								ratio /= (cste * 0.34);
 
 								std::cout << "\tEtat lie\n";
-								std::cout << "\tBest energy at target: " << mecanic_energy << " (J)\n";
+								std::cout << std::fixed << std::setprecision(30);
+								std::cout << "\tBest ratio power of tkt (energie meca / min energie pot effective) at target: " << ratio * 100 << "%\n";
+								std::cout << std::setprecision(3) << std::defaultfloat;
 							}
 							else if (
-								best_fit < 10 * cste
-								&&
 								best_fit > 9 * cste
 								) {
 								std::cout << "\tBest distance to target: " << 0 << '\n';
+
+								long double delta_v__odg = best_fit - 9 * cste;
+								delta_v__odg = 1 / delta_v__odg;
+								delta_v__odg -= SimuCore::Systems::AdaptedSystem::m_CstScore;
+
+								std::cout << "\tBest delta_v to capture (odg): " << delta_v__odg << "\n";
+
+								// afficher rayon min et rayon max à la planète finale
+								// donner le cout energetique et le tof
+							}
+							else if (best_fit == 9 * cste) {
+								std::cout << "\tFaut pas abuser la non plus\n";
 							}
 						}
 

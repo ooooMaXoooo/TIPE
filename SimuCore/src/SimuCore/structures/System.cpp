@@ -234,7 +234,6 @@ namespace SimuCore::Systems {
 
 		case RocketState::VALID:
 			// on veut que la borne inf soit 9/m_CstScore
-			// on veut que la borne sup soit 10/m_CstScore
 			return HandleScoreValidState(); // TODO : ajuster la formule pour que le score soit dans l'intervalle souhaité
 			break;
 		
@@ -333,7 +332,7 @@ namespace SimuCore::Systems {
 
 		Real cout_energetique = m_rocket.getDeltaM();
 		Real tof = m_time;
-		return 1/(tof*cout_energetique + m_CstScore) + Majorant_etat_neutre;
+		return (s_MaxTime/tof)/(cout_energetique + m_CstScore) + Majorant_etat_neutre;
 	} // HandleScoreValidState
 
 	AdaptedSystem::Real AdaptedSystem::HandleScoreNeutralState() const
@@ -397,7 +396,7 @@ namespace SimuCore::Systems {
 				// si l'énergie mécanique est positive, la fusée n'est pas en orbite stable autour de la planète cible.
 				
 
-				influence_position += 0.33 / ((mecanical_energy * 1e-5) + m_CstScore); // borne max : 0.66 / m_CstScore
+				influence_position += 0.33 / ((mecanical_energy * mecanical_energy * 1e-24) + m_CstScore); // borne max : 0.66 / m_CstScore
 
 
 			} else {
@@ -405,23 +404,17 @@ namespace SimuCore::Systems {
 
 				// on ajoute le minimum que l'énergie potentielle effective peut-atteindre pour que l'énergie mécanique le soit aussi.
 				double constante_des_aires = GetConstanteDesAires(rocket_position_relative_to_planet, rocket_velocity_relative_to_planet);
-				double energy_offset = 0.5 * m_rocket.mass * std::pow(s_final_planet_info.muPlanet / constante_des_aires, 2); // le minimum de l'énergie potentielle effective en valeur absolue
+				double min_energie_potentielle_effective = - 0.5 * m_rocket.mass * std::pow(s_final_planet_info.muPlanet / constante_des_aires, 2); // en J
 
-				mecanical_energy += energy_offset;
+				//mecanical_energy += energy_offset;
 
+				double ratio = mecanical_energy / min_energie_potentielle_effective; // en nombre sans unité, qu'on cherche à maximiser
 
-
-				if (mecanical_energy <= 0) {
-					std::cout << "\n\n\n\tERREUR \n\n\n\n" << std::endl;
-					std::abort();
-				}
-
-
-				influence_position += 0.34 / (mecanical_energy + m_CstScore);
+				int constexpr puissance = 1e5;
+				influence_position += (0.34 * std::pow(ratio, puissance)) / m_CstScore;
 				// on prend la racine de la vitesse pour que l'influence de la vitesse soit grandit d'autant plus
 				// que le vitesse finale est faible.
-
-			}			
+			}
 		}
 		// on veut que la borne inf soit 8/epsilon, donc on ajoute 8 / epsilon
 		// donc la borne sup est 1/epsilon + 8/epsilon = 9/epsilon

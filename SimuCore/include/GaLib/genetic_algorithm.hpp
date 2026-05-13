@@ -7,6 +7,7 @@
 #include <limits>
 #include <random>
 #include <vector>
+#include <iomanip>
 
 #include "genetic_config.hpp"
 #include "genetic_individu.hpp"
@@ -113,6 +114,7 @@ public:
         auto affiche_proba_array =
             [&](const Individual& ind)
             {
+                std::cout << std::scientific;
                 std::cout << "[";
                 auto probas = ind.get_mutation_probas();
                 for (int i = 0; i < probas.size(); i++) {
@@ -122,6 +124,7 @@ public:
                     }
                 }
                 std::cout << ']';
+                std::cout << std::defaultfloat;
             };
 
         for (size_t gen = 0; gen < m_config.max_generations; gen++) {
@@ -132,7 +135,9 @@ public:
 
                 // affichage best
                 {
+					std::cout << std::fixed << std::setprecision(30);
                     std::cout << "\n\tBest fitness: " << m_best_fitness;
+                    std::cout << std::setprecision(3) << std::defaultfloat;
                     if (m_config.enable_auto_adaptation) {
                         std::cout << " ~ Proba Array: ";
                         affiche_proba_array(m_best_individual);

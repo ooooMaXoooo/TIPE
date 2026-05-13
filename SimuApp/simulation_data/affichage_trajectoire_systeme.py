@@ -10,9 +10,8 @@ import graphics
 from Donnees_astres import *
 
 
-dossier = "simu_12_05_2026_17_29_40"
-generation = 1951
-
+dossier = "simu_13_05_2026_14_42_02"
+generation = 11 * 100 + 1
 
 
 

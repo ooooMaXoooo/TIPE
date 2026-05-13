@@ -314,20 +314,20 @@ int main(int argc, char** argv) {
 			lifetime, // -> durée de vie de la fusée en jours
             std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(),
             700._ton_to_kg,
-            4.5),
+			4.5), // -> vitesse d'éjection des gaz en km/s
 		lifetime, // durée de simulation en jours
 		3600); // -> pas de temps en secondes
 
 	sy.Initialize();
 
-    genetic::CrossoverType cross_type = genetic::CrossoverType::UNIFORM_BIT_LEVEL;
-    bool elitism = true;
-    bool auto_adapt = false;
-    size_t population_size =  1000;
+    genetic::CrossoverType cross_type = genetic::CrossoverType::UNIFORM_BIT_LEVEL; // ce paramètre ne change rien, on a implémenter en dur un UCLC
+    bool elitism = false;                   // diminituion de la vitesse de perte de diversité ?
+    bool auto_adapt = true;                 // a tester
+    size_t population_size =  1e5;
     size_t max_generation  =  1e6;
-    size_t print_interval  =  20;
+    size_t print_interval  =  1;
     bool verbose = true;
-    size_t snapshot_interval = 50;
+    size_t snapshot_interval = 1;
     bool save_in_file = true;
 
     constexpr size_t nombre_d_impulsions = 2;
