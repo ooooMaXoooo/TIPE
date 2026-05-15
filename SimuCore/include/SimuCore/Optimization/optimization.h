@@ -122,9 +122,7 @@ namespace SimuCore {
 				return local_system.Score(vecs);		// A VERIFIER !!!!! OK ?
 			};
 
-			unsigned int seed = 0; // 0 pour une seed aléatoire
-
-			genetic::GeneticAlgorithm<ConfigType> ga(config, fitness, seed); // création d'un algorithme génétique
+			genetic::GeneticAlgorithm<ConfigType> ga(config, fitness); // création d'un algorithme génétique
 
 
 			using Ind = typename genetic::Individu<ConfigType>;
@@ -237,11 +235,11 @@ namespace SimuCore {
 								) {
 								std::cout << "\tBest distance to target: " << 0 << '\n';
 
-								long double delta_v__odg = best_fit - 9 * cste;
-								delta_v__odg = 1 / delta_v__odg;
-								delta_v__odg -= SimuCore::Systems::AdaptedSystem::m_CstScore;
+								long double delta_m__odg = best_fit - 9 * cste;
+								delta_m__odg = 1 / delta_m__odg;
+								delta_m__odg -= SimuCore::Systems::AdaptedSystem::m_CstScore;
 
-								std::cout << "\tBest delta_v to capture (odg): " << delta_v__odg << "\n";
+								std::cout << "\tBest delta_m to capture (odg): " << delta_m__odg << "\n";
 
 								// afficher rayon min et rayon max à la planète finale
 								// donner le cout energetique et le tof
@@ -392,47 +390,38 @@ namespace SimuCore {
 
 								bool etat_lie = false;
 
-								constexpr double cste = 1.0 / SimuCore::Systems::AdaptedSystem::m_CstScore;
-								if (best_fit > 8.66 * cste && best_fit < 9 * cste) {
-									auto [r_min, r_max] = copy_system.GetApsidesAroundFinalPlanet(&etat_lie); // en km
+								//constexpr double cste = 1.0 / SimuCore::Systems::AdaptedSystem::m_CstScore;
+								auto [r_min, r_max] = copy_system.GetApsidesAroundFinalPlanet(&etat_lie); // en km
 								
 
-									r_min = meters_to_kilometers(r_min);
-									r_max = meters_to_kilometers(r_max);
+								r_min = meters_to_kilometers(r_min);
+								r_max = meters_to_kilometers(r_max);
 
-									constexpr uint8_t dimension = 2;
+								constexpr uint8_t dimension = 2;
 
-									PhysicsData phys_data{ tof, dt, startPlanetIndex, finalPlanetIndex,
-										startPlanet_initialPosition,
-										finalPlanet_initialPosition,
-										startPlanet_finalPosition,
-										finalPlanet_finalPosition,
-										finalVelocity_rocket,
-										impulsions_times,
-										impulsions_vectors,
-										etat_lie, r_min, r_max,
-										dimension
-									};
+								PhysicsData phys_data{ tof, dt, startPlanetIndex, finalPlanetIndex,
+									startPlanet_initialPosition,
+									finalPlanet_initialPosition,
+									startPlanet_finalPosition,
+									finalPlanet_finalPosition,
+									finalVelocity_rocket,
+									impulsions_times,
+									impulsions_vectors,
+									etat_lie, r_min, r_max,
+									dimension
+								};
 
-									std::filesystem::path filepath_physics_data =
-										file_directory /
-										generate_snapshot_filename("txt", gen + 1, "physics");
+								std::filesystem::path filepath_physics_data =
+									file_directory /
+									generate_snapshot_filename("txt", gen + 1, "physics");
 
-									try {
-										generationalExporter.enqueue(std::make_shared<PhysicsData>(phys_data), filepath_physics_data);
-									}
-									catch (const std::exception& e) {
-										std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
-										exit(EXIT_FAILURE);
-									}
-
-
-
+								try {
+									generationalExporter.enqueue(std::make_shared<PhysicsData>(phys_data), filepath_physics_data);
 								}
-
-
-
-
+								catch (const std::exception& e) {
+									std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
+									exit(EXIT_FAILURE);
+								}
 							}
 						}
 					}

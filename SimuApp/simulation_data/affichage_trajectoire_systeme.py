@@ -10,8 +10,8 @@ import graphics
 from Donnees_astres import *
 
 
-dossier = "simu_14_05_2026_15_42_06"
-generation = 107
+dossier = "simu_15_05_2026_18_22_09"
+generation = 35
 
 
 
@@ -92,7 +92,7 @@ graphics.DrawRing(planete_arrivee, k, ax, "Anneau_planete_finale_position_initia
 graphics.DrawRing(planete_arrivee, k, ax, "Anneau_planete_finale_position_finale", "red", pos_final_arrivee)
 
 if (est_etat_lie) :
-    graphics.DrawRealRing(r_min, r_max, (x_fusee[-1], y_fusee[-1]), ax, "#0A680C", "encadrement ellipse finale")
+    graphics.DrawRealRing(r_min, r_max, pos_final_arrivee, ax, "#0A680C", "encadrement ellipse finale")
 
 
 # Affichage impulsions

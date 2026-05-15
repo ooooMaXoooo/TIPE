@@ -336,7 +336,7 @@ namespace SimuCore::Systems {
 
 		Real cout_energetique = m_rocket.getDeltaM();
 		Real tof = m_time;
-		return ((s_MaxTime / tof)/(cout_energetique + m_CstScore)) + Majorant_etat_neutre;
+		return (std::pow(s_MaxTime / tof, 5)/(cout_energetique * 1e-3 + m_CstScore)) + Majorant_etat_neutre;
 	} // HandleScoreValidState
 
 	AdaptedSystem::Real AdaptedSystem::HandleScoreNeutralState() const
@@ -356,16 +356,17 @@ namespace SimuCore::Systems {
 
 		Real influence_position = 0;
 
-		Planet final_planet = getPlanetFromName(s_final_planet);
 
 		const glm::dvec3 final_planet_position = s_finalPlanet_positions[getFinalPlanetPositionIndice()]; // en UA
 
+		Planet final_planet = getPlanetFromName(s_final_planet);
 		glm::dvec3 projection_on_ring = final_planet.orbitRadius() * glm::normalize(m_rocket.position - final_planet_position); // en km
 
 		glm::dvec3 rocket_position_relative_to_planet = m_rocket.position - final_planet_position; // en UA
 		Real distance_to_ring = glm::length(rocket_position_relative_to_planet - (kilometers_to_AU(1) * projection_on_ring)); // en km
 		distance_to_ring = AU_to_kilometers(distance_to_ring); // conversion en km
 		
+
 		bool position_ok = (final_planet.minOrbitRadius() <= distance_to_ring && distance_to_ring <= final_planet.maxOrbitRadius());
 		if (!position_ok)
 		{
@@ -412,7 +413,7 @@ namespace SimuCore::Systems {
 
 				double ratio = mecanical_energy / min_energie_potentielle_effective; // en nombre sans unité, qu'on cherche à maximiser
 
-				int constexpr puissance = 1e5;
+				int constexpr puissance = 1;
 				influence_position += (0.34 * std::pow(ratio, puissance)) / m_CstScore;
 				// on prend la racine de la vitesse pour que l'influence de la vitesse soit grandit d'autant plus
 				// que le vitesse finale est faible.
@@ -616,6 +617,9 @@ namespace SimuCore::Systems {
 			bool is_trajectory_elliptic = false;
 			auto [perige, apogee] = GetApsidesAroundFinalPlanet(&is_trajectory_elliptic);
 
+			perige = meters_to_kilometers(perige); // conversion en km
+			apogee = meters_to_kilometers(apogee); // conversion en km)
+
 			if (!is_trajectory_elliptic) {
 				// si la trajectoire n'est pas elliptique, alors la fusée n'est pas en orbite stable autour de la planète finale, et on considère que c'est un échec (état neutre)
 				return RocketState::NEUTRAL;
@@ -634,11 +638,15 @@ namespace SimuCore::Systems {
 
 	const char* AdaptedSystem::TypeOfTrajectory(double score) const
 	{
-		if (score > - constants::epsilon) {
+		constexpr double cste = 1 / m_CstScore;
+		if (score > 9 * cste) {
+			return "Alive : Valid";
+		}
+		else if (score > 0) {
 			//constexpr double cste = 1 / m_CstScore;
 			score *= m_CstScore; // <=> /= cste
 
-			const char* kinds[10] = {
+			const char* kinds[9] = {
 				"Dead : Collision start panet with high speed",
 				"Dead : Collision start panet with low speed",
 				"Dead : Collision sun with high speed",
@@ -647,8 +655,7 @@ namespace SimuCore::Systems {
 				"Dead : Rocket get too far in the system",
 				"Dead : Collision final panet with high speed",
 				"Dead : Collision final panet with low speed",
-				"Alive : Neutral",
-				"Alive : Valid",
+				"Alive : Neutral"
 			};
 
 			return kinds[static_cast<int>(score)];
