@@ -66,7 +66,16 @@ def lire_donnees(nom_fichier):
 
       impulsions.append((temps, vect))
 
+   etat_lie = int(lignes[i]) == 1
+   i += 1
+
+   r_min = float(lignes[i])
+   i += 1
+
+   r_max = float(lignes[i])
+   i += 1
+
    return (tof, dt, planete_depart, planete_arrivee, dimension,
          pos_init_depart, pos_init_arrivee,
          pos_final_depart, pos_final_arrivee,
-         vitesse_finale, impulsions)
+         vitesse_finale, impulsions, etat_lie, r_min, r_max)

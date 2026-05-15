@@ -175,7 +175,7 @@ glm::dvec3 forceAttractionGrav(const SimuCore::Structures::Entity& from, const S
 
 
 
-std::pair<double, double> calcul_perige_et_apoge(
+std::pair<double, double> calcul_perige_et_apoge (
     double distance_to_central_body,
     double system_mass,
     double mu_central_body,
@@ -193,7 +193,7 @@ std::pair<double, double> calcul_perige_et_apoge(
     double minimum_energie_effective = -0.5 * system_mass * (mu2 / C2);
 
     if (system_energy < minimum_energie_effective) {
-        std::cerr << "Erreur, ce n'est pas cense etre possible physiquement | LIGNE :" << __LINE__ << "\t fichier :" << __FILE__ << std::endl;
+        std::cerr << "Erreur, ce n'est pas cense etre possible physiquement |\tLIGNE :" << __LINE__ << " | fichier :" << __FILE__ << std::endl;
         std::abort();
     }
 
@@ -207,8 +207,23 @@ std::pair<double, double> calcul_perige_et_apoge(
 	double inverse_energy_times_2 = 1 / energy_times_2;
 	double moins_mu_fois_masse = - mu_central_body * system_mass;
 
-    double r_min = (moins_mu_fois_masse - sqrt_delta) * inverse_energy_times_2;
-    double r_max = (moins_mu_fois_masse + sqrt_delta) * inverse_energy_times_2;
+    double r_min = (moins_mu_fois_masse + sqrt_delta) * inverse_energy_times_2;
+    double r_max = (moins_mu_fois_masse - sqrt_delta) * inverse_energy_times_2;
+
+	if (r_min > r_max) {
+        std::cerr << "Erreur, r_min > r_max |\tLIGNE :" << __LINE__ << " | fichier :" << __FILE__ << std::endl;
+        std::abort();
+	}
+
+	if (r_min < 0) {
+        std::cerr << "Erreur, r_min < 0 |\tLIGNE :" << __LINE__ << " | fichier :" << __FILE__ << std::endl;
+        std::abort();
+	}
+
+	if (r_max < 0) {
+        std::cerr << "Erreur, r_max < 0 |\tLIGNE :" << __LINE__ << " | fichier :" << __FILE__ << std::endl;
+        std::abort();
+	}
 
 	*is_trajectory_elliptic = true;
 	return { r_min, r_max };

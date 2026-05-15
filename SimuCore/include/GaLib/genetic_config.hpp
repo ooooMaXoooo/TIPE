@@ -237,7 +237,7 @@ struct Config {
         }
 
         // validation de la taille de la population
-        if (population_size % 4 == 1) {
+        if (population_size % 4 != 0) {
             throw std::invalid_argument("population size must be a multiple of 4 (for pairing half population)");
         }
         if (population_size == 0) {

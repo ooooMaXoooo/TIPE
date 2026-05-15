@@ -122,7 +122,9 @@ namespace SimuCore {
 				return local_system.Score(vecs);		// A VERIFIER !!!!! OK ?
 			};
 
-			genetic::GeneticAlgorithm<ConfigType> ga(config, fitness); // création d'un algorithme génétique
+			unsigned int seed = 0; // 0 pour une seed aléatoire
+
+			genetic::GeneticAlgorithm<ConfigType> ga(config, fitness, seed); // création d'un algorithme génétique
 
 
 			using Ind = typename genetic::Individu<ConfigType>;
@@ -331,13 +333,6 @@ namespace SimuCore {
 								std::cerr << "\n\n" << e.what() << std::endl;
 								exit(EXIT_FAILURE);
 							}
-
-
-							//writeTrajectory(file_start, system.getStartPlanetPositions());
-							//writeTrajectory(file_final, system.getFinalPlanetPositions());
-
-							//file_start.close();
-							//file_final.close();
 						}
 
 						if (gen % snapshot_interval == 0 || gen == max_generation - 1) {
@@ -372,10 +367,10 @@ namespace SimuCore {
 								uint8_t startPlanetIndex = SimuCore::Systems::AdaptedSystem::GetStartPlanetID();
 								uint8_t finalPlanetIndex = SimuCore::Systems::AdaptedSystem::GetFinalPlanetID();
 
-								glm::dvec3 startPlanet_initialPosition		= copy_system.GetStartPlanet_StartPosition();
-								glm::dvec3 startPlanet_finalPosition		= copy_system.GetStartPlanet_CurrentPosition();
-								glm::dvec3 finalPlanet_initialPosition		= copy_system.GetFinalPlanet_StartPosition();
-								glm::dvec3 finalPlanet_finalPosition		= copy_system.GetFinalPlanet_CurrentPosition();
+								glm::dvec3 startPlanet_initialPosition = copy_system.GetStartPlanet_StartPosition();
+								glm::dvec3 startPlanet_finalPosition = copy_system.GetStartPlanet_CurrentPosition();
+								glm::dvec3 finalPlanet_initialPosition = copy_system.GetFinalPlanet_StartPosition();
+								glm::dvec3 finalPlanet_finalPosition = copy_system.GetFinalPlanet_CurrentPosition();
 
 								glm::dvec3 finalVelocity_rocket = copy_system.GetRocketVelocity(); // en km/s
 
@@ -395,30 +390,49 @@ namespace SimuCore {
 									impulsions_vectors.emplace_back(vec.GetDeltaV_vec());
 								}
 
-								constexpr uint8_t dimension = 2;
+								bool etat_lie = false;
 
-								PhysicsData phys_data{ tof, dt, startPlanetIndex, finalPlanetIndex,
-									startPlanet_initialPosition,
-									finalPlanet_initialPosition,
-									startPlanet_finalPosition,
-									finalPlanet_finalPosition,
-									finalVelocity_rocket,
-									impulsions_times,
-									impulsions_vectors,
-									dimension
-								};
+								constexpr double cste = 1.0 / SimuCore::Systems::AdaptedSystem::m_CstScore;
+								if (best_fit > 8.66 * cste && best_fit < 9 * cste) {
+									auto [r_min, r_max] = copy_system.GetApsidesAroundFinalPlanet(&etat_lie); // en km
+								
 
-								std::filesystem::path filepath_physics_data =
-									file_directory /
-									generate_snapshot_filename("txt", gen + 1, "physics");
+									r_min = meters_to_kilometers(r_min);
+									r_max = meters_to_kilometers(r_max);
 
-								try {
-									generationalExporter.enqueue(std::make_shared<PhysicsData>(phys_data), filepath_physics_data);
+									constexpr uint8_t dimension = 2;
+
+									PhysicsData phys_data{ tof, dt, startPlanetIndex, finalPlanetIndex,
+										startPlanet_initialPosition,
+										finalPlanet_initialPosition,
+										startPlanet_finalPosition,
+										finalPlanet_finalPosition,
+										finalVelocity_rocket,
+										impulsions_times,
+										impulsions_vectors,
+										etat_lie, r_min, r_max,
+										dimension
+									};
+
+									std::filesystem::path filepath_physics_data =
+										file_directory /
+										generate_snapshot_filename("txt", gen + 1, "physics");
+
+									try {
+										generationalExporter.enqueue(std::make_shared<PhysicsData>(phys_data), filepath_physics_data);
+									}
+									catch (const std::exception& e) {
+										std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
+										exit(EXIT_FAILURE);
+									}
+
+
+
 								}
-								catch (const std::exception& e) {
-									std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
-									exit(EXIT_FAILURE);
-								}
+
+
+
+
 							}
 						}
 					}

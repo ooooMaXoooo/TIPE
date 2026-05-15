@@ -139,6 +139,10 @@ namespace SimuCore::Systems {
 			final_planet_index = (final_planet_index + 1) % s_final_planet_info.nb_iterations_orbit;
 		}
 
+		if (m_time > 0) {
+			m_time -= seconds_to_days(s_deltaTime);
+		}
+
 		return current_state;
 	} // Run
 
@@ -287,7 +291,7 @@ namespace SimuCore::Systems {
 			0,
 			0,
 			is_start_planet ? &s_startPlanet_positions : &s_finalPlanet_positions,
-			is_start_planet ? s_start_planet_info : s_final_planet_info
+			planet_info
 		);
 	} // InitPlanet
 
@@ -332,7 +336,7 @@ namespace SimuCore::Systems {
 
 		Real cout_energetique = m_rocket.getDeltaM();
 		Real tof = m_time;
-		return (s_MaxTime/tof)/(cout_energetique + m_CstScore) + Majorant_etat_neutre;
+		return ((s_MaxTime / tof)/(cout_energetique + m_CstScore)) + Majorant_etat_neutre;
 	} // HandleScoreValidState
 
 	AdaptedSystem::Real AdaptedSystem::HandleScoreNeutralState() const
@@ -361,7 +365,6 @@ namespace SimuCore::Systems {
 		glm::dvec3 rocket_position_relative_to_planet = m_rocket.position - final_planet_position; // en UA
 		Real distance_to_ring = glm::length(rocket_position_relative_to_planet - (kilometers_to_AU(1) * projection_on_ring)); // en km
 		distance_to_ring = AU_to_kilometers(distance_to_ring); // conversion en km
-
 		
 		bool position_ok = (final_planet.minOrbitRadius() <= distance_to_ring && distance_to_ring <= final_planet.maxOrbitRadius());
 		if (!position_ok)
@@ -380,8 +383,7 @@ namespace SimuCore::Systems {
 			// on va chercher à minimiser l'énergie mécanique de la fusée.
 			rocket_position_relative_to_planet *= 1._AU_to_m; // conversion en m
 
-
-			glm::dvec3 rocket_velocity_relative_to_planet = m_rocket.velocity - final_planet.velocity; // en m/s
+			glm::dvec3 rocket_velocity_relative_to_planet = m_rocket.velocity - GetFinalPlanet_CurrentVelocity(); // en m/s
 			rocket_velocity_relative_to_planet *= 1._km_per_s__to__m_per_s; // conversion en m/s
 
 			double mecanical_energy = RocketMecanicalEnergyAroundFinalPlanet(
@@ -471,12 +473,12 @@ namespace SimuCore::Systems {
 			break;
 
 		case ObjectName::START :
-			object_pos = getPlanetFromName(s_start_planet).position;
+			object_pos = GetStartPlanet_CurrentPosition();
 			object_radius = getPlanetFromName(s_start_planet).getRadius();
 			break;
 
 		case ObjectName::FINAL :
-			object_pos = getPlanetFromName(s_final_planet).position;
+			object_pos = GetFinalPlanet_CurrentPosition();
 			object_radius = getPlanetFromName(s_final_planet).getRadius();
 			break;
 
@@ -513,8 +515,24 @@ namespace SimuCore::Systems {
 		return state;
 	}
 
+	glm::dvec3 AdaptedSystem::GetStartPlanet_CurrentVelocity() const noexcept {
+		glm::dvec3 u_r = glm::normalize(GetStartPlanet_CurrentPosition()); // un vecteur unitaire pointant de l'origine vers la planète de départ
+		glm::dvec3 u_theta = glm::dvec3(-u_r.y, u_r.x, 0); // un vecteur unitaire orthogonal à u_r dans le plan de l'orbite (sens inverse des aiguilles d'une montre)
+
+		double speed = glm::length(getPlanetFromName(s_start_planet).velocity); // en km/s
+		return speed * u_theta; // en km/s, vitesse tangentielle à l'orbite de la planète de départ
+	} // GetStartPlanet_CurrentVelocity
+
+	glm::dvec3 AdaptedSystem::GetFinalPlanet_CurrentVelocity() const noexcept {
+		glm::dvec3 u_r = glm::normalize(GetFinalPlanet_CurrentPosition()); // un vecteur unitaire pointant de l'origine vers la planète d'arrivée
+		glm::dvec3 u_theta = glm::dvec3(-u_r.y, u_r.x, 0); // un vecteur unitaire orthogonal à u_r dans le plan de l'orbite (sens inverse des aiguilles d'une montre)
+
+		double speed = glm::length(getPlanetFromName(s_final_planet).velocity); // en km/s
+		return speed * u_theta; // en km/s, vitesse tangentielle à l'orbite de la planète d'arrivée
+	} // GetFinalPlanet_CurrentVelocity
+
 	AdaptedSystem::RocketState AdaptedSystem::Rocket_state() const {
-		// on check la postion
+		// on check la position
 		if (glm::length(m_rocket.position) > m_SolarSystemBound) {
 			return RocketState::DEAD_GET_TOO_FAR;
 		}
@@ -531,6 +549,15 @@ namespace SimuCore::Systems {
 
 		Planet start_planet = getPlanetFromName(s_start_planet);
 		Planet final_planet = getPlanetFromName(s_final_planet);
+
+		// synchronisation de l'état des planètes avec le système
+		{
+			start_planet.position = GetStartPlanet_CurrentPosition();
+			start_planet.velocity = GetStartPlanet_CurrentVelocity();
+
+			final_planet.position = GetFinalPlanet_CurrentPosition();
+			final_planet.velocity = GetFinalPlanet_CurrentVelocity();
+		}
 
 		bool collided = rocket_collide_with(ObjectName::SUN) || rocket_collide_with(ObjectName::START) || rocket_collide_with(ObjectName::FINAL);
 
@@ -604,6 +631,7 @@ namespace SimuCore::Systems {
 			return RocketState::NEUTRAL;
 		}
 	}
+
 	const char* AdaptedSystem::TypeOfTrajectory(double score) const
 	{
 		if (score > - constants::epsilon) {
@@ -629,6 +657,7 @@ namespace SimuCore::Systems {
 			return "Undefined";
 		}
 	}
+
 	const char* AdaptedSystem::TypeOfTrajectory(RocketState state) const
 	{
 		constexpr const char* kinds[10] = {
@@ -717,8 +746,13 @@ namespace SimuCore::Systems {
 
 		}
 
+		if (m_time > 0) {
+			m_time -= seconds_to_days(s_deltaTime);
+		}
+
 		trajectory.push_back(m_rocket.position);
 	}
+
 	std::pair<double, double> AdaptedSystem::GetApsidesAroundFinalPlanet(bool* is_trajectory_elliptic) const
 	{
 		double distance_rocket_to_final_planet = 0; // en m
@@ -730,6 +764,13 @@ namespace SimuCore::Systems {
 		{
 			Planet final_planet = getPlanetFromName(s_final_planet);
 
+			// mise à jour de l'état de la planète pour qu'elle corresponde à l'instant où on veut calculer les apsides
+			{
+				final_planet.position = GetFinalPlanet_CurrentPosition();
+				final_planet.velocity = GetFinalPlanet_CurrentVelocity();
+			}
+
+
 			// calcul de la distance entre la fusée et la planète finale
 			{
 				distance_rocket_to_final_planet = glm::length(m_rocket.position - final_planet.position); // en UA
@@ -737,7 +778,7 @@ namespace SimuCore::Systems {
 			}
 
 
-			glm::dvec3 position_dans_referentiel_planete = m_rocket.position - final_planet.position; // m, position de la fusée dans le référentiel de la planète finale
+			glm::dvec3 position_dans_referentiel_planete = m_rocket.position - final_planet.position; // en m, position de la fusée dans le référentiel de la planète finale
 			position_dans_referentiel_planete *= AU_to_meters(1); // conversion en m
 
 			glm::dvec3 vecteur_vitesse_referentiel_planete_finale = m_rocket.velocity - final_planet.velocity; // en m/s, vitesse de la fusée dans le référentiel de la planète finale
@@ -746,11 +787,11 @@ namespace SimuCore::Systems {
 
 			// calcul constante des aires
 			{
-				glm::dvec3 moment_cinetique_sur_masse = glm::cross(position_dans_referentiel_planete, vecteur_vitesse_referentiel_planete_finale);
-				constante_des_aires = glm::length(moment_cinetique_sur_masse); // en m^2/s
+				glm::dvec3 constante_des_aires_vectorielle = glm::cross(position_dans_referentiel_planete, vecteur_vitesse_referentiel_planete_finale);
+				constante_des_aires = glm::length(constante_des_aires_vectorielle); // en m^2/s
 			}
 
-			// calcul énergie orbitale
+			// calcul énergie orbitale (énergie mécanique)
 			{
 				energie_orbitale = RocketMecanicalEnergyAroundFinalPlanet(
 					distance_rocket_to_final_planet,

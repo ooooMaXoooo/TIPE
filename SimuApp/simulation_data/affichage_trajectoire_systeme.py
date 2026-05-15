@@ -10,8 +10,8 @@ import graphics
 from Donnees_astres import *
 
 
-dossier = "simu_13_05_2026_14_42_02"
-generation = 11 * 100 + 1
+dossier = "simu_14_05_2026_15_42_06"
+generation = 107
 
 
 
@@ -33,9 +33,8 @@ ImportData.init_liste(dossier + "/gen_" + str(generation) + "_rocket.txt", x_fus
 
 
 
-
 # Recuperation des données
-tof, dt, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_finale, impulsions = ImportData.lire_donnees(dossier + "/gen_" + str(generation) + "_physics.txt")
+tof, dt, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_finale, impulsions, est_etat_lie, r_min, r_max = ImportData.lire_donnees(dossier + "/gen_" + str(generation) + "_physics.txt")
 
 # Affichage anneaux
 
@@ -53,9 +52,13 @@ print(f"Final planet :\t{get_planet_name(planete_arrivee)}")
 print(f"dimension:\t{dimension}")
 print(f"Start Planet initial position:\t{get_vec_string(pos_init_depart)} UA")
 print(f"Start Planet final position:\t{get_vec_string(pos_final_depart)} UA")
-print(f"Start Planet initial position:\t{get_vec_string(pos_init_arrivee)} UA")
+print(f"Final Planet initial position:\t{get_vec_string(pos_init_arrivee)} UA")
 print(f"Final Planet final position:\t{get_vec_string(pos_final_arrivee)} UA")
 print(f"Rocket's final velocity:\t{get_vec_string(vitesse_finale)} km/s")
+print(f"Etat lie ? :\t{"True" if est_etat_lie else "False"}")
+print(f"Rayon minimum de l'encadrement de l'ellipse finale de la fusee:\t{r_min} km")
+print(f"Rayon maximum de l'encadrement de l'ellipse finale de la fusee:\t{r_max} km")
+
 
 
 AU = 1.496e8  # km
@@ -88,6 +91,9 @@ graphics.DrawRing(planete_depart, k, ax, "Anneau_planete_depart_position_finale"
 graphics.DrawRing(planete_arrivee, k, ax, "Anneau_planete_finale_position_initiale", "lightcoral", pos_init_arrivee)
 graphics.DrawRing(planete_arrivee, k, ax, "Anneau_planete_finale_position_finale", "red", pos_final_arrivee)
 
+if (est_etat_lie) :
+    graphics.DrawRealRing(r_min, r_max, (x_fusee[-1], y_fusee[-1]), ax, "#0A680C", "encadrement ellipse finale")
+
 
 # Affichage impulsions
 
@@ -102,7 +108,7 @@ for t, dv in impulsions:
         ax.plot(x, y, 'ko')  # point noir
 
         # vecteur impulsion
-        scale = 1e7  # ajuste selon visibilité
+        scale = 5*1e7  # ajuste selon visibilité
 
         ax.quiver(
             x, y,
@@ -116,7 +122,7 @@ for t, dv in impulsions:
 ax.plot([], [], 'ko', label='Impulsions')
 ax.plot([], [], color='green', label='Delta-v')
 
-
+ax.plot(x_fusee[-1], y_fusee[-1], 'o')
 
 
 

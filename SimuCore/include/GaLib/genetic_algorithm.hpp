@@ -75,13 +75,16 @@ public:
     GeneticAlgorithm(const ConfigType& config, FitnessFunction fitness_func, unsigned int seed = 0)
         : m_config(config),
           m_fitness_func(fitness_func),
-          m_seed(seed),
-          m_rng(seed == 0 ? std::random_device{}() : seed),
           m_best_fitness(std::numeric_limits<Real>::lowest()),
           m_worst_fitness(std::numeric_limits<Real>::max()),
           m_index_dist(0, config.population_size - 1),
           m_cut_dist(0, (config.dimension * config.integer_bits) - 1),
-          m_cut_dist_proba(0, ((config.number_of_vectors + 1) * config.integer_bits) - 1) {
+          m_cut_dist_proba(0, ((config.number_of_vectors + 1) * config.integer_bits) - 1)
+    
+    {
+		m_seed = seed == 0 ? std::random_device{}() : seed;
+        m_rng = std::mt19937_64(m_seed);
+
         m_config.validate();
         initialize_population();
         m_selected.resize(m_config.get_half_population_size());
@@ -106,6 +109,8 @@ public:
      */
     Individual run(bool verbose = true, CallbackFunctionType callback = nullptr) {
         if (verbose) {
+			/*std::cout << "seed : " << m_seed << '\n';
+            std::cin.get();*/
             std::cout << "Starting genetic algorithm..." << '\n';
             std::cout << m_config;
             std::cout << '\n';

@@ -33,10 +33,14 @@ namespace SimuCore {
 		};
 
 		struct PlanetInfo {
-			double distance_to_sun = 0; // en UA
-			double angular_velocity = 0; // en rad/s
-			double muPlanet = 0; // en m^3/s²
-			size_t nb_iterations_orbit = 0; // nombre d'itérations pour faire une orbite complète (en fonction du pas de temps)
+			// en UA
+			double distance_to_sun = 0;
+			// en rad/s
+			double angular_velocity = 0;
+			// en m^3/s²
+			double muPlanet = 0;
+			// nombre d'itérations pour faire une orbite complète (en fonction du pas de temps)
+			size_t nb_iterations_orbit = 0;
 		};
 
 		SimuCore::Structures::Planet getPlanetFromName(PlanetsName name);
@@ -85,9 +89,9 @@ namespace SimuCore {
 			static PlanetInfo s_start_planet_info;
 			static PlanetInfo s_final_planet_info;
 
-			constexpr static double m_max_acceleration = 5 * constants::g;
+			constexpr static double m_max_acceleration = 5 * constants::g; // USI
 
-			double m_SolarSystemBound = 55; // en UA
+			constexpr static double m_SolarSystemBound = 55; // en UA
 
 
 		public:
@@ -225,8 +229,31 @@ namespace SimuCore {
 			size_t getFinalPlanetPositionIndice() const noexcept { return (static_cast<size_t>(daysInSeconds(m_time) / s_deltaTime) + getFinalPlanetStartIndice()) % s_final_planet_info.nb_iterations_orbit; }
 
 
+			/// <summary>
+			/// Renvoie la position actuelle de la planète de départ.
+			/// </summary>
+			/// <returns>en UA</returns>
 			glm::dvec3 GetStartPlanet_CurrentPosition() const noexcept { return getStartPlanetPositions()[getStartPlanetPositionIndice()]; }
+
+			/// <summary>
+			/// Renvoie la position actuelle de la planète d'arrivée.
+			/// </summary>
+			/// <returns>en UA</returns>
 			glm::dvec3 GetFinalPlanet_CurrentPosition() const noexcept { return getFinalPlanetPositions()[getFinalPlanetPositionIndice()]; }
+
+
+
+			/// <summary>
+			/// Retourne la vitesse actuelle de la planète de départ.
+			/// </summary>
+			/// <returns>en km/s</returns>
+			glm::dvec3 GetStartPlanet_CurrentVelocity() const noexcept;
+
+			/// <summary>
+			/// Renvoie la vitesse actuelle de la planète d'arrivée.
+			/// </summary>
+			/// <returns>en km/s</returns>
+			glm::dvec3 GetFinalPlanet_CurrentVelocity() const noexcept;
 
 
 

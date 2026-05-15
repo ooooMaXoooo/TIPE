@@ -10,12 +10,19 @@ namespace SimuCore {
 
         class Planet : public Entity {
             const char* m_Name;
-            double m_radius;                        // Rayon physique de la planète (km)
-            double m_muPlanet;                      // Paramètre gravitationnel de la planète (G * mass) (m^3/s²)
-            double m_mass;                          // Masse de la planète (kg)
 
-            double m_exobase;                       // altitude du début de l'exosphère (km)
-            double m_maxAltitude;                   // altitude maximale de l'anneau dans lequel la fusée dot être capturée (km)
+            // Rayon physique de la planète (km)
+            double m_radius;
+            // Paramètre gravitationnel de la planète (G * mass) (m^3/s²)
+            double m_muPlanet;
+            // Masse de la planète (kg)
+            double m_mass;
+
+            // altitude du début de l'exosphère (km)
+            double m_exobase;
+
+            // altitude maximale de l'anneau dans lequel la fusée dot être capturée (km)
+            double m_maxAltitude;
 
         public:
             /**

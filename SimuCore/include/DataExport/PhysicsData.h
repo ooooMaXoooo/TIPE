@@ -33,6 +33,9 @@ public:
 		const glm::dvec3& final_rocket_velocity,
 		const std::vector<double>& impulse_times,
 		const std::vector<glm::dvec3>& impulse_vectors,
+		bool etat_lie = false,
+		double r_min = -1,
+		double r_max = -1,
 		uint16_t dimension = 2) :
 
 		m_dimension(dimension),
@@ -46,7 +49,10 @@ public:
 		m_final_planet_final_position(final_planet_final_position),
 		m_final_rocket_velocity(final_rocket_velocity),
 		m_impulse_times(impulse_times),
-		m_impulse_vectors(impulse_vectors)
+		m_impulse_vectors(impulse_vectors),
+		m_etat_lie(etat_lie),
+		m_r_min(r_min),
+		m_r_max(r_max)
 	{
 		if (dimension != 2 && dimension != 3) {
 			throw std::invalid_argument("Dimension must be 2 or 3");
@@ -78,10 +84,10 @@ public:
 		*	- numéro de la planète d'arrivée 
 		*/
 
-		oss << m_simulation_time << '\n' 
-			<< m_time_step << '\n' 
-			<< static_cast<int>(m_start_planet_index) << '\n' 
-			<< static_cast<int>(m_final_planet_index) << '\n' 
+		oss << m_simulation_time << '\n'
+			<< m_time_step << '\n'
+			<< static_cast<int>(m_start_planet_index) << '\n'
+			<< static_cast<int>(m_final_planet_index) << '\n'
 			<< m_number_of_impulsions << '\n'
 			<< m_dimension << '\n'
 			<< formatVector(m_start_planet_start_position) << '\n'
@@ -94,6 +100,10 @@ public:
 				oss << m_impulse_times[i] << '\n';
 				oss << formatVector(m_impulse_vectors[i]) << '\n';
 		}
+
+		oss << (m_etat_lie ? 1 : 0) << '\n'
+			<< m_r_min << '\n'
+			<< m_r_max << '\n';
 
 		return oss.str();
 	}
@@ -119,6 +129,10 @@ private:
 
 	std::vector<double> m_impulse_times;
 	std::vector<glm::dvec3> m_impulse_vectors;
+
+	bool m_etat_lie;
+	double m_r_min;
+	double m_r_max;
 
 
 private :

@@ -7,10 +7,17 @@ namespace SimuCore {
 	namespace Structures {
 
 		struct Entity {
-			glm::dvec3 position;	// position de l'entité (AU)
-			glm::dvec3 velocity;	// vitesse de l'entité (km/s)
-			double mass;			// masse de l'entité (kg)
-			glm::dvec3 forces;		// forces appliquées à l'entité (kN) (kg*km/s²)
+			// position de l'entité (AU)
+			glm::dvec3 position;
+
+			// vitesse de l'entité (km/s)
+			glm::dvec3 velocity;
+
+			// masse de l'entité (kg)
+			double mass;
+
+			// forces appliquées à l'entité (kN) (kg*km/s²)
+			glm::dvec3 forces;
 
 
 			/**
