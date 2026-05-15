@@ -33,6 +33,8 @@ public:
 		const glm::dvec3& final_rocket_velocity,
 		const std::vector<double>& impulse_times,
 		const std::vector<glm::dvec3>& impulse_vectors,
+		double tof,
+		double delta_v,
 		bool etat_lie = false,
 		double r_min = -1,
 		double r_max = -1,
@@ -52,7 +54,9 @@ public:
 		m_impulse_vectors(impulse_vectors),
 		m_etat_lie(etat_lie),
 		m_r_min(r_min),
-		m_r_max(r_max)
+		m_r_max(r_max),
+		m_delta_v(delta_v),
+		m_tof(tof)
 	{
 		if (dimension != 2 && dimension != 3) {
 			throw std::invalid_argument("Dimension must be 2 or 3");
@@ -103,7 +107,9 @@ public:
 
 		oss << (m_etat_lie ? 1 : 0) << '\n'
 			<< m_r_min << '\n'
-			<< m_r_max << '\n';
+			<< m_r_max << '\n'
+			<< m_tof << '\n'
+			<< m_delta_v << '\n';
 
 		return oss.str();
 	}
@@ -134,6 +140,8 @@ private:
 	double m_r_min;
 	double m_r_max;
 
+	double m_tof;
+	double m_delta_v;
 
 private :
 	std::string formatVector(const glm::dvec3& vec) const {

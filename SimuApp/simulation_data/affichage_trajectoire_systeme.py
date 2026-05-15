@@ -10,8 +10,8 @@ import graphics
 from Donnees_astres import *
 
 
-dossier = "simu_15_05_2026_19_23_31"
-generation = 2000
+dossier = "simu_15_05_2026_22_28_40"
+generation = 110
 
 
 
@@ -34,7 +34,7 @@ ImportData.init_liste(dossier + "/gen_" + str(generation) + "_rocket.txt", x_fus
 
 
 # Recuperation des données
-nbLigne, t_simu, dt, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_finale, impulsions, est_etat_lie, r_min, r_max = ImportData.lire_donnees(dossier + "/gen_" + str(generation))
+tof, max_time, dt, delta_v, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_finale, impulsions, est_etat_lie, r_min, r_max = ImportData.lire_donnees(dossier + "/gen_" + str(generation) + "_physics.txt")
 
 # Affichage anneaux
 
@@ -45,10 +45,9 @@ def get_planet_name (id) :
    names = ["Soleil", "Mercure", "Venus", "Terre", "Mars", "Jupiter", "Saturne", "Uranus", "Neptune"]
    return names[id]
 
-tof = nbLigne / 24
-
 print(f"tof:\t{tof} days")
-print(f"temps de simulation max:\t{t_simu} days")
+print(f"delta v:\t{delta_v} km/s")
+print(f"temps de simulation max:\t{max_time} days")
 print(f"dt:\t{dt} sec")
 print(f"Start planet :\t{get_planet_name(planete_depart)}")
 print(f"Final planet :\t{get_planet_name(planete_arrivee)}")

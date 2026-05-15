@@ -230,23 +230,6 @@ namespace SimuCore {
 								std::cout << "\tBest ratio power of tkt (energie meca / min energie pot effective) at target: " << ratio * 100 << "%\n";
 								std::cout << std::setprecision(3) << std::defaultfloat;
 							}
-							else if (
-								best_fit > 9 * cste
-								) {
-								std::cout << "\tBest distance to target: " << 0 << '\n';
-
-								long double delta_m__odg = best_fit - 9 * cste;
-								delta_m__odg = 1 / delta_m__odg;
-								delta_m__odg -= SimuCore::Systems::AdaptedSystem::m_CstScore;
-
-								std::cout << "\tBest delta_m to capture (odg): " << delta_m__odg << "\n";
-
-								// afficher rayon min et rayon max à la planète finale
-								// donner le cout energetique et le tof
-							}
-							else if (best_fit == 9 * cste) {
-								std::cout << "\tFaut pas abuser la non plus\n";
-							}
 						}
 
 						///////// Type de trajectoire
@@ -359,8 +342,10 @@ namespace SimuCore {
 
 								// envoi des données physiques
 
-								double tof = copy_system.getMaxTime();	// en jours
-								double dt = copy_system.getDeltaTime(); // en secondes
+								// en jours
+								double max_time = copy_system.getMaxTime();
+								// en secondes
+								double dt = copy_system.getDeltaTime();
 
 								uint8_t startPlanetIndex = SimuCore::Systems::AdaptedSystem::GetStartPlanetID();
 								uint8_t finalPlanetIndex = SimuCore::Systems::AdaptedSystem::GetFinalPlanetID();
@@ -370,7 +355,8 @@ namespace SimuCore {
 								glm::dvec3 finalPlanet_initialPosition = copy_system.GetFinalPlanet_StartPosition();
 								glm::dvec3 finalPlanet_finalPosition = copy_system.GetFinalPlanet_CurrentPosition();
 
-								glm::dvec3 finalVelocity_rocket = copy_system.GetRocketVelocity(); // en km/s
+								// en km/s
+								glm::dvec3 finalVelocity_rocket = copy_system.GetRocketVelocity();
 
 
 								std::vector<std::pair<SimuCore::Structures::Impulsion, double>> impulsions = rocket.getImpulsions();
@@ -390,8 +376,8 @@ namespace SimuCore {
 
 								bool etat_lie = false;
 
-								//constexpr double cste = 1.0 / SimuCore::Systems::AdaptedSystem::m_CstScore;
-								auto [r_min, r_max] = copy_system.GetApsidesAroundFinalPlanet(&etat_lie); // en km
+								// en km
+								auto [r_min, r_max] = copy_system.GetApsidesAroundFinalPlanet(&etat_lie);
 								
 
 								r_min = meters_to_kilometers(r_min);
@@ -399,7 +385,14 @@ namespace SimuCore {
 
 								constexpr uint8_t dimension = 2;
 
-								PhysicsData phys_data{ tof, dt, startPlanetIndex, finalPlanetIndex,
+
+								double tof = trajectory.size() * dt / 86400.0; // en jours
+								double delta_v = rocket.getDeltaV();
+
+								std::cout << "\tTime of flight : " << tof << " (jours)\n";
+								std::cout << "\tDelta V : " << delta_v << " (km/s)\n";
+
+								PhysicsData phys_data{ max_time, dt, startPlanetIndex, finalPlanetIndex,
 									startPlanet_initialPosition,
 									finalPlanet_initialPosition,
 									startPlanet_finalPosition,
@@ -407,6 +400,7 @@ namespace SimuCore {
 									finalVelocity_rocket,
 									impulsions_times,
 									impulsions_vectors,
+									tof, delta_v,
 									etat_lie, r_min, r_max,
 									dimension
 								};

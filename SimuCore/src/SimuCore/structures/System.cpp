@@ -325,18 +325,16 @@ namespace SimuCore::Systems {
 		}
 	} // Calculate_planet_trajectory
 
-	AdaptedSystem::Real AdaptedSystem::HandleScoreValidState() const
-	{
+	AdaptedSystem::Real AdaptedSystem::HandleScoreValidState() const {
 		// On sait que la fusée est en orbite stable autour de la planète cible :
 		// On peut donc renvoyer un score parfait ou presque (en fonction du coût énergétique et du temps)
 		// Il reste à déterminer ce qu'est un score parfait. Il nous faut un meilleur score que dans le cas neutre. C'est à dire un majorant du score neutre.
 		
 		constexpr Real Majorant_etat_neutre = 9 / m_CstScore;
 
-
-		Real cout_energetique = m_rocket.getDeltaM();
+		Real delta_v = m_rocket.getDeltaV();
 		Real tof = m_time;
-		return (std::pow(s_MaxTime / tof, 5)/(cout_energetique * 1e-3 + m_CstScore)) + Majorant_etat_neutre;
+		return (std::pow(s_MaxTime / tof, 5)/(delta_v * 1e-3 + m_CstScore)) + Majorant_etat_neutre;
 	} // HandleScoreValidState
 
 	AdaptedSystem::Real AdaptedSystem::HandleScoreNeutralState() const

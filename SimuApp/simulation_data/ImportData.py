@@ -27,12 +27,12 @@ def lire_vecteur(ligne):
 
 
 def lire_donnees(nom_fichier):
-   with open(nom_fichier + "_physics.txt", "r", encoding="utf-8") as f:
+   with open(nom_fichier, "r", encoding="utf-8") as f:
       lignes = [ligne.strip() for ligne in f if ligne.strip()]
 
    i = 0
 
-   t_simu = float(lignes[i])
+   max_time = float(lignes[i])
    i += 1
    dt = float(lignes[i])
    i += 1
@@ -75,10 +75,13 @@ def lire_donnees(nom_fichier):
    r_max = float(lignes[i])
    i += 1
 
-   with open(nom_fichier + "_rocket.txt", "r", encoding="utf-8") as f:
-      lignes_rocket = [ligne.strip() for ligne in f if ligne.strip()]
+   tof = float(lignes[i])
+   i += 1
 
-   return (len(lignes_rocket), t_simu, dt, planete_depart, planete_arrivee, dimension,
+   delta_v = float(lignes[i])
+   i += 1
+
+   return (tof, max_time, dt, delta_v, planete_depart, planete_arrivee, dimension,
          pos_init_depart, pos_init_arrivee,
          pos_final_depart, pos_final_arrivee,
          vitesse_finale, impulsions, etat_lie, r_min, r_max)
