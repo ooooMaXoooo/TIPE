@@ -90,7 +90,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;;$(SolutionDir)external\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
@@ -122,7 +122,7 @@ xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;;$(SolutionDir)external\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
@@ -152,7 +152,7 @@ xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;;$(SolutionDir)external\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp23</LanguageStandard>
     </ClCompile>
@@ -185,7 +185,7 @@ xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;$(SolutionDir)external\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;$(SolutionDir)external\include;$(SolutionDir)external\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp23</LanguageStandard>
     </ClCompile>

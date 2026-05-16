@@ -85,3 +85,59 @@ def lire_donnees(nom_fichier):
          pos_init_depart, pos_init_arrivee,
          pos_final_depart, pos_final_arrivee,
          vitesse_finale, impulsions, etat_lie, r_min, r_max)
+
+def load_horizons_file(filepath, x_list, y_list):
+   """
+   Charge un fichier Horizons format :
+   GEOMETRIC cartesian states
+
+   et remplit :
+   x_list
+   y_list
+
+   Les coordonnées sont supposées en KM.
+   """
+
+   with open(filepath, "r", encoding="utf-8") as f:
+      lines = f.readlines()
+
+   in_data = False
+
+   for line in lines:
+
+      line = line.strip()
+
+      # Début données
+      if line.startswith("$$SOE"):
+         in_data = True
+         continue
+
+      # Fin données
+      if line.startswith("$$EOE"):
+         break
+
+      if not in_data:
+         continue
+
+      # Ignore lignes vides / headers
+      if not line or line.startswith("*"):
+         continue
+
+      # Format CSV Horizons :
+      #
+      # JD, DATE, X, Y, Z,
+      #
+      parts = [p.strip() for p in line.split(",")]
+
+      if len(parts) < 5:
+         continue
+
+      try:
+         x = float(parts[2])
+         y = float(parts[3])
+
+         x_list.append(x)
+         y_list.append(y)
+
+      except:
+         continue

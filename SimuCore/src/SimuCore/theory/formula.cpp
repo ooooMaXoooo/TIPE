@@ -147,8 +147,6 @@ std::vector<double> orbit::lambert_batch(
             std::array<double, 3> vecteur_vitesse_orbite_depart = calcul_vecteur_cercle(r1);
             std::array<double, 3> vecteur_vitesse_orbite_fin = calcul_vecteur_cercle(r2);
 
-            
-
 
             deltaV[idx] = norme(substract(v1, vecteur_vitesse_orbite_depart)) + norme(substract(vecteur_vitesse_orbite_fin, v2));
         }

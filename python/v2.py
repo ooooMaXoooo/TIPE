@@ -1,6 +1,6 @@
 import print_color as pc
 
-Nb_modules = 8
+Nb_modules = 7
 
 import numpy as np
 pc.print_color(f"numpy imported (1/{Nb_modules})", pc.Color.Green)
@@ -12,15 +12,12 @@ from dash import dcc, html, callback, Input, Output, ctx
 pc.print_color(f"dash imported (3/{Nb_modules})", pc.Color.Green)
 
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 pc.print_color(f"plotly imported (4/{Nb_modules})", pc.Color.Green)
 
 import threading
 pc.print_color(f"threading imported (5/{Nb_modules})", pc.Color.Green)
 import webbrowser
 pc.print_color(f"webbrowser imported (6/{Nb_modules})", pc.Color.Green)
-import json
-pc.print_color(f"json imported (7/{Nb_modules})", pc.Color.Green)
 
 try:
     import TIPE_SimuOrbit  # version Release (rapide)
@@ -47,12 +44,53 @@ except Exception as e:
 
 pc.print_color("All imports successful!", pc.Color.Green)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AU = 149597870700.0 # en m
+
+
 # === Constantes ===
 mu = 1.32712440018e20  # du soleil
-#R_Mars = 2.9e12 #2.28e11
-#R_Mars = 7.78e11
-R_Mars = 2.28e11
-r1 = np.array([1.5e11, 0.0, 0.0])
+
+R_Mercure = 0.39 * AU
+R_Venus = 0.72 * AU
+R_Terre = AU
+R_Mars = 1.5237 * AU
+R_Jupiter = 5.21 * AU
+R_Saturne = 9.54 * AU
+R_Uranus  = 19.18 * AU
+R_Neptune = 30.11 * AU 
+
+R_final = R_Mars
+R_depart = R_Terre
+
+
+
+
+
+
+
+
+r1 = np.array([R_depart, 0.0, 0.0])
 
 
 # === fonctions ===
@@ -64,6 +102,18 @@ def clamp (x, a, b) :
     x = x if x < b else b
 
     return x
+
+
+def calcul_vecteur_vitesse_circulaire (pos) :
+    r = np.linalg.norm(pos)
+    norme = np.sqrt(mu / r)
+
+    u_r = pos / r
+    u_theta = np.array([-u_r[1], u_r[0], 0])
+
+    return u_theta * norme
+
+
 
 
 # === Paramètres utilisateur ===
@@ -99,7 +149,7 @@ def compute_deltav_surface():
     for i in range(n_points):
         for j in range(n_points):
             theta = Theta[i, j]
-            r2 = R_Mars * np.array([np.cos(theta), np.sin(theta), 0.0])
+            r2 = R_final * np.array([np.cos(theta), np.sin(theta), 0.0])
             r2_list.append(r2.tolist())
             tof_flat.append(tof_list[i])
     
@@ -129,7 +179,7 @@ def compute_trajectory(theta, tof_days):
     if cache_key in trajectory_cache:
         return trajectory_cache[cache_key]
     
-    r2 = R_Mars * np.array([np.cos(theta), np.sin(theta), 0.0])
+    r2 = R_final * np.array([np.cos(theta), np.sin(theta), 0.0])
     
     try:
         v1_chosen, v2_chosen = TIPE_SimuOrbit.orbit.lambert_universal(
@@ -155,8 +205,11 @@ def compute_trajectory(theta, tof_days):
             a_new = -mu * r / np.linalg.norm(r)**3
             v_half = v_half + dt * a_new
             traj.append(r.copy())
-            
-        deltav = np.linalg.norm(v1_chosen) + np.linalg.norm(v2_chosen)
+        
+        vitesse_depart = calcul_vecteur_vitesse_circulaire(traj[0])
+        vitesse_finale = calcul_vecteur_vitesse_circulaire(traj[-1])
+
+        deltav = np.linalg.norm(v1_chosen - vitesse_depart) + np.linalg.norm(v2_chosen - vitesse_finale)
         result = (np.array(traj), r2, deltav)
         trajectory_cache[cache_key] = result
         return result
@@ -345,7 +398,7 @@ def update_plots(tof_days, theta_deg, display_options):
     fig_traj = go.Figure()
     if 'mars_orbit' in display_options:
         theta_mars = np.linspace(0, 2*np.pi, 200)
-        mars_orbit = np.array([R_Mars*np.cos(theta_mars), R_Mars*np.sin(theta_mars), np.zeros_like(theta_mars)]).T
+        mars_orbit = np.array([R_final*np.cos(theta_mars), R_final*np.sin(theta_mars), np.zeros_like(theta_mars)]).T
         fig_traj.add_trace(go.Scatter3d(
             x=mars_orbit[:,0], y=mars_orbit[:,1], z=mars_orbit[:,2],
             mode='lines', line=dict(color='orange', width=2, dash='dash'), name='Orbite Mars'

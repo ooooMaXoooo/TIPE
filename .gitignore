@@ -378,3 +378,6 @@ FodyWeavers.xsd
 
 # Simulation data
 simu_*
+
+.vscode
+python/.vscode/
