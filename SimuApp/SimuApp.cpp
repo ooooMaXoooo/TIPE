@@ -14,25 +14,25 @@
 
 int main(int argc, char** argv) {
     
-	double lifetime = 300; // durée de simulation en jours
+	double lifetime = 2000; // durée de simulation en jours
 	SimuCore::Systems::AdaptedSystem sy(
         SimuCore::Systems::PlanetsName::Terre,   // planète de départ
-        SimuCore::Systems::PlanetsName::Mars,  // planète d'arrivée
+        SimuCore::Systems::PlanetsName::Jupiter,  // planète d'arrivée
         SimuCore::Structures::Rocket(
 			lifetime, // -> durée de vie de la fusée en jours
             std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(),
             1._ton_to_kg,
-			2.22), // -> vitesse d'éjection des gaz en km/s  (2.22 pour terre mars, 3 pour terre jupiter)
-		lifetime, // durée de simulation en jours
-		3600); // -> pas de temps en secondes
+			3),                                     // -> vitesse d'éjection des gaz en km/s  (2.22 pour terre mars, 3 pour terre jupiter)
+		lifetime,                                   // durée de simulation en jours
+		3600);                                      // -> pas de temps en secondes
 
 	sy.Initialize();
 
     genetic::CrossoverType cross_type = genetic::CrossoverType::UNIFORM_BIT_LEVEL; // ce paramètre ne change rien, on a implémenter en dur un UCLC
     bool elitism = true;                       // diminituion de la vitesse de perte de diversité ?
     bool auto_adapt = false;                    // a tester
-    size_t population_size =  1e4;
-    size_t max_generation  =  20000;
+    size_t population_size =  1e5;
+    size_t max_generation  =  1e4;
     size_t print_interval  =  1;
     bool verbose = true;
     size_t snapshot_interval = 1;

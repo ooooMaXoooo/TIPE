@@ -387,7 +387,7 @@ namespace SimuCore {
 
 
 								double tof = trajectory.size() * dt / 86400.0; // en jours
-								double delta_v = rocket.getDeltaV();
+								double delta_v = rocket.getDeltaV(tof);
 
 								std::cout << "\tTime of flight : " << tof << " (jours)\n";
 								std::cout << "\tDelta V : " << delta_v << " (km/s)\n";

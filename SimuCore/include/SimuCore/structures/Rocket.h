@@ -143,26 +143,18 @@ namespace SimuCore {
 			/// <summary>
 			/// Calcule la variation de vitesse totale (ΔV) en sommant les longueurs des vecteurs d'impulsion stockés dans m_Impulsions.
 			/// </summary>
+			/// <param name="time"> en jours</param>
 			/// <returns>La variation de vitesse totale (somme des longueurs des impulsions). (en km/s)</returns>
-			double getDeltaV() const {
+			double getDeltaV(double time) const {
 				double deltaV = 0;
 				for (auto& [impuls, t] : m_Impulsions) {
-					deltaV += impuls.Length(); // en km/s
+					if (t <= time)
+						deltaV += impuls.Length(); // en km/s
 				}
 
 				return deltaV;
 			}
 
-
-			/// <summary>
-			/// Calcule la variation de masse (Δm) nécessaire pour produire le Δv obtenu par getDeltaV(), en utilisant coef_alpha = exp(getDeltaV() / m_Vitesse_ejection_gaz). La méthode est const et n'altère pas l'état de l'objet.
-			/// </summary>
-			/// <returns>La variation de masse (Δm) calculée comme mass * ((coef_alpha - 1) / coef_alpha), où coef_alpha = exp(getDeltaV() / m_Vitesse_ejection_gaz). (en kg)</returns>
-			double getDeltaM() const {
-				double coef_alpha = std::exp(getDeltaV() / m_Vitesse_ejection_gaz);
-
-				return mass * ((coef_alpha - 1) / coef_alpha); // on ne change jamais la masse car il n'y a aucun effet sur le PFD
-			}
 
 			/// <summary>
 			/// Remplace la collection interne d'impulsions par le vecteur fourni.

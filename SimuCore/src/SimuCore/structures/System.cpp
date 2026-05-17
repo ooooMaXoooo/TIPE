@@ -332,7 +332,7 @@ namespace SimuCore::Systems {
 		
 		constexpr Real Majorant_etat_neutre = 9 / m_CstScore;
 
-		Real delta_v = m_rocket.getDeltaV();
+		Real delta_v = m_rocket.getDeltaV(m_time);
 		Real tof = m_time;
 		return (std::pow(s_MaxTime / tof, 5)/(delta_v * 1e-3 + m_CstScore)) + Majorant_etat_neutre;
 	} // HandleScoreValidState

@@ -80,9 +80,15 @@ R_Saturne = 9.54 * AU
 R_Uranus  = 19.18 * AU
 R_Neptune = 30.11 * AU 
 
-R_final = R_Mars
+R_final = R_Jupiter
 R_depart = R_Terre
 
+
+# === Paramètres utilisateur ===
+n_points = 1000
+tof_min_days, tof_max_days = 500, 1500
+theta_min, theta_max = 0, 2 * np.pi - 0.1
+tof_chosen_days, theta_chosen = 0.5*(tof_max_days + tof_min_days), np.deg2rad(179.99)
 
 
 
@@ -115,16 +121,8 @@ def calcul_vecteur_vitesse_circulaire (pos) :
 
 
 
-
-# === Paramètres utilisateur ===
-n_points = 200
-tof_min_days, tof_max_days = 50, 500
-theta_min, theta_max = 0, 2 * np.pi - 0.1
-tof_chosen_days, theta_chosen = 259, np.deg2rad(179.99)
-
 tof_chosen_days = clamp(tof_chosen_days, tof_min_days, tof_max_days)
 theta_chosen    = clamp(theta_chosen, theta_min, theta_max)
-
 
 print("=== Paramètres utilisateur ===")
 print(f"Nombre de points : {n_points}")
