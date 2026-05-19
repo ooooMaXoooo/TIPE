@@ -37,6 +37,7 @@ int main(int argc, char** argv) {
     bool verbose = true;
     size_t snapshot_interval = 1;
     bool save_in_file = true;
+	bool calculate_statistics = false;
 
     constexpr size_t nombre_d_impulsions = 2;
 
@@ -44,5 +45,6 @@ int main(int argc, char** argv) {
         cross_type, elitism, auto_adapt,
         population_size, max_generation,
         print_interval, verbose,
-        snapshot_interval, save_in_file);
+        snapshot_interval, save_in_file,
+        calculate_statistics);
 }

@@ -9,39 +9,14 @@ import ImportData
 import graphics
 from Donnees_astres import *
 
-def affiche_fichier (dossier, generation) :
-    x_depart = []
-    y_depart = []
-
-    x_finale = []
-    y_finale = []
-
-    x_fusee = []
-    y_fusee = []
-
-
-    #init_liste("simu_jour_mois_annee_heure_minute_seconde/file", x_fusee, y_fusee)
-                    
-    ImportData.init_liste(dossier + "/start_planet.txt", x_depart, y_depart)
-    ImportData.init_liste(dossier + "/final_planet.txt", x_finale, y_finale)
-    ImportData.init_liste(dossier + "/gen_" + str(generation) + "_rocket.txt", x_fusee, y_fusee)
-
-
-
-    # Recuperation des données
-    tof, max_time, dt, delta_v, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_finale, impulsions, est_etat_lie, r_min, r_max = ImportData.lire_donnees(dossier + "/gen_" + str(generation) + "_physics.txt")
-
-    delta_v_list = []
-
-    # Affichage anneaux
-
+def affiche_console (tof, max_time, dt, delta_v, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_finale, impulsions, est_etat_lie, r_min, r_max, nbPointsTraj) :
     def get_vec_string (vec) :
         return f"({vec[0]}, {vec[1]})"
 
     def get_planet_name (id) :
         names = ["Soleil", "Mercure", "Venus", "Terre", "Mars", "Jupiter", "Saturne", "Uranus", "Neptune"]
         return names[id]
-
+    
     print(f"tof:\t{tof} days")
     print(f"delta v:\t{delta_v} km/s")
     print(f"temps de simulation max:\t{max_time} days")
@@ -58,17 +33,22 @@ def affiche_fichier (dossier, generation) :
     print(f"Rayon minimum de l'encadrement de l'ellipse finale de la fusee:\t{r_min} km")
     print(f"Rayon maximum de l'encadrement de l'ellipse finale de la fusee:\t{r_max} km")
 
+    i=1
+    for t, dv in impulsions:
+        index = int((t * 86400) / dt)
+
+        if index < nbPointsTraj:
+            print(f"delta v {i} km/s - de norme {np.linalg.norm(dv)} km/s")
+            i+=1
 
 
-    AU = 1.496e8  # km
+def convert_vec_to_km (vec_ua) :
+    return tuple([x * AU for x in vec_ua])
 
-    def convert_vec_to_km (vec_ua) :
-        return tuple([x * AU for x in vec_ua])
+def convert_list_to_km(xs, ys):
+    return [x * AU for x in xs], [y * AU for y in ys]
 
-    def convert_list_to_km(xs, ys):
-        return [x * AU for x in xs], [y * AU for y in ys]
-
-
+def conversion_data (pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee) :
     pos_init_depart = convert_vec_to_km(pos_init_depart)
     pos_final_depart = convert_vec_to_km(pos_final_depart)
     pos_init_arrivee = convert_vec_to_km(pos_init_arrivee)
@@ -77,9 +57,9 @@ def affiche_fichier (dossier, generation) :
     x_finale, y_finale = convert_list_to_km(x_finale, y_finale)
     x_fusee, y_fusee = convert_list_to_km(x_fusee, y_fusee)
 
-    # Affichage de l'orbite
-    fig, ax = plt.subplots(figsize=(6, 6))
+    return (pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee)
 
+def affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, generation) :
     ax.plot(x_depart, y_depart, '-', color='blue',label='Trajectoire planète départ')
     ax.plot(x_finale, y_finale, '-', color='red',label='Trajectoire planète finale')
     ax.plot(x_fusee, y_fusee, '-', color='#07b00a',label='Trajectoire fusée')
@@ -94,27 +74,12 @@ def affiche_fichier (dossier, generation) :
         graphics.DrawRealRing(r_min, r_max, pos_final_arrivee, ax, "#0A680C", "encadrement ellipse finale")
 
 
-    for t, dv in impulsions:
-        index = int((t * 86400) / dt)
-
-        if index < len(x_fusee):
-            delta_v_list.append(dv)
-
-
-
-    print()
-    for i in range(len(delta_v_list)): 
-        print(f"delta v {i + 1} km/s - de norme {np.linalg.norm(delta_v_list[i])} km/s")
-
-
-
     graphics.affiche_impulsions(impulsions, dt, x_fusee, y_fusee, ax)
 
     ax.plot([], [], 'ko', label='Impulsions')
     ax.plot([], [], color='green', label='Delta-v')
 
     ax.plot(x_fusee[-1], y_fusee[-1], 'o')
-
 
 
     # Ajuster les limites pour afficher entièrement le grand cercle
@@ -124,6 +89,36 @@ def affiche_fichier (dossier, generation) :
     ax.set_ylabel("y (km)")
     ax.grid(True)
     #ax.legend()
+    return fig, ax
 
+
+def affiche_fichier (dossier, generation, window_title="Mon super titre", verbose=True) :
+    x_depart = []
+    y_depart = []
+
+    x_finale = []
+    y_finale = []
+
+    x_fusee = []
+    y_fusee = []
+                    
+    # Recuperation des données
+    ImportData.init_liste(dossier + "/start_planet.txt", x_depart, y_depart)
+    ImportData.init_liste(dossier + "/final_planet.txt", x_finale, y_finale)
+    ImportData.init_liste(dossier + "/gen_" + str(generation) + "_rocket.txt", x_fusee, y_fusee)
+    tof, max_time, dt, delta_v, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_finale, impulsions, est_etat_lie, r_min, r_max = ImportData.lire_donnees(dossier + "/gen_" + str(generation) + "_physics.txt")
+
+    if verbose :
+        affiche_console(tof, max_time, dt, delta_v, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_finale, impulsions, est_etat_lie, r_min, r_max, len(x_fusee))
+    
+    # conversion
+    pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee = conversion_data(pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee)
+    
+
+    # Affichage de l'orbite
+    fig, ax = plt.subplots(figsize=(6, 6))
+    fig.canvas.manager.set_window_title(window_title)
+
+    fig, ax = affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, generation)
     return fig, ax
 

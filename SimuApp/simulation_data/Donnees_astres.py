@@ -1,5 +1,7 @@
 import numpy as np
 
+
+AU = 1.496e8  # km
 G = 6.67e-11
 
 #                           Soleil   Mercure    Venus      Terre     Mars     Jupiter   Saturne   Uranus   Neptune
