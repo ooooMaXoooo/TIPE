@@ -41,8 +41,8 @@ R_Neptune = 30.11 * AU
 R_final = R_Mars
 R_depart = R_Terre
 
-theta   = 179.8     # deg
-tof     = 258       # jours
+theta   = 179.4     # deg
+tof     = 258.3       # jours
 
 
 
@@ -159,7 +159,9 @@ for pos in traj_3D :
     Y.append(pos[1])
 
 plt.close("all")
-plt.plot(X, Y)
+#plt.style.use('dark_background')
+
+plt.plot(X, Y, linewidth=3)
 
 plt.plot(0, 0, 'oy')
 plt.plot(X[0], Y[0], 'og')
@@ -168,8 +170,8 @@ plt.plot(X[-1], Y[-1], 'or')
 X_depart, Y_depart = compute_circle(np.linalg.norm([X[0], Y[0]]))
 X_final, Y_final = compute_circle(np.linalg.norm([X[-1], Y[-1]]))
 
-plt.plot(X_depart, Y_depart, ':g')
-plt.plot(X_final, Y_final, ':r')
+plt.plot(X_depart, Y_depart, ':g', linewidth=3)
+plt.plot(X_final, Y_final, ':r', linewidth=3)
 
 
 
@@ -186,5 +188,5 @@ plot_vecteur(pf, vca, "#CD10B4", label='vitesse voulue')
 
 plt.axis('equal')
 plt.legend()
-plt.grid()
+#plt.grid()
 plt.show()

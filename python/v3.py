@@ -90,11 +90,17 @@ tof_min_days, tof_max_days = 50, 500
 theta_min, theta_max = np.pi + 0.01 , 3 * np.pi - 0.01
 tof_chosen_days, theta_chosen = 400, np.deg2rad(45 + 360)
 
-width_mars = 3
-width_traj = 5
+width_mars = 2
+width_traj = 3
+
+grid = False
+showAxis = False
+
+modeSombre = False
 
 
 
+templateMode = 'plotly_dark' if modeSombre else 'plotly_white'
 
 r1 = np.array([R_depart, 0.0, 0.0])
 
@@ -380,7 +386,7 @@ def update_plots(tof_days, theta_deg, display_options):
             name=f'Sélection: Δv={deltav_current:.0f} m/s'
         ))
     fig_surface.update_layout(
-        template='plotly_dark',
+        template=templateMode,
         title=f'Surface Δv(θ, temps) - C++ {cpp_version}<br>'
               f'<sub>{computation_time:.2f}s, {total_computations/computation_time:.0f} calc/s</sub>',
         scene=dict(
@@ -393,28 +399,49 @@ def update_plots(tof_days, theta_deg, display_options):
         height=500
     )
 
-    # --- Trajectoire 3D ---
+    # --- Trajectoire 2D ---
     fig_traj = go.Figure()
+    
     if 'mars_orbit' in display_options:
         theta_mars = np.linspace(0, 2*np.pi, 200)
-        mars_orbit = np.array([R_final*np.cos(theta_mars), R_final*np.sin(theta_mars), np.zeros_like(theta_mars)]).T
-        fig_traj.add_trace(go.Scatter3d(
-            x=mars_orbit[:,0], y=mars_orbit[:,1], z=mars_orbit[:,2],
-            mode='lines', line=dict(color='orange', width=width_mars, dash='dash'), name='Orbite Mars'
+        # Plus besoin de créer un tableau 3D, on calcule juste X et Y
+        fig_traj.add_trace(go.Scatter(
+            x=R_final * np.cos(theta_mars), 
+            y=R_final * np.sin(theta_mars),
+            mode='lines', line=dict(color='orange', width=width_mars, dash='dash'), 
+            name='Orbite Mars'
         ))
-    if traj.size>0:
-        fig_traj.add_trace(go.Scatter3d(
-            x=traj[:,0], y=traj[:,1], z=traj[:,2],
-            mode='lines', line=dict(color='blue', width=width_traj), name='Trajectoire fusée'
+        
+    if traj.size > 0:
+        fig_traj.add_trace(go.Scatter(
+            x=traj[:,0], 
+            y=traj[:,1], # On ignore totalement la colonne Z (traj[:,2])
+            mode='lines', line=dict(color='blue', width=width_traj), 
+            name='Trajectoire fusée'
         ))
-    # Soleil, départ, arrivée
-    fig_traj.add_trace(go.Scatter3d(x=[0], y=[0], z=[0], mode='markers', marker=dict(size=6, color='yellow'), name='Soleil'))
-    fig_traj.add_trace(go.Scatter3d(x=[r1[0]], y=[r1[1]], z=[r1[2]], mode='markers', marker=dict(size=5, color='green'), name='Départ'))
-    fig_traj.add_trace(go.Scatter3d(x=[r2[0]], y=[r2[1]], z=[r2[2]], mode='markers', marker=dict(size=5, color='red'), name='Arrivée'))
-    fig_traj.update_layout(template='plotly_dark', scene=dict(
-        xaxis_title='X (m)', yaxis_title='Y (m)', zaxis_title='Z (m)',
-        camera=dict(eye=dict(x=1.5, y=1.5, z=1))
-    ), height=500)
+        
+    # Soleil, départ, arrivée (marqueurs un peu plus gros en 2D pour bien les voir)
+    fig_traj.add_trace(go.Scatter(x=[0], y=[0], mode='markers', marker=dict(size=12, color='yellow'), name='Soleil'))
+    fig_traj.add_trace(go.Scatter(x=[r1[0]], y=[r1[1]], mode='markers', marker=dict(size=10, color='green'), name='Départ'))
+    fig_traj.add_trace(go.Scatter(x=[r2[0]], y=[r2[1]], mode='markers', marker=dict(size=10, color='red'), name='Arrivée'))
+    
+    fig_traj.update_layout(
+        template=templateMode,
+        xaxis_title='X (m)', 
+        yaxis_title='Y (m)',
+        xaxis=dict(
+            showgrid=grid,
+            zeroline=showAxis  # Optionnel : enlève aussi la ligne principale x=0
+        ),
+        # Désactivation de la grille sur l'axe Y + maintien du ratio 1:1
+        yaxis=dict(
+            scaleanchor="x",
+            scaleratio=1,
+            showgrid=grid,
+            zeroline=showAxis  # Optionnel : enlève aussi la ligne principale y=0
+        ),
+        height=500
+    )
 
     current_values = f"Δv actuel: {deltav_current:.2f} m/s | θ={theta_deg:.1f}°, ToF={tof_days:.1f} jours"
     detailed_info = f"Point final r2: {r2}"
