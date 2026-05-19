@@ -558,7 +558,7 @@ namespace SimuCore {
 			distribuée uniformément dans l'espace (3D ou 2D).
 		**/
 
-		glm::dvec2 vitesse_initiale = convert_to_circle_radius_1( // km/s
+		glm::dvec2 impulsions_initiale = convert_to_circle_radius_1( // km/s
 			glm::dvec2(
 				genome[1][0],
 				genome[1][1]
@@ -566,7 +566,7 @@ namespace SimuCore {
 		);
 
 		{ // traitement des cas dégénérés
-			double norme_vitesse_initiale = glm::length(vitesse_initiale);
+			double norme_vitesse_initiale = glm::length(impulsions_initiale);
 			if (norme_vitesse_initiale < SimuCore::constants::epsilon
 				|| norme_vitesse_initiale > 1) {
 
@@ -584,11 +584,11 @@ namespace SimuCore {
 
 		// vesc​(r) ≤∥v0​∥≤ 2vesc​(r)
 		{
-			glm::dvec2 direction = glm::normalize(vitesse_initiale);
+			glm::dvec2 direction = glm::normalize(impulsions_initiale);
 
 			const double v_liberation = start_planet.extractionVelocity(glm::length(position_initiale)); // km/s
-			vitesse_initiale *= v_liberation;
-			vitesse_initiale += (direction * v_liberation);
+			impulsions_initiale *= v_liberation;
+			impulsions_initiale += (direction * v_liberation);
 		}
 
 		// maintenant que la vitesse initiale est dans le bon anneau, on peut la mettre dans la fusée.
@@ -655,9 +655,12 @@ namespace SimuCore {
 		size_t nombre_impulsions = (genome.size() - 1) / 2; // c.f. cahier TIPE (2 vecteurs par impulsion + 1 vecteur pour p0)
 		std::vector<std::pair<Structures::Impulsion, double>> toutes_les_impulsions; // km/s et en jours
 		toutes_les_impulsions.reserve(nombre_impulsions);
+
+
+
 		toutes_les_impulsions.emplace_back(Structures::Impulsion(glm::dvec3(
-			vitesse_initiale.x,
-			vitesse_initiale.y,
+			impulsions_initiale.x,
+			impulsions_initiale.y,
 			0
 		)), constants::epsilon); // la première impulsion est toujours appliquée à t=0s. On met un temps très proche de 0 pour éviter les problèmes numériques.
 

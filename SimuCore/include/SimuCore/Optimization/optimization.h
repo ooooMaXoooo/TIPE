@@ -12,6 +12,9 @@
 #include <DataExport/TrajectoryData.h>
 #include <DataExport/GeneticData.h>
 #include <DataExport/PhysicsData.h>
+#include <DataExport/StatisticsData.h>
+
+#include <SimuCore/statistics/HAC.h>
 
 namespace SimuCore {
 	namespace Optimization {
@@ -73,7 +76,8 @@ namespace SimuCore {
 			genetic::CrossoverType cross_type, bool elitism, bool auto_adapt,
 			size_t population_size = 100, size_t max_generation = 5000,
 			size_t print_interval=100, bool verbose=false,
-			size_t snapshot_interval=10, bool saving_in_file=true)
+			size_t snapshot_interval=10, bool saving_in_file=true,
+			bool calculate_statistics=true)
 		{
 			using ConfigType = genetic::Config<double, uint32_t, 2*NbImpulsions + 1, 2>;
 			ConfigType config;
@@ -147,14 +151,15 @@ namespace SimuCore {
 				print_interval,
 				snapshot_interval,
 				saving_in_file,
+				calculate_statistics,
 				verbose,
 				file_directory,
 				&generationalExporter
 				]
 				(
 					size_t gen,
-					double best_fit, const genetic::Individu<ConfigType>& best_ind,
-					double worst_fit, const genetic::Individu<ConfigType>& /*worst_ind*/,
+					double best_fit, int best_i,
+					double worst_fit, int /*worst_i*/,
 					const std::vector<genetic::Individu<ConfigType>>& population
 					)
 				{
@@ -238,7 +243,7 @@ namespace SimuCore {
 						///////// Info physique du meilleur individu
 						{
 							SimuCore::Systems::AdaptedSystem copy_system = system;
-							auto [rocket, state] = SimuCore::IndividualToRocket(best_ind.to_real_vectors(), copy_system);
+							auto [rocket, state] = SimuCore::IndividualToRocket(population[best_i].to_real_vectors(), copy_system);
 
 
 							auto print_vec = [](glm::dvec3 vec) -> void {
@@ -320,105 +325,203 @@ namespace SimuCore {
 							SimuCore::Systems::AdaptedSystem copy_system = system;
 							///////// Envoi des données
 							{
-								std::filesystem::path filepath =
-									file_directory /
-									generate_snapshot_filename("txt", gen + 1, "rocket");
-
-								auto [rocket, state] = SimuCore::IndividualToRocket(best_ind.to_real_vectors(), copy_system);
-								copy_system.SetRocket(rocket);
-								std::vector<glm::dvec3> trajectory;
-								copy_system.GetRocketTrajectory(trajectory);
-
-								TrajectoryData trajectoryData{ trajectory, 2 };
-								try {
-									generationalExporter.enqueue(std::make_shared<TrajectoryData>(trajectoryData), filepath);
-								}
-								catch (const std::exception& e) {
-									std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
-									exit(EXIT_FAILURE);
-								}
+								// envoi des trajectoires et des impulsions du meilleur individu et des planètes de la génération dans un fichier
+								{
+									std::filesystem::path filepath =
+										file_directory /
+										generate_snapshot_filename("txt", gen + 1, "rocket");
 
 
 
-								// envoi des données physiques
+									auto [rocket, state] = SimuCore::IndividualToRocket(population[best_i].to_real_vectors(), copy_system);
+									copy_system.SetRocket(rocket);
+									std::vector<glm::dvec3> trajectory;
+									copy_system.GetRocketTrajectory(trajectory);
 
-								// en jours
-								double max_time = copy_system.getMaxTime();
-								// en secondes
-								double dt = copy_system.getDeltaTime();
-
-								uint8_t startPlanetIndex = SimuCore::Systems::AdaptedSystem::GetStartPlanetID();
-								uint8_t finalPlanetIndex = SimuCore::Systems::AdaptedSystem::GetFinalPlanetID();
-
-								glm::dvec3 startPlanet_initialPosition = copy_system.GetStartPlanet_StartPosition();
-								glm::dvec3 startPlanet_finalPosition = copy_system.GetStartPlanet_CurrentPosition();
-								glm::dvec3 finalPlanet_initialPosition = copy_system.GetFinalPlanet_StartPosition();
-								glm::dvec3 finalPlanet_finalPosition = copy_system.GetFinalPlanet_CurrentPosition();
-
-								// en km/s
-								glm::dvec3 finalVelocity_rocket = copy_system.GetRocketVelocity();
+									TrajectoryData trajectoryData{ trajectory, 2 };
+									try {
+										generationalExporter.enqueue(std::make_shared<TrajectoryData>(trajectoryData), filepath);
+									}
+									catch (const std::exception& e) {
+										std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
+										exit(EXIT_FAILURE);
+									}
 
 
-								std::vector<std::pair<SimuCore::Structures::Impulsion, double>> impulsions = rocket.getImpulsions();
 
-								std::vector<double> impulsions_times;
-								std::vector<glm::dvec3> impulsions_vectors;
+									// envoi des données physiques
 
-								impulsions_times.reserve(impulsions.size());
-								impulsions_vectors.reserve(impulsions.size());
+									// en jours
+									double max_time = copy_system.getMaxTime();
+									// en secondes
+									double dt = copy_system.getDeltaTime();
 
-								for (auto& impuls : impulsions) {
-									auto& [vec, instant] = impuls;
+									uint8_t startPlanetIndex = SimuCore::Systems::AdaptedSystem::GetStartPlanetID();
+									uint8_t finalPlanetIndex = SimuCore::Systems::AdaptedSystem::GetFinalPlanetID();
 
-									impulsions_times.emplace_back(instant);
-									impulsions_vectors.emplace_back(vec.GetDeltaV_vec());
-								}
+									glm::dvec3 startPlanet_initialPosition = copy_system.GetStartPlanet_StartPosition();
+									glm::dvec3 startPlanet_finalPosition = copy_system.GetStartPlanet_CurrentPosition();
+									glm::dvec3 finalPlanet_initialPosition = copy_system.GetFinalPlanet_StartPosition();
+									glm::dvec3 finalPlanet_finalPosition = copy_system.GetFinalPlanet_CurrentPosition();
 
-								bool etat_lie = false;
-
-								// en km
-								auto [r_min, r_max] = copy_system.GetApsidesAroundFinalPlanet(&etat_lie);
-								
-
-								r_min = meters_to_kilometers(r_min);
-								r_max = meters_to_kilometers(r_max);
-
-								constexpr uint8_t dimension = 2;
+									// en km/s
+									glm::dvec3 finalVelocity_rocket = copy_system.GetRocketVelocity();
 
 
-								double tof = trajectory.size() * dt / 86400.0; // en jours
-								double delta_v = rocket.getDeltaV(tof);
+									std::vector<std::pair<SimuCore::Structures::Impulsion, double>> impulsions = rocket.getImpulsions();
 
-								std::cout << "\tTime of flight : " << tof << " (jours)\n";
-								std::cout << "\tDelta V : " << delta_v << " (km/s)\n";
+									std::vector<double> impulsions_times;
+									std::vector<glm::dvec3> impulsions_vectors;
 
-								PhysicsData phys_data{ max_time, dt, startPlanetIndex, finalPlanetIndex,
-									startPlanet_initialPosition,
-									finalPlanet_initialPosition,
-									startPlanet_finalPosition,
-									finalPlanet_finalPosition,
-									finalVelocity_rocket,
-									impulsions_times,
-									impulsions_vectors,
-									tof, delta_v,
-									etat_lie, r_min, r_max,
-									dimension
-								};
+									impulsions_times.reserve(impulsions.size());
+									impulsions_vectors.reserve(impulsions.size());
 
-								std::filesystem::path filepath_physics_data =
+									for (auto& impuls : impulsions) {
+										auto& [vec, instant] = impuls;
+
+										impulsions_times.emplace_back(instant);
+										impulsions_vectors.emplace_back(vec.GetDeltaV_vec());
+									}
+
+									bool etat_lie = false;
+
+									// en km
+									auto [r_min, r_max] = copy_system.GetApsidesAroundFinalPlanet(&etat_lie);
+
+
+									r_min = meters_to_kilometers(r_min);
+									r_max = meters_to_kilometers(r_max);
+
+									constexpr uint8_t dimension = 2;
+
+
+									double tof = trajectory.size() * dt / 86400.0; // en jours
+									double delta_v = rocket.getDeltaV(tof);
+
+									std::cout << "\tTime of flight : " << tof << " (jours)\n";
+									std::cout << "\tDelta V : " << delta_v << " (km/s)\n";
+
+									PhysicsData phys_data{ max_time, dt, startPlanetIndex, finalPlanetIndex,
+										startPlanet_initialPosition,
+										finalPlanet_initialPosition,
+										startPlanet_finalPosition,
+										finalPlanet_finalPosition,
+										finalVelocity_rocket,
+										impulsions_times,
+										impulsions_vectors,
+										tof, delta_v,
+										etat_lie, r_min, r_max,
+										dimension
+									};
+
+									std::filesystem::path filepath_physics_data =
 									file_directory /
 									generate_snapshot_filename("txt", gen + 1, "physics");
 
-								try {
-									generationalExporter.enqueue(std::make_shared<PhysicsData>(phys_data), filepath_physics_data);
+									try {
+										generationalExporter.enqueue(std::make_shared<PhysicsData>(phys_data), filepath_physics_data);
+									}
+									catch (const std::exception& e) {
+										std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
+										exit(EXIT_FAILURE);
+									}
 								}
-								catch (const std::exception& e) {
-									std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
-									exit(EXIT_FAILURE);
-								}
-							}
-						}
-					}
+
+
+								///////////////////////////////////////////
+								//                 Stats                 //
+								///////////////////////////////////////////
+
+								if (calculate_statistics) {
+									/** On veut :
+									* - le nombre de patates (clusters) de la population
+									* - meilleur score de la population
+									* - pire score de la population
+									* - score moyen de la population
+									* - le nombre de fusée ayant un même état, pour chaque état, i.e la taille de chaque état
+									*/
+
+									/**
+									*
+									*	 0 ~~> Collision start panet with high speed
+									*	 1 ~~> Collision start panet with low speed
+									*	 2 ~~> Collision sun with high speed
+									*	 3 ~~> Collision sun with low speed
+									*	 4 ~~> Acceleration too high
+									*	 5 ~~> Rocket get too far in the system
+									*	 6 ~~> Collision final panet with high speed
+									*	 7 ~~> Collision final panet with low speed
+									*	 8 ~~> Neutral : not in ring
+									*	 9 ~~> Neutral : in ring but not in orbit
+									*	10 ~~> Neutral : in orbit but too large
+									*	11 ~~> Valid
+									* 
+									*/
+									int kinds[12] = { 0 };
+
+									auto type_of_trajectory = [&](double fitness) -> int {
+										if (fitness < 0) return -1;
+
+										constexpr double cste = 1.0 / SimuCore::Systems::AdaptedSystem::m_CstScore;
+
+										if (fitness < 8*cste) {
+											return static_cast<int>(fitness / cste);
+										}
+										else if (fitness < 8.33*cste) {
+											return 8;
+										}
+										else if (fitness < 8.66*cste) {
+											return 9;
+										}
+										else if (fitness < 9*cste) {
+											return 10;
+										}
+										else {
+											return 11;
+										}
+									};
+
+									double score_mean = 0;
+
+									for (const auto& ind : population) {
+
+										if (ind.have_been_evaluated()) {
+											double fitness = ind.get_fitness();
+											score_mean += fitness;
+
+											kinds[type_of_trajectory(fitness)]++;
+										}
+										else {
+											assert(false && "Un individu n'a pas ete evalue, alors que tous les individus devraient l'etre à ce stade de l'algorithme genetique.");
+											std::abort();
+										}
+									} // boucle for sur la population
+
+									score_mean /= population.size();
+
+									SimuCore::Systems::AdaptedSystem copy_system = system;
+									std::vector<SimuCore::Statistics::Cluster> clusters = SimuCore::Statistics::HAC<NbImpulsions>(population, copy_system);
+
+
+									StatisticsData stats_data{clusters.size(), best_fit, worst_fit, score_mean, kinds};
+
+
+									std::filesystem::path filepath_stats_data =
+										file_directory /
+										generate_snapshot_filename("txt", gen + 1, "stats");
+
+									try {
+										generationalExporter.enqueue(std::make_shared<StatisticsData>(stats_data), filepath_stats_data);
+									}
+									catch (const std::exception& e) {
+										std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
+										exit(EXIT_FAILURE);
+									}
+
+								} // if calculate_statistics
+							} // bloc envoi donnéees
+						} // if snapshot
+					} // callback
 				};
 
 			ga.reset(config); // initialisation de l'algo génétique

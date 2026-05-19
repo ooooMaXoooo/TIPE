@@ -153,6 +153,7 @@
     <ClInclude Include="include\DataExport\AsyncDataExporter.h" />
     <ClInclude Include="include\DataExport\GeneticData.h" />
     <ClInclude Include="include\DataExport\PhysicsData.h" />
+    <ClInclude Include="include\DataExport\StatisticsData.h" />
     <ClInclude Include="include\DataExport\TrajectoryData.h" />
     <ClInclude Include="include\GaLib\genetic.hpp" />
     <ClInclude Include="include\GaLib\genetic_algorithm.hpp" />
@@ -163,6 +164,8 @@
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\SimuCore\constants.h" />
     <ClInclude Include="include\SimuCore\Optimization\optimization.h" />
+    <ClInclude Include="include\SimuCore\statistics\HAC.h" />
+    <ClInclude Include="include\SimuCore\statistics\Patate.h" />
     <ClInclude Include="include\SimuCore\structures\Entity.h" />
     <ClInclude Include="include\SimuCore\structures\Planet.h" />
     <ClInclude Include="include\SimuCore\structures\Rocket.h" />
@@ -179,6 +182,7 @@
   <ItemGroup>
     <ClInclude Include="include\SimuCore.h" />
     <ClCompile Include="src\DataExport\AsyncDataExporter.cpp" />
+    <ClCompile Include="src\DataExport\StatisticsData.cpp" />
     <ClCompile Include="src\SimuCore\integrator\integrator.cpp" />
     <ClCompile Include="src\SimuCore\Optimization\optimization.cpp" />
     <ClCompile Include="src\pch.cpp">
@@ -187,6 +191,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\SimuCore\statistics\HAC.cpp" />
+    <ClCompile Include="src\SimuCore\statistics\Patate.cpp" />
     <ClCompile Include="src\SimuCore\structures\Entity.cpp" />
     <ClCompile Include="src\SimuCore\structures\Planet.cpp" />
     <ClCompile Include="src\SimuCore\structures\Rocket.cpp" />

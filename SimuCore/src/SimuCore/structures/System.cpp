@@ -412,7 +412,7 @@ namespace SimuCore::Systems {
 				double ratio = mecanical_energy / min_energie_potentielle_effective; // en nombre sans unité, qu'on cherche à maximiser
 
 				int constexpr puissance = 1;
-				influence_position += (0.34 * std::pow(ratio, puissance)) / m_CstScore;
+				influence_position += (0.34 * ratio) / m_CstScore;
 				// on prend la racine de la vitesse pour que l'influence de la vitesse soit grandit d'autant plus
 				// que le vitesse finale est faible.
 			}

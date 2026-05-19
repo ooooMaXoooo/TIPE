@@ -16,3 +16,27 @@ def DrawRing(planete, k, ax, nom, couleur, position):
    anneau_max = plt.Circle(position, Rayons_astres[planete] + altitude_max(planete, k), color=couleur, linestyle='-', fill=False, label=nom+'_max')
    ax.add_artist(anneau_min)
    ax.add_artist(anneau_max)
+
+def affiche_impulsions (impulsions, dt, x_fusee, y_fusee, ax) :
+   for t, dv in impulsions:
+      index = int((t * 86400) / dt)
+
+      if index < len(x_fusee):
+
+         x = x_fusee[index]
+         y = y_fusee[index]
+
+         # point d'impulsion
+         ax.plot(x, y, 'ko')  # point noir
+
+         # vecteur impulsion
+         scale = 5*1e7  # ajuste selon visibilité
+
+         ax.quiver(
+               x, y,
+               dv[0]*scale, dv[1]*scale,
+               angles='xy',
+               scale_units='xy',
+               scale=1,
+               color='green'
+         )

@@ -32,6 +32,8 @@ namespace SimuCore {
 			/// </summary>
 			/// <returns> km/s </returns>
 			const glm::dvec3& GetDeltaV_vec() const noexcept { return velocity; }
+
+			friend Impulsion operator-(const Impulsion& I1, const Impulsion& I2);
 		};
 
 		struct Rocket : public Entity {
@@ -55,7 +57,7 @@ namespace SimuCore {
 			Rocket(
 				double _lifetime,
 				std::vector<std::pair<Impulsion, double>> impulsions,
-				double m, 
+				double m,
 				double vitesse_ejection_gaz,
 				glm::dvec3 p0 = glm::dvec3(0, 0, 0),
 				glm::dvec3 v0 = glm::dvec3(0, 0, 0)
@@ -81,6 +83,9 @@ namespace SimuCore {
 				}
 				return *this;
 			}
+
+			friend Rocket operator-(const Rocket& r1, const Rocket& r2);
+
 
 			/// <summary>
 			/// Première partie de l'intégration de la position et de la vitesse de l'entité, selon le schéma de Verlet à 2 étapes.
@@ -169,6 +174,21 @@ namespace SimuCore {
 			/// </summary>
 			/// <returns> km/s et jours </returns>
 			const std::vector<std::pair<Impulsion, double>>& getImpulsions() const noexcept { return m_Impulsions; }
+
+			double Norme() const noexcept {
+
+				double norme_instants = 0, norme_impulsions = 0;
+
+				for (auto& [impuls, date] : m_Impulsions) {
+					norme_instants += std::abs(date);
+					norme_impulsions += impuls.Length();
+				}
+
+				return glm::length(position) + norme_impulsions + norme_instants;
+			} // Norme
 		};
-	};
-};
+
+		double distance(const Rocket& r1, const Rocket& r2);
+
+	}; // namespace Structures
+}; // namespace SimuCore

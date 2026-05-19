@@ -20,6 +20,11 @@ public:
 	/// <param name="final_rocket_velocity"> en km/s </param>
 	/// <param name="impulse_times"> jours </param>
 	/// <param name="impulse_vectors"> km/s </param>
+	/// <param name="tof"> en jours </param>
+	/// <param name="delta_v"> en km/s </param>
+	/// <param name="etat_lie"> bool </param>
+	/// <param name="r_min"> en km </param>
+	/// <param name="r_max"> en km </param>
 	/// <param name="dimension"> uint16_t </param>
 	PhysicsData(
 		double simulation_time,
@@ -117,23 +122,34 @@ public:
 private:
 	double m_dimension;
 
+	// en jours
 	double m_simulation_time;
+	// en secondes
 	double m_time_step;
 
+	
 	uint8_t m_start_planet_index;
 	uint8_t m_final_planet_index;
 
 	size_t m_number_of_impulsions;
 
+	// en UA
 	glm::dvec3 m_start_planet_start_position;
+	//en UA
 	glm::dvec3 m_final_planet_start_position;
 
+	// en UA
 	glm::dvec3 m_start_planet_final_position;
+	// en UA
 	glm::dvec3 m_final_planet_final_position;
 
+	// en km/s
 	glm::dvec3 m_final_rocket_velocity;
 
+	// en jours
 	std::vector<double> m_impulse_times;
+
+	// en km/s
 	std::vector<glm::dvec3> m_impulse_vectors;
 
 	bool m_etat_lie;

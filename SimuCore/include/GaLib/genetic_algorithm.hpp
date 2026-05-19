@@ -41,7 +41,9 @@ public:
      * Takes vectors of real values and returns a fitness score (higher is better)
      */
     using FitnessFunction = typename std::function<Real(const std::vector<std::vector<Real>>&)>;
-    using CallbackFunctionType = typename std::function<void(size_t, Real, const Individual&, Real, const Individual&, const Population&)>;
+
+	// generation - > best fitness - > best individual indice -> worst fitness -> worst individual indice -> population
+    using CallbackFunctionType = typename std::function<void(size_t, Real, int, Real, int, const Population&)>;
 
 private:
     ConfigType m_config;
@@ -52,9 +54,11 @@ private:
 
     Real m_best_fitness;
     Individual m_best_individual;
+    int m_best_individual_index;
 
     Real m_worst_fitness;
-    Individual m_worst_individual;
+    //Individual m_worst_individual;
+    int m_worst_individual_index;
 
     // section pour la fonction selection
     std::uniform_int_distribution<size_t> m_index_dist;
@@ -102,9 +106,9 @@ public:
      * @param callback Optional callback called after each generation, it takes in order :
             - the current_generation
             - the best fitness
-            - the best individual
+            - the best individual indice
             - the worst fitness
-            - the worst individual
+            - the worst individual indice
             - the vector of all individual in the current generation
      */
     Individual run(bool verbose = true, CallbackFunctionType callback = nullptr) {
@@ -145,7 +149,7 @@ public:
                     std::cout << std::setprecision(3) << std::defaultfloat;
                     if (m_config.enable_auto_adaptation) {
                         std::cout << " ~ Proba Array: ";
-                        affiche_proba_array(m_best_individual);
+                        affiche_proba_array(m_population[m_best_individual_index]);
                     }
                 }
 
@@ -154,7 +158,7 @@ public:
                     std::cout << "\n\tWorst fitness: " << m_worst_fitness;
                     if (m_config.enable_auto_adaptation) {
                         std::cout << " ~ Proba Array: ";
-                        affiche_proba_array(m_worst_individual);
+                        affiche_proba_array(m_population[m_worst_individual_index]);
                     }
                 }
 
@@ -180,16 +184,16 @@ public:
             }
 
             if (callback) {
-                callback(gen, m_best_fitness, m_best_individual, m_worst_fitness, m_worst_individual, m_population);
+                callback(gen, m_best_fitness, m_best_individual_index, m_worst_fitness, m_worst_individual_index, m_population);
             }
         }
 
         if (verbose) {
             std::cout << "\nFinal best fitness: " << m_best_fitness << std::endl;
-            std::cout << "Best individual:\n" << m_best_individual << std::endl;
+            std::cout << "Best individual:\n" << m_population[m_best_individual_index] << std::endl;
         }
 
-		return m_best_individual;
+		return m_population[m_best_individual_index];
     }
 
     void reset(const ConfigType& config) {
@@ -202,6 +206,8 @@ public:
         m_cut_dist = std::uniform_int_distribution<size_t>(0, (config.dimension * config.integer_bits) - 1);
         m_cut_dist_proba = std::uniform_int_distribution<size_t>(0, ((config.number_of_vectors + 1) * config.integer_bits) - 1);
 
+        m_best_individual_index = 0;
+        m_worst_individual_index = 0;
         m_best_individual = Individual(m_config, m_rng);
         initialize_population();
 
@@ -213,8 +219,8 @@ public:
 
     [[nodiscard]] Real get_best_fitness() const { return m_best_fitness; }
     [[nodiscard]] Real get_worst_fitness() const { return m_worst_fitness; }
-    [[nodiscard]] const Individual& get_best_individual() const { return m_best_individual; }
-    [[nodiscard]] const Individual& get_worst_individual() const { return m_worst_individual; }
+    [[nodiscard]] const Individual& get_best_individual() const { return m_population[m_best_individual_index]; }
+    [[nodiscard]] const Individual& get_worst_individual() const { return m_population[m_worst_individual_index]; }
     [[nodiscard]] const Population& get_population() const { return m_population; }
     [[nodiscard]] const Config<Real, Integer>& get_config() const { return m_config; }
 
@@ -619,16 +625,16 @@ private:
     void update_best() {
         Real best_fitness_local = std::numeric_limits<Real>::lowest();
         Real worst_fitness_local = std::numeric_limits<Real>::max();
-        Individual best_ind_local;
-        Individual worst_ind_local;
+        int best_indice_local = -1;
+        int worst_indice_local = -1;
 
         #pragma omp parallel
         {
             Real thread_best = std::numeric_limits<Real>::lowest();
-            Individual thread_best_ind;
+            int thread_best_indice = -1;
 
             Real thread_worst = std::numeric_limits<Real>::lowest();
-            Individual thread_worst_ind;
+            int thread_worst_indice = -1;
 
             // Parcours parallèle
             #pragma omp for nowait
@@ -636,11 +642,11 @@ private:
                 Real f = m_population[i].get_fitness();
                 if (f > thread_best) {
                     thread_best = f;
-                    thread_best_ind = m_population[i];
+                    thread_best_indice = i;
                 }
                 else if (f < thread_worst) {
                     thread_worst = f;
-                    thread_worst_ind = m_population[i];
+                    thread_worst_indice = i;
                 }
             }
 
@@ -649,22 +655,24 @@ private:
             {
                 if (thread_best > best_fitness_local) {
                     best_fitness_local = thread_best;
-                    best_ind_local = thread_best_ind;
+                    best_indice_local = thread_best_indice;
                 }
                 
                 if (thread_worst < worst_fitness_local) {
                     worst_fitness_local = thread_worst;
-                    worst_ind_local = thread_worst_ind;
+                    worst_indice_local = thread_worst_indice;
                 }
             }
         }
 
         // Mise à jour finale
         m_best_fitness = best_fitness_local;
-        m_best_individual = best_ind_local;
+        m_best_individual_index = best_indice_local;
 
         m_worst_fitness = worst_fitness_local;
-        m_worst_individual = worst_ind_local;
+        m_worst_individual_index = worst_indice_local;
+
+		m_best_individual = m_population[best_indice_local];
     }
 
 
@@ -672,6 +680,7 @@ private:
         // on sélectionne aléatoirement un individu, qu'on remplace par le meilleur actuel pré-sauvegardé
         size_t indice = m_index_dist(m_rng);
         m_population[indice] = m_best_individual;
+        m_best_individual_index = indice;
     }
 };
 }  // namespace genetic
