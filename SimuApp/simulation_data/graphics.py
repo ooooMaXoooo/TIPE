@@ -30,7 +30,7 @@ def affiche_impulsions (impulsions, dt, x_fusee, y_fusee, ax) :
          ax.plot(x, y, 'ko')  # point noir
 
          # vecteur impulsion
-         scale = 5*1e7  # ajuste selon visibilité
+         scale = 3*1e7  # ajuste selon visibilité
 
          ax.quiver(
                x, y,
@@ -40,3 +40,18 @@ def affiche_impulsions (impulsions, dt, x_fusee, y_fusee, ax) :
                scale=1,
                color='green'
          )
+
+def barre_chargement (value, max_value, size, fill_char='#', empty_char='_') :
+   if (value >= max_value) :
+      print() # sautement de ligne
+   else :
+      proportion = value / max_value
+      nb_filled = int(proportion * size)
+
+      print('\r', end='')
+      for _ in range(nb_filled) :
+         print(fill_char, end='')
+      for _ in range(size-nb_filled) :
+         print(empty_char, end='')
+
+      print(f" - {proportion * 100}%", end='')

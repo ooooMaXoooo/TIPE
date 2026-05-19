@@ -1,7 +1,3 @@
-# Jules METAIREAU
-# TIPE
-# 12/02/2026
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -38,7 +34,7 @@ def affiche_console (tof, max_time, dt, delta_v, planete_depart, planete_arrivee
         index = int((t * 86400) / dt)
 
         if index < nbPointsTraj:
-            print(f"delta v {i} km/s - de norme {np.linalg.norm(dv)} km/s")
+            print(f"delta_v {i} de norme {np.linalg.norm(dv)} km/s")
             i+=1
 
 
@@ -87,38 +83,55 @@ def affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee,
     ax.set_title("Trajectoire des objets du système - gen " + str(generation))
     ax.set_xlabel("x (km)")
     ax.set_ylabel("y (km)")
-    ax.grid(True)
+    ax.grid(False)
     #ax.legend()
     return fig, ax
 
+def _affiche_generation_sur_ax(fig, ax, dossier, generation, verbose=False):
+    x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee = [], [], [], [], [], []
 
-def affiche_fichier (dossier, generation, window_title="Mon super titre", verbose=True) :
-    x_depart = []
-    y_depart = []
-
-    x_finale = []
-    y_finale = []
-
-    x_fusee = []
-    y_fusee = []
-                    
-    # Recuperation des données
     ImportData.init_liste(dossier + "/start_planet.txt", x_depart, y_depart)
     ImportData.init_liste(dossier + "/final_planet.txt", x_finale, y_finale)
     ImportData.init_liste(dossier + "/gen_" + str(generation) + "_rocket.txt", x_fusee, y_fusee)
     tof, max_time, dt, delta_v, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_finale, impulsions, est_etat_lie, r_min, r_max = ImportData.lire_donnees(dossier + "/gen_" + str(generation) + "_physics.txt")
 
-    if verbose :
+    if verbose:
         affiche_console(tof, max_time, dt, delta_v, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_finale, impulsions, est_etat_lie, r_min, r_max, len(x_fusee))
-    
-    # conversion
-    pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee = conversion_data(pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee)
-    
 
-    # Affichage de l'orbite
-    fig, ax = plt.subplots(figsize=(6, 6))
+    pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee = conversion_data(pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee)
+
+    affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, generation)
+
+
+def affiche_grille(dossiers_generations, layout, window_title="Trajectoires", verbose=False):
+    """
+    dossiers_generations : liste de tuples (dossier, generation)
+    layout               : tuple (nrows, ncols)
+    """
+    nrows, ncols = layout
+    assert len(dossiers_generations) <= nrows * ncols, "Plus de graphiques que de cases dans le layout"
+
+    fig, axes = plt.subplots(nrows, ncols, figsize=(6 * ncols, 6 * nrows))
     fig.canvas.manager.set_window_title(window_title)
 
-    fig, ax = affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_finale, y_finale, x_fusee, y_fusee, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, generation)
-    return fig, ax
+    # Normalise axes en liste 1D quelle que soit la forme du layout
+    axes_flat = np.array(axes).flatten()
 
+    for ax, (dossier, generation) in zip(axes_flat, dossiers_generations):
+        _affiche_generation_sur_ax(fig, ax, dossier, generation, verbose=verbose)
+
+    # Masque les axes inutilisés si le layout n'est pas rempli
+    for ax in axes_flat[len(dossiers_generations):]:
+        ax.set_visible(False)
+
+    fig.tight_layout()
+    return fig, axes_flat
+
+def affiche_fichier(dossier, generation, window_title="Trajectoire", verbose=True):
+    fig, axes = affiche_grille([(dossier, generation)], layout=(1, 1), window_title=window_title, verbose=verbose)
+    return fig, axes[0]
+
+def affiche_couple_generations(dir1, dir2, couple_gen, window_title="Title", verbose=False):
+    entries = [(dir1, couple_gen[0]), (dir2, couple_gen[1])]
+    fig, axes = affiche_grille(entries, layout=(1, 2), window_title=window_title, verbose=verbose)
+    return fig, axes[0], axes[1]

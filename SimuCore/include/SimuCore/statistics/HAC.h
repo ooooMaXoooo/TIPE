@@ -88,7 +88,7 @@ namespace SimuCore {
 		std::vector<Cluster> HAC(const Pop<NbImpulsions>& population, const SimuCore::Systems::AdaptedSystem& system) {
 			std::vector<std::pair<SimuCore::Structures::Rocket, size_t>> rockets_and_indices = population_to_rockets<NbImpulsions>(population, system);
 
-			constexpr double dissimilarity_threshold = 0.5; // à ajuster en fonction des résultats
+			constexpr double dissimilarity_threshold = 50; // à ajuster en fonction des résultats
 
 			// on initialise les patates avec une fusée chacune
 			std::vector<Patate> patates;

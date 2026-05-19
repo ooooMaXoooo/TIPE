@@ -1,4 +1,0 @@
-1 | simu_12_05_2026_17_51_47 - 6001 - elitism on - autoadapt off - 1k pop - 2 impuls - 700 tonnes - 4.5 km/s ejection
-2 | simu_12_05_2026_18_33_51 - 1501 - elitism on - autoadapt off - 1k pop - 2 impuls - 700 tonnes - 4.5 km/s ejection
-3 | simu_12_05_2026_18_45_51 - 1201 - elitism on - autoadapt off - 1k pop - 2 impuls - 700 tonnes - 4.5 km/s ejection
-4 | simu_12_05_2026_18_54_20 - 2951 - elitism on - autoadapt off - 1k pop - 2 impuls - 700 tonnes - 4.5 km/s ejection

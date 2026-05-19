@@ -51,20 +51,6 @@ pc.print_color("All imports successful!", pc.Color.Green)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 AU = 149597870700.0 # en m
 
 
@@ -80,18 +66,24 @@ R_Saturne = 9.54 * AU
 R_Uranus  = 19.18 * AU
 R_Neptune = 30.11 * AU 
 
-R_final = R_Mars
+R_final = R_Jupiter
 R_depart = R_Terre
 
 
 # === Paramètres utilisateur ===
 n_points = 500
-tof_min_days, tof_max_days = 50, 500
+tof_min_days, tof_max_days = 900, 1100
 theta_min, theta_max = np.pi + 0.01 , 3 * np.pi - 0.01
-tof_chosen_days, theta_chosen = 400, np.deg2rad(45 + 360)
+tof_chosen_days, theta_chosen = 1000, np.deg2rad(45 + 360)
 
-width_mars = 2
+width_mars = 3
 width_traj = 3
+
+taille_point_Soleil = 14
+taille_point_Terre = 12
+taille_point_Final = 12
+
+couleur_soleil = "#D9BF12"
 
 grid = False
 showAxis = False
@@ -408,8 +400,8 @@ def update_plots(tof_days, theta_deg, display_options):
         fig_traj.add_trace(go.Scatter(
             x=R_final * np.cos(theta_mars), 
             y=R_final * np.sin(theta_mars),
-            mode='lines', line=dict(color='orange', width=width_mars, dash='dash'), 
-            name='Orbite Mars'
+            mode='lines', line=dict(color='#000000', width=width_mars, dash='dash'), 
+            name="Orbite planète d'arrivée"
         ))
         
     if traj.size > 0:
@@ -421,9 +413,9 @@ def update_plots(tof_days, theta_deg, display_options):
         ))
         
     # Soleil, départ, arrivée (marqueurs un peu plus gros en 2D pour bien les voir)
-    fig_traj.add_trace(go.Scatter(x=[0], y=[0], mode='markers', marker=dict(size=12, color='yellow'), name='Soleil'))
-    fig_traj.add_trace(go.Scatter(x=[r1[0]], y=[r1[1]], mode='markers', marker=dict(size=10, color='green'), name='Départ'))
-    fig_traj.add_trace(go.Scatter(x=[r2[0]], y=[r2[1]], mode='markers', marker=dict(size=10, color='red'), name='Arrivée'))
+    fig_traj.add_trace(go.Scatter(x=[0], y=[0], mode='markers', marker=dict(size=taille_point_Soleil, color=couleur_soleil), name='Soleil'))
+    fig_traj.add_trace(go.Scatter(x=[r1[0]], y=[r1[1]], mode='markers', marker=dict(size=taille_point_Terre, color='green'), name='Départ'))
+    fig_traj.add_trace(go.Scatter(x=[r2[0]], y=[r2[1]], mode='markers', marker=dict(size=taille_point_Final, color='red'), name='Arrivée'))
     
     fig_traj.update_layout(
         template=templateMode,

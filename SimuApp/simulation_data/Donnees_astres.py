@@ -13,6 +13,7 @@ Distances_au_soleil  = [        0,   5.81E+07, 1.08E+08, 1.50E+08, 2.28E+08, 7.8
 
 k = 10 # facteur de domination : l'attraction d'une planète sur l'attraction du soleil
 
+mu_soleil = G * Masses[0]
 
 
 
@@ -30,7 +31,7 @@ def epaisseur_anneau(planete, k):   # en km
    """
    return altitude_max(planete, k) - Exobases[planete]
 
-def rayon_max(planete, k):  # en km
+def rayon_max(planete, k = 10):  # en km
    """
    Calcul le rayon correspondant à l'altitude maximale (voir la fonction liée).
    Le résultat est en km.
@@ -43,3 +44,9 @@ def energie_potentielle_effective (planete : int, r : float, mass : float, const
    mu = G * Masses[planete]
    C_a = constante_des_aires # norme de OM ^ v, dans le référentiel de la planète en question
    return mass * ((0.5 * (C_a * C_a * un_sur_r)) - (mu * un_sur_r)) * un_sur_r
+
+def vitesse_de_liberation(distance : float, mu : float) -> float :  #USI
+    return np.sqrt(2*mu/distance)
+
+def vitesse_orbite_circulaire(distance, mu) :
+    return np.sqrt(mu/distance)
