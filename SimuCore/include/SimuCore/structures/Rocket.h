@@ -175,20 +175,7 @@ namespace SimuCore {
 			/// <returns> km/s et jours </returns>
 			const std::vector<std::pair<Impulsion, double>>& getImpulsions() const noexcept { return m_Impulsions; }
 
-			double Norme() const noexcept {
-
-				double norme_instants = 0, norme_impulsions = 0;
-
-				for (auto& [impuls, date] : m_Impulsions) {
-					norme_instants += std::abs(date);
-					norme_impulsions += impuls.Length();
-				}
-
-				return glm::length(position) + norme_impulsions + norme_instants;
-			} // Norme
+			friend double distance(const Rocket& r1, const Rocket& r2);
 		};
-
-		double distance(const Rocket& r1, const Rocket& r2);
-
 	}; // namespace Structures
 }; // namespace SimuCore

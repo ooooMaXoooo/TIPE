@@ -16,11 +16,11 @@ if affiche_traj_simple :
     plt.show()
 
 else :
-    dir1 = "simu_18_05_2026_14_37_28__super"
-    dir2 = "simu_18_05_2026_15_57_44__cool"
+    dir1 = "simu_19_05_2026_10_54_59"
+    dir2 = "simu_18_05_2026_14_37_28__super"
     
-    max_generation_1 = 180
-    max_generation_2 = 43
+    max_generation_1 = 200
+    max_generation_2 = 180
 
 
 
@@ -50,7 +50,7 @@ else :
     fig1, _, _ = affiche_couple_generations(dir1, dir2, i_j_min, window_title=f"Min - {d_min:.2f}", verbose=False)
     fig2, _, _ = affiche_couple_generations(dir1, dir2, i_j_max, window_title=f"Max - {d_max:.2f}", verbose=False)
 
-    output_dir = "distances_trajectoires/" + dir1 + "-" + dir2 + '/'
+    output_dir = "distances_trajectoires_distv1/" + dir1 + "-" + dir2 + '/'
 
     i_min, j_min = i_j_min
     i_max, j_max = i_j_max

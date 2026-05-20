@@ -26,7 +26,11 @@ namespace SimuCore {
 		}
 
 		double distance(const Rocket& r1, const Rocket& r2) {
-			return (r1 - r2).Norme();
+			// On va définir une "distance" entre deux fusées sans utiliser de normes.
+			// 
+			// Afin de coller à la version python, nous avons besoin de connaître le tof.
+			// Il nous est donc nécessaire de faire une simulation de la trajectoire pour en déduire le tof.
+			// Cependant, si nous faisons une simulation complète, autant faire une distance de Fréchet, et cela serait très coûteux en temps de calcul.
 		}
 
 	}; // namespace Structures

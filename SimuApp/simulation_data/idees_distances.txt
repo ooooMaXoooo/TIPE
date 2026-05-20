@@ -1,0 +1,6 @@
+... + [norm1 - (v1.v2 / norm1)] + ...
+    --> ce terme est compris dans le segment [norm1 - norm2, norm1 + norm2]
+    --> c'est simple à envoyer par bijection dans [0,1]
+
+
+centrepidicité des impulsions

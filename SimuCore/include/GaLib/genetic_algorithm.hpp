@@ -247,11 +247,6 @@ private:
                 auto real_vecs = m_population[i].to_real_vectors();
                 Real eval = m_fitness_func(real_vecs);
                 m_population[i].set_fitness(eval);
-
-                /*#pragma omp critical
-                {
-                    std::cout << "Individu " << i << " fitness: " << eval << '\n';
-                }*/
             }
         }
     }
