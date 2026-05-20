@@ -177,4 +177,40 @@ namespace SimuCore::Integrator {
 			}
 		}
 	}
+
+	SimuCore::Systems::AdaptedSystem::RocketState Simulate(double dt, double max_time, double mass, glm::dvec3 initial_pos, glm::dvec3 initial_velocity, size_t final_planet_pos_indice, uint8_t nb_impulsions, std::vector<glm::dvec3> impulsions, std::vector<double> dates, SimuCore::Systems::PlanetsName startPlanet, SimuCore::Systems::PlanetsName finalPlanet, bool arretPasNeutre, std::vector<glm::dvec3>* positions) {
+	{
+			std::vector<std::pair<SimuCore::Structures::Impulsion, double>> impulsionsTraduites;
+			impulsionsTraduites.reserve(nb_impulsions);
+			for (size_t i = 0; i < nb_impulsions; i++) {
+				impulsionsTraduites.push_back({ impulsions[i], dates[i] });
+			}
+
+		SimuCore::Systems::AdaptedSystem sys(
+			startPlanet,
+			finalPlanet,
+			SimuCore::Structures::Rocket{ max_time, impulsionsTraduites, mass, 2.2,  initial_pos, initial_pos },
+			max_time, dt);
+
+		if (!SimuCore::Systems::AdaptedSystem::Is_initialized()) {
+			sys.Initialize();
+		}
+
+		// initialiser les planètes
+		sys.SetFinalPlanetPosition(final_planet_pos_indice);
+		sys.SetStartPlanetPosition(0); // toujours ici
+
+
+		if (positions != nullptr) {
+			// on va utiliser getRocketsTrajectory
+			sys.GetRocketTrajectory(*positions);
+		}
+		else {
+			// on va utiliser Run
+		}
+
+
+		return SimuCore::Systems::AdaptedSystem::RocketState();
+	}
+
 };

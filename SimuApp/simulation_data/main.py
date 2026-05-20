@@ -6,7 +6,7 @@ import os
 
 plt.close("all")
 
-affiche_traj_simple = False
+affiche_traj_simple = True
 
 if affiche_traj_simple :
     dossier = "simu_17_05_2026_15_12_55__super"

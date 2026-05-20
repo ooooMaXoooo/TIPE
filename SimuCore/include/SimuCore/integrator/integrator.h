@@ -46,5 +46,9 @@ namespace SimuCore {
 		void VelocityVerletIntegrator(std::vector<Entity*>& entities, double dt, double t_simu);
 
 		void CalculateForces(std::vector<Entity*>& entities, double t_simu);
+
+
+		using RocketState = SimuCore::Systems::AdaptedSystem::RocketState;
+		SimuCore::Systems::AdaptedSystem::RocketState Simulate(double dt, double max_time, double mass, glm::dvec3 initial_pos, glm::dvec3 initial_velocity, size_t final_planet_pos_indice, uint8_t nb_impulsions, std::vector<glm::dvec3> impulsions, std::vector<double> dates, SimuCore::Systems::PlanetsName startPlanet, SimuCore::Systems::PlanetsName finalPlanet, bool arretPasNeutre=false, std::vector<glm::dvec3>* positions=nullptr);
 	}
 };

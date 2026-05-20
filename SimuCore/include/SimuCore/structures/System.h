@@ -131,6 +131,8 @@ namespace SimuCore {
 
 			AdaptedSystem& operator=(const AdaptedSystem& sys) = delete;
 
+			static bool Is_initialized() noexcept { return s_initialized; }
+
 			/// <summary>
 			/// Effectue l'initialisation nécessaire pour préparer le composant ou le système à l'utilisation.
 			/// </summary>
@@ -306,6 +308,11 @@ namespace SimuCore {
 			double GetConstanteDesAires(glm::dvec3 position_referentiel_final, glm::dvec3 speed_referentiel_final) const;
 
 			friend RocketState GetRocketState(const Rocket& rocket, AdaptedSystem& system);
+
+			void SetStartPlanetPosition(int indice) { m_start_planet_start_indice = indice; }
+			void SetFinalPlanetPosition(int indice) { m_final_planet_start_indice = indice; }
+
+			size_t GetFinalPlanetPositionsSize() const { return s_finalPlanet_positions.size(); }
 
 		private:
 			void InitPlanet(bool is_start_planet, PlanetsName name); // TODO AMELIORER L'IMPLEM
