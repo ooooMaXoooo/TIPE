@@ -46,7 +46,8 @@ std::string RocketData::string() const {
 	//oss << std::fixed << std::setprecision(std::numeric_limits<double>::max_digits10);
 	oss << std::setprecision(std::numeric_limits<double>::max_digits10);
 
-	oss << m_tof << '\n'
+	oss << m_id << '\n'
+		<< m_tof << '\n'
 		<< m_maxTime << '\n'
 		<< m_thetaMin << '\n' << m_thetaMax << '\n' << m_thetaMean / m_NbRegisteredPositions << '\n'
 		<< m_TotalTheta / (2*SimuCore::constants::PI) << '\n'

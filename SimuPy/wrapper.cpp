@@ -121,6 +121,16 @@ PYBIND11_MODULE(MODULE_NAME, m) {
             std::array<std::array<uint32_t, 2>, 5> genome // 5 chromosomes, 2 gènes par chromosome
             ) -> std::array<std::vector<double>, 2>
         {
+
+            std::cout << "[C++]\n";
+			for (int i = 0; i < 5; i++) {
+				for (int j = 0; j < 2; j++) {
+					std::cout << '\t' << genome[i][j] << " ";
+				}
+				std::cout << "\n";
+			}
+
+
             double lifetime = max_time_days; // durée de simulation en jours
 
             SimuCore::Systems::AdaptedSystem sy{

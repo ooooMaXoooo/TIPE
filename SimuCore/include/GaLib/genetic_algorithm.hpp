@@ -610,10 +610,10 @@ private:
         #pragma omp parallel
         {
             Real thread_best = std::numeric_limits<Real>::lowest();
-            int thread_best_indice = -1;
+            int thread_best_indice = 0;
 
             Real thread_worst = std::numeric_limits<Real>::lowest();
-            int thread_worst_indice = -1;
+            int thread_worst_indice = 0;
 
             // Parcours parallèle
             #pragma omp for nowait

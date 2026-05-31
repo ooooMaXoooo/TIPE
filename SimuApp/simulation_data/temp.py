@@ -23,15 +23,16 @@ def simulate_individual (dossier, gen, verbose=False) :
     base_filepath = dossier + "/gen_" + str(gen)
 
     (
-      tof, max_time,
-      thetaMin, thetaMax, thetaMean,
-      NbTours,
-      RMin, RMax, RMean,
-      startPlanet, finalPlanet,
-      p0, v0,
-      finalPlanetStartIndice,
-      imp0, impulsions, dates,
-      genome
+        id, 
+        tof, max_time,
+        thetaMin, thetaMax, thetaMean,
+        NbTours,
+        RMin, RMax, RMean,
+        startPlanet, finalPlanet,
+        p0, v0,
+        finalPlanetStartIndice,
+        imp0, impulsions, dates,
+        genome
    ) = ImportData.lire_donnees_new(base_filepath + "_rockets_data.txt")
 
     X_rocket, Y_rocket = cpp.genetic.GetIndividualTrajectory__configD32_2_2(
@@ -51,9 +52,9 @@ def simulate_individual (dossier, gen, verbose=False) :
     ax.plot(X_rocket, Y_rocket, '+')
 
 
-dossier = "simu_31_05_2026_17_19_38"
-gen = 257
+dossier = "simu_31_05_2026_21_39_18"
+generation = 2001
 
-simulate_individual(dossier, gen, verbose=True)
+simulate_individual(dossier, generation, verbose=True)
 
 plt.show()

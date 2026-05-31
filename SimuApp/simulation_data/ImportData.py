@@ -149,6 +149,9 @@ def lire_donnees_new(nom_fichier):
 
    i = 0
 
+   id = int(lignes[i])
+   i += 1
+
    tof = float(lignes[i])
    i += 1
 
@@ -216,6 +219,7 @@ def lire_donnees_new(nom_fichier):
 
 
    return (
+      id, 
       tof, max_time,
       thetaMin, thetaMax, thetaMean,
       NbTours,

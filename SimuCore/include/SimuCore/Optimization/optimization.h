@@ -14,6 +14,7 @@
 #include <DataExport/PhysicsData.h>
 #include <DataExport/StatisticsData.h>
 #include <DataExport/RocketData.h>
+#include <DataExport/ClustersData.h>
 
 #include <SimuCore/statistics/HAC.h>
 
@@ -57,9 +58,9 @@ namespace SimuCore {
 			return oss.str();
 		}
 
-		inline std::string generate_snapshot_filename(const std::string& extension = "txt", int id=0, const char* suffix = "") {
+		inline std::string generate_snapshot_filename(const std::string& extension = "txt", int id=0, const char* suffix = "", const char* prefix = "gen_") {
 			std::ostringstream oss;
-			oss << "gen_" << id
+			oss << prefix << id
 				<< "_" << suffix
 				<< "." << extension;
 
@@ -501,87 +502,114 @@ namespace SimuCore {
 								///////////////////////////////////////////
 
 								if (calculate_statistics) {
-									/** On veut :
-									* - le nombre de patates (clusters) de la population
-									* - meilleur score de la population
-									* - pire score de la population
-									* - score moyen de la population
-									* - le nombre de fusée ayant un même état, pour chaque état, i.e la taille de chaque état
-									*/
+									{
+										/** On veut :
+										* - le nombre de patates (clusters) de la population
+										* - meilleur score de la population
+										* - pire score de la population
+										* - score moyen de la population
+										* - le nombre de fusée ayant un même état, pour chaque état, i.e la taille de chaque état
+										*/
 
-									/**
-									*
-									*	 0 ~~> Collision start panet with high speed
-									*	 1 ~~> Collision start panet with low speed
-									*	 2 ~~> Collision sun with high speed
-									*	 3 ~~> Collision sun with low speed
-									*	 4 ~~> Acceleration too high
-									*	 5 ~~> Rocket get too far in the system
-									*	 6 ~~> Collision final panet with high speed
-									*	 7 ~~> Collision final panet with low speed
-									*	 8 ~~> Neutral : not in ring
-									*	 9 ~~> Neutral : in ring but not in orbit
-									*	10 ~~> Neutral : in orbit but too large
-									*	11 ~~> Valid
-									* 
-									*/
-									int kinds[12] = { 0 };
+										/**
+										*
+										*	 0 ~~> Collision start panet with high speed
+										*	 1 ~~> Collision start panet with low speed
+										*	 2 ~~> Collision sun with high speed
+										*	 3 ~~> Collision sun with low speed
+										*	 4 ~~> Acceleration too high
+										*	 5 ~~> Rocket get too far in the system
+										*	 6 ~~> Collision final panet with high speed
+										*	 7 ~~> Collision final panet with low speed
+										*	 8 ~~> Neutral : not in ring
+										*	 9 ~~> Neutral : in ring but not in orbit
+										*	10 ~~> Neutral : in orbit but too large
+										*	11 ~~> Valid
+										*
+										*/
+										int kinds[12] = { 0 };
 
-									auto type_of_trajectory = [&](double fitness) -> int {
-										if (fitness < 0) return -1;
+										auto type_of_trajectory = [&](double fitness) -> int {
+											if (fitness < 0) return -1;
 
-										constexpr double cste = 1.0 / SimuCore::Systems::AdaptedSystem::m_CstScore;
+											constexpr double cste = 1.0 / SimuCore::Systems::AdaptedSystem::m_CstScore;
 
-										if (fitness < 8*cste) {
-											return static_cast<int>(fitness / cste);
+											if (fitness < 8 * cste) {
+												return static_cast<int>(fitness / cste);
+											}
+											else if (fitness < 8.33 * cste) {
+												return 8;
+											}
+											else if (fitness < 8.66 * cste) {
+												return 9;
+											}
+											else if (fitness < 9 * cste) {
+												return 10;
+											}
+											else {
+												return 11;
+											}
+											};
+
+										double score_mean = 0;
+
+										for (const auto& ind : population) {
+
+											if (ind.have_been_evaluated()) {
+												double fitness = ind.get_fitness();
+												score_mean += fitness;
+
+												kinds[type_of_trajectory(fitness)]++;
+											}
+											else {
+												assert(false && "Un individu n'a pas ete evalue, alors que tous les individus devraient l'etre à ce stade de l'algorithme genetique.");
+												std::abort();
+											}
+										} // boucle for sur la population
+
+										score_mean /= population.size();
+
+										std::vector<SimuCore::Statistics::Cluster> clusters = SimuCore::Statistics::HAC(rockets_data);
+
+										StatisticsData stats_data{ clusters.size(), best_fit, worst_fit, score_mean, kinds };
+
+
+										std::filesystem::path filepath_stats_data =
+											file_directory /
+											generate_snapshot_filename("txt", gen + 1, "stats");
+
+										try {
+											generationalExporter.enqueue(std::make_shared<StatisticsData>(stats_data), filepath_stats_data);
 										}
-										else if (fitness < 8.33*cste) {
-											return 8;
+										catch (const std::exception& e) {
+											std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
+											exit(EXIT_FAILURE);
 										}
-										else if (fitness < 8.66*cste) {
-											return 9;
-										}
-										else if (fitness < 9*cste) {
-											return 10;
-										}
-										else {
-											return 11;
-										}
-									};
-
-									double score_mean = 0;
-
-									for (const auto& ind : population) {
-
-										if (ind.have_been_evaluated()) {
-											double fitness = ind.get_fitness();
-											score_mean += fitness;
-
-											kinds[type_of_trajectory(fitness)]++;
-										}
-										else {
-											assert(false && "Un individu n'a pas ete evalue, alors que tous les individus devraient l'etre à ce stade de l'algorithme genetique.");
-											std::abort();
-										}
-									} // boucle for sur la population
-
-									score_mean /= population.size();
-									
-									std::vector<SimuCore::Statistics::Cluster> clusters = SimuCore::Statistics::HAC(rockets_data);
-
-									StatisticsData stats_data{clusters.size(), best_fit, worst_fit, score_mean, kinds};
-
-
-									std::filesystem::path filepath_stats_data =
-										file_directory /
-										generate_snapshot_filename("txt", gen + 1, "stats");
-
-									try {
-										generationalExporter.enqueue(std::make_shared<StatisticsData>(stats_data), filepath_stats_data);
 									}
-									catch (const std::exception& e) {
-										std::cerr << "\n\nTrajectory writing error ||\t" << e.what() << std::endl;
-										exit(EXIT_FAILURE);
+
+
+
+									// envoi Clusters
+									{
+										std::filesystem::path file_directory_cluster =
+											file_directory /
+											"HAC";
+
+										std::filesystem::create_directories(file_directory_cluster);
+
+										std::filesystem::path filepath_cluster =
+											file_directory_cluster /
+											("gen_" + std::to_string(gen + 1) + std::string(".cluster")); // le cast, c'est mal
+
+										std::vector<std::vector<int>> cluster = SimuCore::Statistics::HAC(rockets_data);
+
+										try {
+											generationalExporter.enqueue(std::make_shared<ClustersData>(cluster), filepath_cluster);
+										}
+										catch (const std::exception& e) {
+											std::cerr << "\n\nClustersData writing error ||\t" << e.what() << std::endl;
+											exit(EXIT_FAILURE);
+										}
 									}
 
 								} // if calculate_statistics
@@ -590,7 +618,7 @@ namespace SimuCore {
 
 
 
-							// envoi rocketsData
+							// envoi rocketsData best
 							{
 								// trouvons le meilleur individu de la population
 								size_t idx = 0;
@@ -612,6 +640,28 @@ namespace SimuCore {
 								}
 							}
 
+							// envoi rocketsData all
+							{
+								std::filesystem::path file_directory_all_rockets =
+									file_directory /
+									("RocketsData_gen_" + std::to_string(gen+1)); // le cast, c'est mal
+
+								std::filesystem::create_directories(file_directory_all_rockets);
+
+								for (size_t idx = 0; idx < rockets_data.size(); idx++) {
+									std::filesystem::path filepath_rocket_data =
+										file_directory_all_rockets /
+										generate_snapshot_filename("txt", idx, "rocketData", "");
+
+									try {
+										generationalExporter.enqueue(std::make_shared<RocketData>(*rockets_data[idx]), filepath_rocket_data);
+									}
+									catch (const std::exception& e) {
+										std::cerr << "\n\nRocketData writing error ||\t" << e.what() << std::endl;
+										exit(EXIT_FAILURE);
+									}
+								}
+							}
 						} // if snapshot
 					}
 					rockets_data.clear();

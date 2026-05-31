@@ -155,6 +155,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\DataExport\AsyncDataExporter.h" />
+    <ClInclude Include="include\DataExport\ClustersData.h" />
     <ClInclude Include="include\DataExport\GeneticData.h" />
     <ClInclude Include="include\DataExport\PhysicsData.h" />
     <ClInclude Include="include\DataExport\RocketData.h" />
@@ -188,6 +189,7 @@
   <ItemGroup>
     <ClInclude Include="include\SimuCore.h" />
     <ClCompile Include="src\DataExport\AsyncDataExporter.cpp" />
+    <ClCompile Include="src\DataExport\ClustersData.cpp" />
     <ClCompile Include="src\DataExport\GeneticData.cpp" />
     <ClCompile Include="src\DataExport\physicsData.cpp" />
     <ClCompile Include="src\DataExport\RocketData.cpp" />
