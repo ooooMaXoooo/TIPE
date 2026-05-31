@@ -119,7 +119,7 @@ std::vector<double> orbit::lambert_batch(
             const auto& v1 = res.first;
             const auto& v2 = res.second;
 
-            // Vérifier la validité
+            // VÃ©rifier la validitÃ©
             bool ok = true;
             for (int k = 0; k < 3; ++k) {
                 if (!std::isfinite(v1[k]) || !std::isfinite(v2[k])) { ok = false; break; }

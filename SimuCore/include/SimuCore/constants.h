@@ -4,7 +4,7 @@ namespace SimuCore {
 	namespace constants {
 		constexpr double mu = 1.32712440018e20; // Gravitation du Soleil
 		constexpr double G = 6.67428e-11; // USI
-		constexpr double g = 9.80665; // m/s²
+		constexpr double g = 9.80665; // m/sÂ²
 
 		constexpr double softening = 1e1; // m
 

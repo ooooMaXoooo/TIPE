@@ -3,6 +3,8 @@
 #include <pch.h>
 #include <SimuCore/structures/Rocket.h>
 
+#include <DataExport/RocketData.h>
+
 namespace SimuCore {
 	namespace Statistics {
 
@@ -13,7 +15,7 @@ namespace SimuCore {
 
 			friend double dissimilarity(Patate const& p1, Patate const& p2);
 
-			void AddRocket(const SimuCore::Structures::Rocket* rocket, size_t indice);
+			void AddRocket(const RocketData* rocket);
 
 			void Merge(Patate& other);
 
@@ -21,11 +23,11 @@ namespace SimuCore {
 
 		private:
 
-			std::vector<std::pair<const SimuCore::Structures::Rocket*, size_t>> m_rockets; // faire attention à la durée de vie des pointeurs
+			std::vector<const RocketData*> m_rockets; // faire attention à la durée de vie des pointeurs
 
 		public :
 
-			std::vector<std::pair<const SimuCore::Structures::Rocket*, size_t>> getRockets() const noexcept { return m_rockets; }
+			std::vector<const RocketData*> getRockets() const noexcept { return m_rockets; }
 		};
 
 

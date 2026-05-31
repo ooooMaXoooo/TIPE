@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 
 #include <pch.h>
@@ -44,6 +44,7 @@ namespace SimuCore {
 		};
 
 		SimuCore::Structures::Planet getPlanetFromName(PlanetsName name);
+		PlanetsName getPlanetNameFromIndex(size_t index);
 
 		class AdaptedSystem {
 			using Entity = SimuCore::Structures::Entity;
@@ -144,7 +145,7 @@ namespace SimuCore {
 			* @param state Une fonction booléenne, prenant en paramètre une fusée, et indiquant si son état est valide
 			* @return l'état de la fusée à la fin de la simulation
 			*/
-			RocketState Run(std::function<RocketState()> state); // TODO : Revoir la fonction de simulation pour modification
+			RocketState Run(bool stopOnNonNeutralState = true, const std::function<void(const glm::dvec3&)>& position_callback = {}, double simulation_duration = -1);
 
 			/// <summary>
 			/// Réinitialise le système à l'état à un instant donné, qui deviendra l'instant initial de la simulation.
@@ -153,7 +154,7 @@ namespace SimuCore {
 			/// <param name="t">l'instant auquel le système sera réinitialisé (en jours) </param>
 			void Reset(double t);
 
-			Real Score(const std::vector<std::vector<Real>>& genome);
+			Real Score(Rocket rocket, GenerationState gen_state, const std::function<void(const glm::dvec3&)>& position_callback = {}, bool stopOnNonNeutralState = true, double simulation_duration = -1);
 
 			/// <summary>
 			/// La taille de l'anneau dans lequel les fusées sont générées
@@ -165,7 +166,8 @@ namespace SimuCore {
 			///////////////////////////////////////////////////////
 			// Getters et Setters
 			///////////////////////////////////////////////////////
-
+			PlanetsName getStartPlanetName() const noexcept { return s_start_planet; }
+			PlanetsName getFinalPlanetName() const noexcept { return s_final_planet; }
 
 			const Planet& getStartPlanet() const noexcept { return m_planets[static_cast<size_t>(s_start_planet)]; }
 			const Planet& getFinalPlanet() const noexcept { return m_planets[static_cast<size_t>(s_final_planet)]; }
@@ -307,12 +309,33 @@ namespace SimuCore {
 			/// <returns> m^2 / s </returns>
 			double GetConstanteDesAires(glm::dvec3 position_referentiel_final, glm::dvec3 speed_referentiel_final) const;
 
-			friend RocketState GetRocketState(const Rocket& rocket, AdaptedSystem& system);
+			friend RocketState GetRocketState(const Rocket& rocket, AdaptedSystem& system) {
+				// on sauvegarde l'état actuel du système
+				Structures::Rocket saved_rocket = system.m_rocket;
+				double saved_time = system.m_time;
+
+				// on remplace la fusée par celle passée en paramètre et on calcule l'état
+				system.m_rocket = rocket;
+				AdaptedSystem::RocketState state = system.Rocket_state(); // Rocket_state est une fonction const donc il n'y avait pas besoin de sauvegarder/restaurer l'état du système, mais on le fait quand même pour être sûr
+
+				// on restaure l'état du système
+				system.m_rocket = saved_rocket;
+				system.m_time = saved_time;
+
+				return state;
+			}
 
 			void SetStartPlanetPosition(int indice) { m_start_planet_start_indice = indice; }
 			void SetFinalPlanetPosition(int indice) { m_final_planet_start_indice = indice; }
 
+			size_t GetStartPlanetPositionsSize() const { return s_startPlanet_positions.size(); }
 			size_t GetFinalPlanetPositionsSize() const { return s_finalPlanet_positions.size(); }
+
+			/// <summary>
+			/// Fait tourner la planète d'arrivée de l'angle spécifié à l'instant initial.
+			/// </summary>
+			/// <param name="theta"> doit être dans [0, 2*PI) </param>
+			void RotateFinalPlanet(double theta);
 
 		private:
 			void InitPlanet(bool is_start_planet, PlanetsName name); // TODO AMELIORER L'IMPLEM
@@ -361,8 +384,7 @@ namespace SimuCore {
 
 		}; // class AdaptedSystem
 
-
-		AdaptedSystem::RocketState GetRocketState(const Structures::Rocket& rocket, AdaptedSystem& system);
+		AdaptedSystem::RocketState GetRocketState(const AdaptedSystem::Rocket& rocket, AdaptedSystem& system);
 
 	}; // namespace Systems
 
@@ -393,7 +415,7 @@ namespace SimuCore {
 			"Real type must be a floating-point type (float, double, long double)");
 
 		if (!Systems::AdaptedSystem::IsInitialized()) {
-			std::runtime_error("Le système doit être initialisé avant de pouvoir convertir un genome en fusée.");
+			throw std::runtime_error("Le système doit être initialisé avant de pouvoir convertir un genome en fusée.");
 			std::abort();
 		}
 
@@ -755,6 +777,12 @@ namespace SimuCore {
 		rocket.setImpulsions(toutes_les_impulsions);
 		rocket.acceleration = 0; // une acceleration valide pour que le RocketState initial soit sûr d'être valide. (Pas utiliser dans les calculs)
 		
+		// en UA, donc normé
+		glm::dvec3 pos_start = system.GetStartPlanet_StartPosition();
+		rocket.Rotate(pos_start); // pour tourner d'un angle opposé à la pos de la terre
+		system.RotateFinalPlanet(- std::atan2(pos_start.y, pos_start.x));
+		system.SetStartPlanetPosition(0);
+
 		return { rocket, GenerationState::VALID };
 	}
 }; // namespace SimuCore

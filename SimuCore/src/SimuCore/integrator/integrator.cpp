@@ -45,16 +45,16 @@ namespace SimuCore::Integrator {
 		////////////////////////////////////////
 
 		for (size_t k = 1; k < NB_ITERATION; k++) {
-			// on simule l'étape actuelle pour toute les entités
+			// on simule l'Ã©tape actuelle pour toute les entitÃ©s
 
 			// 1) on calcul les forces
 			for (size_t i = 0; i < NB_PLANETS + 1; i++) {
 
-				// on vérifie que l'entité i est encore "vivante"
+				// on vÃ©rifie que l'entitÃ© i est encore "vivante"
 				if (!entities[i]->IsAlive(time)) continue;
 
 				for (size_t j = i + 1; j < NB_PLANETS + 1; j++) {
-					// on vérifie que l'entité j est encore "vivante"
+					// on vÃ©rifie que l'entitÃ© j est encore "vivante"
 					if (!entities[j]->IsAlive(time)) continue;
 
 					// on calcul la force d'attraction de j sur i
@@ -64,17 +64,17 @@ namespace SimuCore::Integrator {
 					entities[i]->forces += attractionForce;
 					entities[j]->forces -= attractionForce;
 				}
-				// 2) on peut bouger la planète i
+				// 2) on peut bouger la planÃ¨te i
 				entities[i]->UpdateFirstPart(dt);
 			}
 
-			// 3) on refait la même chose pour la seconde partie de l'algo LeapFrog
+			// 3) on refait la mÃªme chose pour la seconde partie de l'algo LeapFrog
 			for (size_t i = 0; i < NB_PLANETS + 1; i++) {
-				// on vérifie que l'entité i est encore "vivante"
+				// on vÃ©rifie que l'entitÃ© i est encore "vivante"
 				if (!entities[i]->IsAlive(time)) continue;
 
 				for (size_t j = i + 1; j < NB_PLANETS + 1; j++) {
-					// on vérifie que l'entité j est encore "vivante"
+					// on vÃ©rifie que l'entitÃ© j est encore "vivante"
 					if (!entities[j]->IsAlive(time)) continue;
 
 					// on calcul la force d'attraction de j sur i
@@ -84,15 +84,15 @@ namespace SimuCore::Integrator {
 					entities[i]->forces += attractionForce;
 					entities[j]->forces -= attractionForce;
 				}
-				// 2) on peut bouger la planète i
+				// 2) on peut bouger la planÃ¨te i
 				entities[i]->UpdateSecondPart(dt);
 			}
 			
 			time += dt;
 
-			// 4) on sauvegarde les données
+			// 4) on sauvegarde les donnÃ©es
 			for (size_t i = 0; i < NB_PLANETS + 1; i++) {
-				// on calcul l'énergie cinétique et potentielle
+				// on calcul l'Ã©nergie cinÃ©tique et potentielle
 				double potential = 0.0;
 				for (size_t j = 0; j < entities.size(); ++j) {
 					if (j == i) continue;
@@ -130,27 +130,27 @@ namespace SimuCore::Integrator {
 	}
 
 	void VelocityVerletIntegrator(std::vector<Entity*>& entities, double dt, double t_simu) {
-		// Étape 0 : Calculer les forces F_n (à l'instant t_n)
+		// Ã‰tape 0 : Calculer les forces F_n (Ã  l'instant t_n)
 		CalculateForces(entities, t_simu);
 
-		// Étape 1 : Mise à jour de la demi-vitesse (v_{n+1/2}) et de la position (x_{n+1})
+		// Ã‰tape 1 : Mise Ã  jour de la demi-vitesse (v_{n+1/2}) et de la position (x_{n+1})
 		for (size_t i = 0; i < entities.size(); i++) {
 			if (!entities[i]->IsAlive(t_simu)) continue;
 			entities[i]->UpdateFirstPart(dt);
 		}
 
-		// Application des Impulsions pour la Fusée
-		// t_simu est le temps à la fin de ce pas de temps (t_{n+1})
+		// Application des Impulsions pour la FusÃ©e
+		// t_simu est le temps Ã  la fin de ce pas de temps (t_{n+1})
 		Rocket* rocket = dynamic_cast<Rocket*>(entities[0]);
 		if (rocket != nullptr) {
 			rocket->ApplyImpulsions(t_simu, dt);
 		}
 
 
-		// Étape 2 : Calculer les nouvelles forces F_{n+1} aux nouvelles positions x_{n+1}
+		// Ã‰tape 2 : Calculer les nouvelles forces F_{n+1} aux nouvelles positions x_{n+1}
 		CalculateForces(entities, t_simu);
 
-		// Étape 3 : Mise à jour de la pleine vitesse v_{n+1}
+		// Ã‰tape 3 : Mise Ã  jour de la pleine vitesse v_{n+1}
 		for (size_t i = 0; i < entities.size(); i++) {
 			if (!entities[i]->IsAlive(t_simu)) continue;
 			entities[i]->UpdateSecondPart(dt);
@@ -158,7 +158,7 @@ namespace SimuCore::Integrator {
 	}
 
 	void CalculateForces(std::vector<Entity*>& entities, double t_simu) {
-		// 1. Réinitialiser toutes les forces avant de calculer les nouvelles.
+		// 1. RÃ©initialiser toutes les forces avant de calculer les nouvelles.
 		for (Entity* entity : entities) {
 			entity->forces = glm::dvec3(0);
 		}
@@ -178,39 +178,51 @@ namespace SimuCore::Integrator {
 		}
 	}
 
-	SimuCore::Systems::AdaptedSystem::RocketState Simulate(double dt, double max_time, double mass, glm::dvec3 initial_pos, glm::dvec3 initial_velocity, size_t final_planet_pos_indice, uint8_t nb_impulsions, std::vector<glm::dvec3> impulsions, std::vector<double> dates, SimuCore::Systems::PlanetsName startPlanet, SimuCore::Systems::PlanetsName finalPlanet, bool arretPasNeutre, std::vector<glm::dvec3>* positions) {
+	SimuCore::Systems::AdaptedSystem::RocketState Simulate(
+		double dt_seconds,
+		double max_time_days,
+		double mass_kg,
+		glm::dvec3 initial_pos_UA,
+		glm::dvec3 initial_velocity_km_s,
+		size_t final_planet_pos_indice,
+		uint8_t nb_impulsions,
+		std::vector<glm::dvec3> impulsions_km_s,
+		std::vector<double> dates_days,
+		SimuCore::Systems::PlanetsName startPlanet,
+		SimuCore::Systems::PlanetsName finalPlanet,
+		bool arretPasNeutre,
+		std::vector<glm::dvec2>* positions) 
 	{
-			std::vector<std::pair<SimuCore::Structures::Impulsion, double>> impulsionsTraduites;
-			impulsionsTraduites.reserve(nb_impulsions);
-			for (size_t i = 0; i < nb_impulsions; i++) {
-				impulsionsTraduites.push_back({ impulsions[i], dates[i] });
-			}
+		std::vector<std::pair<SimuCore::Structures::Impulsion, double>> impulsionsTraduites;
+		impulsionsTraduites.reserve(nb_impulsions);
+		for (size_t i = 0; i < nb_impulsions; i++) {
+			impulsionsTraduites.push_back({ impulsions_km_s[i], dates_days[i] });
+		}
 
-		SimuCore::Systems::AdaptedSystem sys(
+		SimuCore::Systems::AdaptedSystem sys{
 			startPlanet,
 			finalPlanet,
-			SimuCore::Structures::Rocket{ max_time, impulsionsTraduites, mass, 2.2,  initial_pos, initial_pos },
-			max_time, dt);
+			SimuCore::Structures::Rocket{ max_time_days, impulsionsTraduites, mass_kg, 2.2,  initial_pos_UA, initial_velocity_km_s },
+			max_time_days, dt_seconds };
 
 		if (!SimuCore::Systems::AdaptedSystem::Is_initialized()) {
 			sys.Initialize();
 		}
 
-		// initialiser les planètes
+		// initialiser les planÃ¨tes
 		sys.SetFinalPlanetPosition(final_planet_pos_indice);
 		sys.SetStartPlanetPosition(0); // toujours ici
 
+		auto position_callback = [&positions](const glm::dvec3& position) -> void {
+			positions->emplace_back(glm::dvec2(position.x, position.y));
+		};
 
 		if (positions != nullptr) {
-			// on va utiliser getRocketsTrajectory
-			sys.GetRocketTrajectory(*positions);
+			positions->clear();
+			return sys.Run(arretPasNeutre, position_callback);
 		}
 		else {
-			// on va utiliser Run
+			return sys.Run(arretPasNeutre);
 		}
-
-
-		return SimuCore::Systems::AdaptedSystem::RocketState();
 	}
-
 };

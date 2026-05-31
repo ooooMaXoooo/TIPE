@@ -46,7 +46,16 @@ def energie_potentielle_effective (planete : int, r : float, mass : float, const
    return mass * ((0.5 * (C_a * C_a * un_sur_r)) - (mu * un_sur_r)) * un_sur_r
 
 def vitesse_de_liberation(distance : float, mu : float) -> float :  #USI
-    return np.sqrt(2*mu/distance)
+   return np.sqrt(2*mu/distance)
 
 def vitesse_orbite_circulaire(distance, mu) :
-    return np.sqrt(mu/distance)
+   return np.sqrt(mu/distance)
+
+def vecteur_vitesse_orbite_circulaire(r, mu) :
+   distance = np.linalg.norm(r)
+   norme = vitesse_orbite_circulaire(distance, mu)
+
+   u_r = (1/distance) * np.array(r)
+   u_theta = np.array([-u_r[1], u_r[0]])
+   return norme * u_theta
+

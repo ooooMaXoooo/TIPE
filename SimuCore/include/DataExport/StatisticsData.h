@@ -1,6 +1,6 @@
 #pragma once
 
-#include <DataExport/AsyncDataExporter.h>
+#include <DataExport/Writable.h>
 
 class StatisticsData : public Writable {
 public :

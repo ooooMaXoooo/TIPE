@@ -7,66 +7,44 @@ namespace SimuCore {
 	namespace Structures {
 
 		struct Entity {
-			// position de l'entité (AU)
+			// position de l'entitÃ© (AU)
 			glm::dvec3 position;
 
-			// vitesse de l'entité (km/s)
+			// vitesse de l'entitÃ© (km/s)
 			glm::dvec3 velocity;
 
-			// masse de l'entité (kg)
+			// masse de l'entitÃ© (kg)
 			double mass;
 
-			// forces appliquées à l'entité (kN) (kg*km/s²)
+			// forces appliquÃ©es Ã  l'entitÃ© (kN) (kg*km/sÂ²)
 			glm::dvec3 forces;
 
 
 			/**
 			 * @brief Constructeur de la classe Entity.
-			 * @param m Masse de la planète. (kg)
+			 * @param m Masse de la planÃ¨te. (kg)
 			 * @param p0 Position initiale (glm::dvec3). (AU)
 			 * @param v0 Vitesse initiale (glm::dvec3). (km/s)
 			 */
-			Entity(double m, glm::dvec3 p0 = glm::dvec3(0, 0, 0), glm::dvec3 v0 = glm::dvec3(0, 0, 0)) {
-				mass = m;
-				position = p0;
-				velocity = v0;
-				forces = glm::dvec3(0);
-			}
+			Entity(double m, glm::dvec3 p0 = glm::dvec3(0, 0, 0), glm::dvec3 v0 = glm::dvec3(0, 0, 0));
 
-			Entity& operator=(const Entity& other) {
-				if (this != &other) {
-					this->position = other.position;
-					this->velocity = other.velocity;
-					this->mass = other.mass;
-					this->forces = other.forces;
-				}
-				return *this;
-			}
+			Entity& operator=(const Entity& other);
 
 			/// <summary>
-			/// Première partie de l'intégration de la position et de la vitesse de l'entité, selon le schéma de Verlet à 2 étapes.
+			/// PremiÃ¨re partie de l'intÃ©gration de la position et de la vitesse de l'entitÃ©, selon le schÃ©ma de Verlet Ã  2 Ã©tapes.
 			/// </summary>
 			/// <param name="dt">pas de temps en s</param>
-			virtual void UpdateFirstPart(double dt) {
-				glm::dvec3 acceleration = forces / mass;								// a = F/m (en km/s²)
-				velocity += 0.5 * dt * acceleration;									// a * dt/2 (en km/s)
-				position += static_cast<double>((1._km_to_AU) * dt) * velocity;			// dt * v en km
-
-				forces = glm::dvec3(0);
-			}
+			virtual void UpdateFirstPart(double dt);
 
 			/// <summary>
-			/// Seconde partie de l'intégration de la position et de la vitesse de l'entité, selon le schéma de Verlet à 2 étapes.
+			/// Seconde partie de l'intÃ©gration de la position et de la vitesse de l'entitÃ©, selon le schÃ©ma de Verlet Ã  2 Ã©tapes.
 			/// </summary>
 			/// <param name="dt">pas de temps en s</param>
-			virtual void UpdateSecondPart(double dt) {
-				glm::dvec3 acceleration = forces / mass;	// F en kN (kg*km/s²)   |  m en kg       = a en km/s²
-				velocity += 0.5 * dt * acceleration;		// a en km/s²		    | dt en s        = a*dt en km/s
-
-				forces = glm::dvec3(0);
-			}
+			virtual void UpdateSecondPart(double dt);
 
 			virtual bool IsAlive(double current_time) const { return true; };
+
+			virtual void Rotate(double theta);
 		};
 	}
 }

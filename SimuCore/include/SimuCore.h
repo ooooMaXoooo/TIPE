@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <omp.h>
 #include "SimuCore/integrator/integrator.h"

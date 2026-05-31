@@ -84,6 +84,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)external\include\python3.12;$(ProjectDir)include\SimuCore;$(ProjectDir)include;$(SolutionDir)external\include;;$(SolutionDir)external\HDF5\2.0.0\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp23</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -104,6 +105,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)external\include\python3.12;$(ProjectDir)include\SimuCore;$(ProjectDir)include;$(SolutionDir)external\include;;$(SolutionDir)external\HDF5\2.0.0\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp23</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -122,6 +124,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)external\include\python3.12;$(ProjectDir)include\SimuCore;$(ProjectDir)include;$(SolutionDir)external\include;$(ProjectDir)include;$(SolutionDir)external\include;%(AdditionalIncludeDirectories);$(SolutionDir)external\HDF5\2.0.0\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp23</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -142,6 +145,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)external\include\python3.12;$(ProjectDir)include\SimuCore;$(ProjectDir)include;$(SolutionDir)external\include;;$(SolutionDir)external\HDF5\2.0.0\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp23</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -153,8 +157,10 @@
     <ClInclude Include="include\DataExport\AsyncDataExporter.h" />
     <ClInclude Include="include\DataExport\GeneticData.h" />
     <ClInclude Include="include\DataExport\PhysicsData.h" />
+    <ClInclude Include="include\DataExport\RocketData.h" />
     <ClInclude Include="include\DataExport\StatisticsData.h" />
     <ClInclude Include="include\DataExport\TrajectoryData.h" />
+    <ClInclude Include="include\DataExport\Writable.h" />
     <ClInclude Include="include\GaLib\genetic.hpp" />
     <ClInclude Include="include\GaLib\genetic_algorithm.hpp" />
     <ClInclude Include="include\GaLib\genetic_config.hpp" />
@@ -182,7 +188,12 @@
   <ItemGroup>
     <ClInclude Include="include\SimuCore.h" />
     <ClCompile Include="src\DataExport\AsyncDataExporter.cpp" />
+    <ClCompile Include="src\DataExport\GeneticData.cpp" />
+    <ClCompile Include="src\DataExport\physicsData.cpp" />
+    <ClCompile Include="src\DataExport\RocketData.cpp" />
     <ClCompile Include="src\DataExport\StatisticsData.cpp" />
+    <ClCompile Include="src\DataExport\TrajectoryData.cpp" />
+    <ClCompile Include="src\DataExport\Writable.cpp" />
     <ClCompile Include="src\SimuCore\integrator\integrator.cpp" />
     <ClCompile Include="src\SimuCore\Optimization\optimization.cpp" />
     <ClCompile Include="src\pch.cpp">

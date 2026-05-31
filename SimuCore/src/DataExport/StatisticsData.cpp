@@ -11,6 +11,7 @@ StatisticsData::StatisticsData(size_t NClusters, double best_score, double worst
 
 std::string StatisticsData::string() const {
 	std::ostringstream oss;
+	oss << std::setprecision(std::numeric_limits<double>::max_digits10);
 
 	oss << m_NClusters << '\n'
 		<< m_best_score << '\n'

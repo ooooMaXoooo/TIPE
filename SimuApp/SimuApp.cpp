@@ -1,7 +1,7 @@
 #ifdef _OPENMP
-#pragma message("OpenMP activÈ")
+#pragma message("OpenMP activ√©")
 #else
-#pragma message("OpenMP NON activÈ")
+#pragma message("OpenMP NON activ√©")
 #endif
 
 #include <omp.h>
@@ -14,25 +14,25 @@
 
 int main(int argc, char** argv) {
     
-	double lifetime = 400; // durÈe de simulation en jours
+	double lifetime = 250; // dur√©e de simulation en jours
 	SimuCore::Systems::AdaptedSystem sy(
-        SimuCore::Systems::PlanetsName::Terre,   // planËte de dÈpart
-        SimuCore::Systems::PlanetsName::Mars,  // planËte d'arrivÈe
+        SimuCore::Systems::PlanetsName::Terre,   // plan√®te de d√©part
+        SimuCore::Systems::PlanetsName::Mars,  // plan√®te d'arriv√©e
         SimuCore::Structures::Rocket(
-			lifetime, // -> durÈe de vie de la fusÈe en jours
+			lifetime, // -> dur√©e de vie de la fus√©e en jours
             std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(),
             1._ton_to_kg,
-			2.22),                                     // -> vitesse d'Èjection des gaz en km/s  (2.22 pour terre mars, 3 pour terre jupiter)
-		lifetime,                                   // durÈe de simulation en jours
+			2.22),                                     // -> vitesse d'√©jection des gaz en km/s  (2.22 pour terre mars, 3 pour terre jupiter)
+		lifetime,                                   // dur√©e de simulation en jours
 		3600);                                      // -> pas de temps en secondes
 
 	sy.Initialize();
 
-    genetic::CrossoverType cross_type = genetic::CrossoverType::UNIFORM_BIT_LEVEL; // ce paramËtre ne change rien, on a implÈmenter en dur un UCLC
-    bool elitism = true;                       // diminituion de la vitesse de perte de diversitÈ ?
+    genetic::CrossoverType cross_type = genetic::CrossoverType::UNIFORM_BIT_LEVEL; // ce param√®tre ne change rien, on a impl√©menter en dur un UCLC
+    bool elitism = true;                       // diminituion de la vitesse de perte de diversit√© ?
     bool auto_adapt = false;                    // a tester
-    size_t population_size =  1e3;
-    size_t max_generation  =  250;
+    size_t population_size =  10000;
+    size_t max_generation  =  10000;
     size_t print_interval  =  1;
     bool verbose = true;
     size_t snapshot_interval = 1;

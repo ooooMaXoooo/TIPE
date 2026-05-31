@@ -9,8 +9,8 @@ namespace SimuCore {
 			m_rockets.reserve(n_rockets);
 		}
 
-		void Patate::AddRocket(const SimuCore::Structures::Rocket* rocket, size_t indice) {
-			m_rockets.push_back({ rocket, indice });
+		void Patate::AddRocket(const RocketData* rocket) {
+			m_rockets.push_back(rocket);
 		}
 
 		void Patate::Merge(Patate& other) {
@@ -30,7 +30,7 @@ namespace SimuCore {
 
 			for (size_t i = 0; i < p1.m_rockets.size(); ++i) {
 				for (size_t j = 0; j < p2.m_rockets.size(); ++j) {
-					double d = SimuCore::Structures::distance(*(p1.m_rockets[i].first), *(p2.m_rockets[j].first));
+					double d = distance(*(p1.m_rockets[i]), *(p2.m_rockets[j]));
 
 					if (d < Dmin) {
 						Dmin = d;

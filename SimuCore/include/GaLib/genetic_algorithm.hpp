@@ -40,7 +40,7 @@ public:
      * @brief Fitness function type
      * Takes vectors of real values and returns a fitness score (higher is better)
      */
-    using FitnessFunction = typename std::function<Real(const std::vector<std::vector<Real>>&)>;
+    using FitnessFunction = typename std::function<Real(const Individual&, size_t, bool)>;
 
 	// generation - > best fitness - > best individual indice -> worst fitness -> worst individual indice -> population
     using CallbackFunctionType = typename std::function<void(size_t, Real, int, Real, int, const Population&)>;
@@ -239,31 +239,15 @@ private:
         update_best();
     }
 
-    void evaluate_population() {
+    void evaluate_population(bool last_evaluation) {
         #pragma omp parallel
         {
             #pragma omp for
             for (int i = 0; i < m_config.population_size; i++) {
-                auto real_vecs = m_population[i].to_real_vectors();
-                Real eval = m_fitness_func(real_vecs);
+                Real eval = m_fitness_func(m_population[i], i, last_evaluation);
                 m_population[i].set_fitness(eval);
             }
         }
-    }
-
-
-    /**
-     * @brief Evaluates the fitness of an individual, Not thread-safe
-     */
-    Real evaluate(Individual& ind) {
-        if (ind.have_been_evaluated()) {
-            return ind.get_fitness();
-        }
-
-        auto real_vecs = ind.to_real_vectors();
-        Real eval = m_fitness_func(real_vecs);
-        ind.set_fitness(eval);
-        return eval;
     }
 
     /**
@@ -584,7 +568,7 @@ private:
     void step(int gen) {
 		//std::cout << "Generation " << gen << ":\n";
         // évaluation
-        evaluate_population(); // multithreadé
+        evaluate_population(false); // multithreadé
 
         // Sélection
         selection(gen); // multithreadé
@@ -606,7 +590,7 @@ private:
         }
 
 		//std::cout << "\nAfter mutation of generation " << gen << ":\n";
-        evaluate_population(); // les mutés n'ont pas de score valide
+        evaluate_population(true); // les mutés n'ont pas de score valide
         // Mise à jour du meilleur
         update_best(); // multithreadé // update aussi le pire
 
@@ -635,11 +619,11 @@ private:
             #pragma omp for nowait
             for (int i = 0; i < static_cast<int>(m_population.size()); ++i) {
                 Real f = m_population[i].get_fitness();
-                if (f > thread_best) {
+                if (f >= thread_best) {
                     thread_best = f;
                     thread_best_indice = i;
                 }
-                else if (f < thread_worst) {
+                else if (f <= thread_worst) {
                     thread_worst = f;
                     thread_worst_indice = i;
                 }
@@ -648,12 +632,12 @@ private:
             // Mise à jour globale sécurisée
             #pragma omp critical
             {
-                if (thread_best > best_fitness_local) {
+                if (thread_best >= best_fitness_local) {
                     best_fitness_local = thread_best;
                     best_indice_local = thread_best_indice;
                 }
                 
-                if (thread_worst < worst_fitness_local) {
+                if (thread_worst <= worst_fitness_local) {
                     worst_fitness_local = thread_worst;
                     worst_indice_local = thread_worst_indice;
                 }

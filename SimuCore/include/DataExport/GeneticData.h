@@ -1,28 +1,18 @@
 #pragma once
 
-#include <DataExport/AsyncDataExporter.h>
+#include <DataExport/Writable.h>
 
 class GeneticData : public Writable {
 	public:
 	GeneticData() = default;
 
-	std::string string() const override {
-		/* On veut envoyer :
-		*	- numero generation
-		*	- taille population
-		*	- nombre genes
-		*	- meilleur genes
-		*	- meilleur score
-		*/
-
-		return "Genetic data string representation";
-	}
+	std::string string() const override;
 
 private :
 	size_t m_generationId;
 
 	double m_bestFitness;
-	// double m_averageFitness; // pas encore implémenté
+	// double m_averageFitness; // pas encore implÃ©mentÃ©
 
 	size_t m_populationSize;
 

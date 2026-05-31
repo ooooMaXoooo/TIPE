@@ -92,6 +92,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;;$(SolutionDir)external\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -103,8 +104,10 @@
     <PostBuildEvent>
       <Command>if "$(Configuration)"=="Debug" (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit_d.pyd"
+    copy /Y "$(TargetPath)" "$(SolutionDir)SimuApp\simulation_data\TIPE_SimuOrbit_d.pyd"
 ) else (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit.pyd"
+    copy /Y "$(TargetPath)" "$(SolutionDir)SimuApp\simulation_data\TIPE_SimuOrbit.pyd"
 )
 
 xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
@@ -124,6 +127,7 @@ xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;;$(SolutionDir)external\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,8 +139,10 @@ xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
     <PostBuildEvent>
       <Command>if "$(Configuration)"=="Debug" (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit_d.pyd"
+    copy /Y "$(TargetPath)" "$(SolutionDir)SimuApp\simulation_data\TIPE_SimuOrbit_d.pyd"
 ) else (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit.pyd"
+    copy /Y "$(TargetPath)" "$(SolutionDir)SimuApp\simulation_data\TIPE_SimuOrbit.pyd"
 )
 
 xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
@@ -155,6 +161,7 @@ xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
       <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;;$(SolutionDir)external\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp23</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -166,8 +173,10 @@ xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
     <PostBuildEvent>
       <Command>if "$(Configuration)"=="Debug" (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit_d.pyd"
+    copy /Y "$(TargetPath)" "$(SolutionDir)SimuApp\simulation_data\TIPE_SimuOrbit_d.pyd"
 ) else (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit.pyd"
+    copy /Y "$(TargetPath)" "$(SolutionDir)SimuApp\simulation_data\TIPE_SimuOrbit.pyd"
 )
 
 xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
@@ -188,6 +197,7 @@ xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
       <AdditionalIncludeDirectories>$(SolutionDir)external\HDF5\2.0.0\include;$(SolutionDir)external\python;$(SolutionDir)external\python\python3.12;$(SolutionDir)SimuCore\include;$(SolutionDir)external\include;$(SolutionDir)external\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp23</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -199,8 +209,10 @@ xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"
     <PostBuildEvent>
       <Command>if "$(Configuration)"=="Debug" (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit_d.pyd"
+    copy /Y "$(TargetPath)" "$(SolutionDir)SimuApp\simulation_data\TIPE_SimuOrbit_d.pyd"
 ) else (
     copy /Y "$(TargetPath)" "$(SolutionDir)python\TIPE_SimuOrbit.pyd"
+    copy /Y "$(TargetPath)" "$(SolutionDir)SimuApp\simulation_data\TIPE_SimuOrbit.pyd"
 )
 
 xcopy /Y "$(SolutionDir)external\HDF5\2.0.0\bin\*.dll" "$(OutDir)"

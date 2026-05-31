@@ -1,13 +1,14 @@
 #pragma once
 
-#include <DataExport/AsyncDataExporter.h>
-#include <pch.h>
+#include <DataExport/Writable.h>
+#include <string>
+#include <glm/glm.hpp>
 
 class PhysicsData : public Writable {
 public:
 
 	/// <summary>
-	/// Classe pour empacter les données physiques utiles à une simulation
+	/// Classe pour empacter les donnÃ©es physiques utiles Ã  une simulation
 	/// </summary>
 	/// <param name="simulation_time"> en jours </param>
 	/// <param name="time_step"> en secondes </param>
@@ -43,81 +44,9 @@ public:
 		bool etat_lie = false,
 		double r_min = -1,
 		double r_max = -1,
-		uint16_t dimension = 2) :
+		uint16_t dimension = 2);
 
-		m_dimension(dimension),
-		m_simulation_time(simulation_time),
-		m_time_step(time_step),
-		m_start_planet_index(start_planet_index),
-		m_final_planet_index(final_planet_index),
-		m_start_planet_start_position(start_planet_start_position),
-		m_final_planet_start_position(final_planet_start_position),
-		m_start_planet_final_position(start_planet_final_position),
-		m_final_planet_final_position(final_planet_final_position),
-		m_final_rocket_velocity(final_rocket_velocity),
-		m_impulse_times(impulse_times),
-		m_impulse_vectors(impulse_vectors),
-		m_etat_lie(etat_lie),
-		m_r_min(r_min),
-		m_r_max(r_max),
-		m_delta_v(delta_v),
-		m_tof(tof)
-	{
-		if (dimension != 2 && dimension != 3) {
-			throw std::invalid_argument("Dimension must be 2 or 3");
-		}
-
-		m_number_of_impulsions = impulse_times.size();
-	}
-
-	std::string string() const override {
-		std::ostringstream oss;
-
-		/* On veut envoyer :
-		*	- Position de départ de la planète de départ
-		*	- Position de départ de la planète d'arrivée
-		*	
-		*	- Position d'arrivée de la planète de départ
-		*	- Position d'arrivée de la planète d'arrivée
-		* 
-		*	- le dernier vecteur vitesse de la fusée
-		* 
-		*	- le nombre d'impulsions
-		*	- les instants des impulsions
-		*	- les vecteurs d'impulsion
-		* 
-		*	- temps de simulation
-		*	- pas de temps
-		* 
-		*	- numéro de la planète de départ
-		*	- numéro de la planète d'arrivée 
-		*/
-
-		oss << m_simulation_time << '\n'
-			<< m_time_step << '\n'
-			<< static_cast<int>(m_start_planet_index) << '\n'
-			<< static_cast<int>(m_final_planet_index) << '\n'
-			<< m_number_of_impulsions << '\n'
-			<< m_dimension << '\n'
-			<< formatVector(m_start_planet_start_position) << '\n'
-			<< formatVector(m_final_planet_start_position) << '\n'
-			<< formatVector(m_start_planet_final_position) << '\n'
-			<< formatVector(m_final_planet_final_position) << '\n'
-			<< formatVector(m_final_rocket_velocity) << '\n';
-
-		for (size_t i = 0; i < m_number_of_impulsions; ++i) {
-				oss << m_impulse_times[i] << '\n';
-				oss << formatVector(m_impulse_vectors[i]) << '\n';
-		}
-
-		oss << (m_etat_lie ? 1 : 0) << '\n'
-			<< m_r_min << '\n'
-			<< m_r_max << '\n'
-			<< m_tof << '\n'
-			<< m_delta_v << '\n';
-
-		return oss.str();
-	}
+	std::string string() const override;
 
 private:
 	double m_dimension;
@@ -159,19 +88,7 @@ private:
 	double m_tof;
 	double m_delta_v;
 
-private :
-	std::string formatVector(const glm::dvec3& vec) const {
-		std::ostringstream oss;
-		if (m_dimension == 2) {
-			oss << vec.x << ';' << vec.y;
-			return oss.str();
-		}
-		else
-		{
-			oss << vec.x << ';' << vec.y << ';' << vec.z;
-		}
+private:
 
-		return oss.str();
-	}
-
+	std::string formatVector(const glm::dvec3& vec) const;
 };

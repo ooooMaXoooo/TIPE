@@ -11,19 +11,7 @@
 #include <stdexcept>
 #include <fstream>
 
-class Writable;
-class AsyncDataExporter;
-
-
-
-class Writable {
-public:
-    virtual std::string string() const {
-        throw std::runtime_error("The function Writable::GetData needs to be override !");
-    }
-};
-
-std::ofstream& operator<<(std::ofstream& fs, const Writable& writable);
+#include "Writable.h"
 
 
 class AsyncDataExporter {

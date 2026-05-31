@@ -12,12 +12,12 @@ namespace stumpff {
 
 namespace orbit {
     /// <summary>
-	/// Renvoie les vitesses initiale et finale pour une manúuvre de Lambert entre r1 et r2 en un temps tof. Etant donnÈ le paramËtre gravitationnel mu de l'astre attracteur.
+	/// Renvoie les vitesses initiale et finale pour une man≈ìuvre de Lambert entre r1 et r2 en un temps tof. Etant donn√© le param√®tre gravitationnel mu de l'astre attracteur.
     /// </summary>
     /// <param name="r1">vecteur position initial</param>
     /// <param name="r2">vecteur position final</param>
     /// <param name="tof">temps total du voyage</param>
-    /// <param name="mu">paramËtre gravitationnel</param>
+    /// <param name="mu">param√®tre gravitationnel</param>
     /// <returns></returns>
     std::pair<std::array<double, 3>, std::array<double, 3>> lambert_universal(
         const std::array<double, 3>& r1,
@@ -45,7 +45,7 @@ glm::dvec3 forceAttractionGrav(const SimuCore::Structures::Entity& from, const S
 /// <param name="mu_central_body"> en USI, i.e m^3 / s^2 </param>
 /// <param name="constante_des_aires"> en USI, i.e m^2 / s </param>
 /// <param name="system_energy"> en J, kg * m^2 / s^2 </param>
-/// <param name="is_trajectory_elliptic"> un pointeur sur un boolÈen </param>
+/// <param name="is_trajectory_elliptic"> un pointeur sur un bool√©en </param>
 /// <returns></returns>
 std::pair<double, double> calcul_perige_et_apoge(
     double distance_to_central_body,

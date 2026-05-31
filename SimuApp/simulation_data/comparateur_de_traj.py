@@ -6,14 +6,14 @@ import os
 
 plt.close("all")
 
-dir1 = "simu_18_05_2026_15_57_44__cool"
-dir2 = "simu_19_05_2026_11_11_35"
+dir1 = "simu_20_05_2026_23_42_24"
+dir2 = "simu_20_05_2026_23_42_24"
 
-gen1 = 42
-gen2 = 1
+gen1 = 1
+gen2 = 70
 
 
-chercher = True
+chercher = False
 distance = distance_generation(gen1, gen2, dir1, dir2)
 max_gen2 = 200
 

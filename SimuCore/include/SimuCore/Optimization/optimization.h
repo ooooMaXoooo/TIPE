@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <pch.h>
 #include "../structures/Rocket.h"
@@ -13,8 +13,10 @@
 #include <DataExport/GeneticData.h>
 #include <DataExport/PhysicsData.h>
 #include <DataExport/StatisticsData.h>
+#include <DataExport/RocketData.h>
 
 #include <SimuCore/statistics/HAC.h>
+
 
 namespace SimuCore {
 	namespace Optimization {
@@ -74,7 +76,7 @@ namespace SimuCore {
 		template <size_t NbImpulsions>
 		SimuCore::Structures::Rocket getBestRocket(const SimuCore::Systems::AdaptedSystem system,
 			genetic::CrossoverType cross_type, bool elitism, bool auto_adapt,
-			size_t population_size = 100, size_t max_generation = 5000,
+			const size_t population_size = 100, size_t max_generation = 5000,
 			size_t print_interval=100, bool verbose=false,
 			size_t snapshot_interval=10, bool saving_in_file=true,
 			bool calculate_statistics=true)
@@ -94,7 +96,7 @@ namespace SimuCore {
 			config.initial_mutation_probability = 0.8;				// paramètre à ajuster
 			config.initial_self_adaptation_probability = 0.8;		// paramètre à ajuster
 
-			config.custom_mutation_proba = -1;					// on prend la proba uniforme
+			config.custom_mutation_proba = 1 * config.number_of_vectors * config.dimension * 0.003125;					// on prend la proba uniforme (-1 pour uniforme)
 
 
 
@@ -110,27 +112,75 @@ namespace SimuCore {
 
 			using Real = ConfigType::real_type;
 			using Integer = ConfigType::integer_type;
+			using Ind = typename genetic::Individu<ConfigType>;
+			using Pop = typename std::vector<Ind>;
 
+
+			std::vector<std::unique_ptr<RocketData>> rockets_data;
+			rockets_data.resize(config.population_size);
 			// associe à un génome un score
-			auto fitness = [&](const std::vector<std::vector<Real>>& vecs) -> Real {
+			auto fitness = [&](const Ind& individu, size_t indice, bool last_evaluation) -> Real {
 				// vec[0] --> un vecteur à 3 dimension, équivalent à la position initiale
 				// vec[1] --> un vecteur à 3 dimension, équivalent à l'impulsion initiale
 				// vec[2] --> un vecteur à 3 dimension, dont on n'utilise que la première composante, équivalent à l'instant de la 1ere impulsion
 				// etc...
+				std::vector<std::vector<Real>> vecs = individu.to_real_vectors();
 
 				SimuCore::Systems::AdaptedSystem local_system = system; // on copie le système (problème de concurrence)
+				double score = SimuCore::Systems::AdaptedSystem::m_LowestScore; // score par défaut pour les individus invalides
+				auto [rocket, gen_state] = IndividualToRocket(vecs, local_system);
 
-				//local_system.Reset();		// On réinitialise le système pour que les individus commençent tous dans les mêmes confitions initiales.
-				// On n'a pas besoin de réinitialiser car la fonction Score le fait déjà.
+				if (last_evaluation) { // TODO : ajouter calculate_statistics en condition pour limiter les calculs lorsque c'est possible
 
-				return local_system.Score(vecs);		// A VERIFIER !!!!! OK ?
+					//local_system.Reset();		// On réinitialise le système pour que les individus commençent tous dans les mêmes confitions initiales.
+					// On n'a pas besoin de réinitialiser car la fonction Score le fait déjà.
+
+					rockets_data[indice] = std::make_unique<RocketData>(
+						indice,
+						-1.0,	// tof
+						system.getMaxTime(), // maxTime
+						rocket.GetInitialImpulsion(), // impulsion initiale
+						rocket.position, // position initiale
+						rocket.velocity, // vitesse initiale (toujours nulle)
+						local_system.getFinalPlanetStartIndice(),
+						static_cast<uint8_t>(local_system.getStartPlanetName()),
+						static_cast<uint8_t>(local_system.getFinalPlanetName()),
+						NbImpulsions,
+						individu.to_integer_vectors()
+					); 
+
+					/// TODO : ajouter le stockage de l'individu génétique en forme binaire pour pouvoir le simuler et avoir sa trajectoire en python
+
+					RocketData& current_rocket_data = *rockets_data[indice];
+
+
+					auto position_callback = [&](const glm::dvec3& pos) {
+						current_rocket_data.RegisterNewCartesianPosition(pos);
+						};
+
+
+					score = local_system.Score(rocket, gen_state, position_callback);
+					double tof = local_system.getCurrentTime();
+					current_rocket_data.SetTof(tof);
+
+					const std::vector<std::pair<SimuCore::Structures::Impulsion, double>>& impulsions = rocket.getImpulsions();
+
+					for (size_t i = 1; i < impulsions.size(); i++) {
+						auto& [impulsion, time] = impulsions[i];
+
+						if (time < tof)
+							current_rocket_data.RegisterNewImpulsion(impulsion.GetDeltaV_vec(), time);
+					}
+				}
+				else {
+					score = local_system.Score(rocket, gen_state);
+				}
+
+
+				return score;
 			};
 
 			genetic::GeneticAlgorithm<ConfigType> ga(config, fitness); // création d'un algorithme génétique
-
-
-			using Ind = typename genetic::Individu<ConfigType>;
-			using Pop = typename std::vector<Ind>;
 
 
 			std::filesystem::path file_directory =
@@ -154,7 +204,8 @@ namespace SimuCore {
 				calculate_statistics,
 				verbose,
 				file_directory,
-				&generationalExporter
+				&generationalExporter,
+				&rockets_data
 				]
 				(
 					size_t gen,
@@ -164,6 +215,20 @@ namespace SimuCore {
 					)
 				{
 					if (gen % print_interval == 0 || gen == max_generation - 1) {
+
+						// best genes 
+						{
+							std::vector<std::vector<uint32_t>> genes = population[best_i].to_integer_vectors();
+							
+							std::cout << "Best genes :\n";
+							for (size_t j = 0; j < genes.size(); ++j) {
+								for (size_t k = 0; k < genes[j].size(); ++k) {
+									std::cout << '\t' << genes[j][k] << ' ';
+								}
+								std::cout << '\n';
+							}
+						}
+
 						///////// petites stats
 						{
 							size_t count_defined = 0;
@@ -338,6 +403,9 @@ namespace SimuCore {
 									std::vector<glm::dvec3> trajectory;
 									copy_system.GetRocketTrajectory(trajectory);
 
+
+
+
 									TrajectoryData trajectoryData{ trajectory, 2 };
 									try {
 										generationalExporter.enqueue(std::make_shared<TrajectoryData>(trajectoryData), filepath);
@@ -498,10 +566,8 @@ namespace SimuCore {
 									} // boucle for sur la population
 
 									score_mean /= population.size();
-
-									SimuCore::Systems::AdaptedSystem copy_system = system;
-									std::vector<SimuCore::Statistics::Cluster> clusters = SimuCore::Statistics::HAC<NbImpulsions>(population, copy_system);
-
+									
+									std::vector<SimuCore::Statistics::Cluster> clusters = SimuCore::Statistics::HAC(rockets_data);
 
 									StatisticsData stats_data{clusters.size(), best_fit, worst_fit, score_mean, kinds};
 
@@ -520,9 +586,37 @@ namespace SimuCore {
 
 								} // if calculate_statistics
 							} // bloc envoi donnéees
+
+
+
+
+							// envoi rocketsData
+							{
+								// trouvons le meilleur individu de la population
+								size_t idx = 0;
+								while (idx < rockets_data.size() && rockets_data[idx]->GetId() != best_i) {
+									idx++;
+								}
+
+
+								std::filesystem::path filepath_rockets_data =
+									file_directory /
+									generate_snapshot_filename("txt", gen + 1, "rockets_data");
+								try {
+									generationalExporter.enqueue(std::make_shared<RocketData>(*rockets_data[idx]), filepath_rockets_data);
+								}
+								catch (const std::exception& e) {
+									std::cerr << "\n\nRocketData writing error ||\t" << e.what() << std::endl;
+									exit(EXIT_FAILURE);
+
+								}
+							}
+
 						} // if snapshot
-					} // callback
-				};
+					}
+					rockets_data.clear();
+					rockets_data.resize(population.size());
+				}; // callback
 
 			ga.reset(config); // initialisation de l'algo génétique
 			genetic::Individu<ConfigType> best = ga.run(verbose, callback);	// on lance l'algorithme en affichant des logs dans la console

@@ -11,27 +11,27 @@ namespace SimuCore {
         class Planet : public Entity {
             const char* m_Name;
 
-            // Rayon physique de la planète (km)
+            // Rayon physique de la planÃ¨te (km)
             double m_radius;
-            // Paramètre gravitationnel de la planète (G * mass) (m^3/s²)
+            // ParamÃ¨tre gravitationnel de la planÃ¨te (G * mass) (m^3/sÂ²)
             double m_muPlanet;
-            // Masse de la planète (kg)
+            // Masse de la planÃ¨te (kg)
             double m_mass;
 
-            // altitude du début de l'exosphère (km)
+            // altitude du dÃ©but de l'exosphÃ¨re (km)
             double m_exobase;
 
-            // altitude maximale de l'anneau dans lequel la fusée dot être capturée (km)
+            // altitude maximale de l'anneau dans lequel la fusÃ©e dot Ãªtre capturÃ©e (km)
             double m_maxAltitude;
 
         public:
             /**
              * @brief Constructeur de Planet.
-             * @param name Nom de la planète.
-             * @param m Masse de la planète. (kg)
-             * @param radius Rayon physique de la planète. (km)
-             * @param exobase Altitude du début de l'exosphère. (km)
-             * @param maxAltitude Altitude maximale de l'anneau dans lequel la fusée doit être capturée. (km)
+             * @param name Nom de la planÃ¨te.
+             * @param m Masse de la planÃ¨te. (kg)
+             * @param radius Rayon physique de la planÃ¨te. (km)
+             * @param exobase Altitude du dÃ©but de l'exosphÃ¨re. (km)
+             * @param maxAltitude Altitude maximale de l'anneau dans lequel la fusÃ©e doit Ãªtre capturÃ©e. (km)
              * @param p0 Position initiale (glm::dvec3). (AU)
              * @param v0 Vitesse initiale (glm::dvec3). (km/s)
              */
@@ -67,7 +67,7 @@ namespace SimuCore {
             // --- FONCTIONS D'ORBITE AUTOMATIQUE (pour la phase finale) ---
 
             /// <summary>
-            /// Renvoi le rayon cible pour l'orbite de capture, qui est {le rayon de la planète} + {la moyenne entre l'altitude de l'exobase et l'altitude maximale}.
+            /// Renvoi le rayon cible pour l'orbite de capture, qui est {le rayon de la planÃ¨te} + {la moyenne entre l'altitude de l'exobase et l'altitude maximale}.
             /// </summary>
             /// <returns>km</returns>
             double orbitRadius() const {
@@ -75,7 +75,7 @@ namespace SimuCore {
             }
 
             /// <summary>
-            /// Rayon minimum toléré pour l'orbite.
+            /// Rayon minimum tolÃ©rÃ© pour l'orbite.
             /// </summary>
             /// <returns>km</returns>
             double minOrbitRadius() const {
@@ -84,14 +84,14 @@ namespace SimuCore {
 
             
             /// <summary>
-            /// Rayon maximum toléré pour l'orbite
+            /// Rayon maximum tolÃ©rÃ© pour l'orbite
             /// </summary>
             /// <returns>km</returns>
             double maxOrbitRadius() const {
                 return m_radius + m_maxAltitude;
             }
 
-            /** Vitesse nécessaire pour une orbite circulaire stable (Vitesse relative cible). */
+            /** Vitesse nÃ©cessaire pour une orbite circulaire stable (Vitesse relative cible). */
 
             /// <summary>
             /// 
@@ -106,7 +106,7 @@ namespace SimuCore {
 
 
             /// <summary>
-			/// Vitesse relative cible attendue (égale à la vitesse de capture) (en km/h)
+			/// Vitesse relative cible attendue (Ã©gale Ã  la vitesse de capture) (en km/h)
             /// </summary>
             /// <returns>km/s</returns>
             double orbitVelocity() const {
@@ -114,7 +114,7 @@ namespace SimuCore {
             }
 
             /// <summary>
-            /// Vitesse minimal à l'extraction de la planète à partir d'un rayon initial en km
+            /// Vitesse minimal Ã  l'extraction de la planÃ¨te Ã  partir d'un rayon initial en km
             /// </summary>
             /// <param name="initial_radius">km</param>
             /// <returns> vitesse d'extraction en km/s </returns>
@@ -128,46 +128,46 @@ namespace SimuCore {
 
 
             /// <summary>
-            /// Renvoi la masse de la planète en kg
+            /// Renvoi la masse de la planÃ¨te en kg
             /// </summary>
             /// <returns>kg</returns>
             double getMass() const { return m_mass; }
 
             /// <summary>
-            /// Renvoi le paramètre mu de la planète = masse * G (en m^3/s²)
+            /// Renvoi le paramÃ¨tre mu de la planÃ¨te = masse * G (en m^3/sÂ²)
             /// </summary>
-            /// <returns>m^3/s² (USI) </returns>
+            /// <returns>m^3/sÂ² (USI) </returns>
             double getMu() const { return m_muPlanet; }
 
             /// <summary>
-            /// Renvoi le rayon de la planète en km
+            /// Renvoi le rayon de la planÃ¨te en km
             /// </summary>
             /// <returns>km</returns>
             double getRadius() const { return m_radius; }
 
             /// <summary>
-            /// Renvoi l'altitude de l'exobase de la planète en km
+            /// Renvoi l'altitude de l'exobase de la planÃ¨te en km
             /// </summary>
             /// <returns>km</returns>
             double getExobase() const { return m_exobase; }
 
             /// <summary>
-            /// Renvoi l'altitude maximal autorisé pour que la planète garde son influence par rapport à un astre central (en km)
+            /// Renvoi l'altitude maximal autorisÃ© pour que la planÃ¨te garde son influence par rapport Ã  un astre central (en km)
             /// </summary>
             /// <returns>km</returns>
             double getMaxAltitude() const { return m_maxAltitude; }
 
             /// <summary>
-            /// Calcul la vitesse angulaire de la planète autour d'un astre central
+            /// Calcul la vitesse angulaire de la planÃ¨te autour d'un astre central
             /// </summary>
             /// <param name="distance_to_central_star">AU</param>
-            /// <param name="mu_central_star">m^3/s²</param>
+            /// <param name="mu_central_star">m^3/sÂ²</param>
             /// <returns>vitesse angulaire rad/h </returns>
             double getAngularVelocity(double distance_to_central_star, double mu_central_star) const {
                 distance_to_central_star = AU_to_meters(distance_to_central_star);
 			    double omega = std::sqrt(
                     mu_central_star /(distance_to_central_star * distance_to_central_star * distance_to_central_star)
-                ); // deuxième loi de Kepler
+                ); // deuxiÃ¨me loi de Kepler
 
 				// conversion de rad/s en rad/h
 				return omega * 3600;

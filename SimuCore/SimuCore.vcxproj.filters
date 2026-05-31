@@ -102,6 +102,12 @@
     <ClInclude Include="include\DataExport\StatisticsData.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="include\DataExport\Writable.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DataExport\RocketData.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\pch.cpp">
@@ -138,6 +144,21 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\DataExport\StatisticsData.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DataExport\Writable.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DataExport\TrajectoryData.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DataExport\physicsData.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DataExport\GeneticData.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DataExport\RocketData.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

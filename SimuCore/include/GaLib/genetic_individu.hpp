@@ -118,6 +118,16 @@ public:
 
 	void set_mutation_probas(const proba_array& probas) { m_mutation_probas = probas; }
 
+    inline void set_genome(const genome& g) { m_genome = g; }
+
+    inline void set_genome(const std::vector<std::vector<Integer>>& g) {
+		for (size_t i = 0; i < m_num_vectors; i++) {
+			for (size_t j = 0; j < m_dimension; j++) {
+				m_genome[i][j] = g[i][j];
+			}
+		}
+    }
+
     void set_config(const ConfigType* config) {
         m_config = config;
         m_num_vectors = config->number_of_vectors;
@@ -165,6 +175,18 @@ public:
 
         return result;
     }
+
+	inline std::vector<std::vector<Integer>> to_integer_vectors() const {
+		std::vector<std::vector<Integer>> result(m_num_vectors, std::vector<Integer>(m_dimension));
+
+		for (size_t i = 0; i < m_num_vectors; i++) {
+			for (size_t j = 0; j < m_dimension; j++) {
+				result[i][j] = m_genome[i][j];
+			}
+		}
+
+		return result;
+	}
 
     /**
      * @brief Output operator for debugging

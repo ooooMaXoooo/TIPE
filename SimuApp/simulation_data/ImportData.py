@@ -143,3 +143,86 @@ def load_horizons_file(filepath, x_list, y_list):
          continue
 
 
+def lire_donnees_new(nom_fichier):
+   with open(nom_fichier, "r", encoding="utf-8") as f:
+      lignes = [ligne.strip() for ligne in f if ligne.strip()]
+
+   i = 0
+
+   tof = float(lignes[i])
+   i += 1
+
+   max_time = float(lignes[i])
+   i += 1
+
+
+   thetaMin = float(lignes[i])
+   i += 1
+   thetaMax = float(lignes[i])
+   i += 1
+   thetaMean = float(lignes[i])
+
+   i += 1
+   NbTours = float(lignes[i])
+   i += 1
+
+   RMin = float(lignes[i])
+   i += 1
+   RMax = float(lignes[i])
+   i += 1
+   RMean = float(lignes[i])
+   i+=1
+
+   startPlanet = int(lignes[i])
+   i+=1
+   finalPlanet = int(lignes[i])
+   i+=1
+
+   p0 = list(lire_vecteur(lignes[i]))
+   i += 1
+   v0 = list(lire_vecteur(lignes[i]))
+   i += 1
+
+   finalPlanetStartIndice = int(lignes[i])
+   i+=1
+
+   imp0 = list(lire_vecteur(lignes[i]))
+   i+=1
+
+   nbImpulsions = int(lignes[i])
+   i+=1
+
+   impulsions, dates = [], []
+   for j in range(nbImpulsions-1) :
+      impulsions.append(list(lire_vecteur(lignes[i])))
+      i+=1
+
+      dates.append(float(lignes[i]))
+      i+=1
+
+   nbChromosomes = int(lignes[i])
+   i += 1
+   nbGenes = int(lignes[i])
+   i += 1
+
+
+   genome = []
+   for k in range(nbChromosomes) :
+      chromo = [int(x) for x in lignes[i].split(";")]
+      genome.append(chromo)
+      print(chromo)
+      i+=1
+
+
+
+   return (
+      tof, max_time,
+      thetaMin, thetaMax, thetaMean,
+      NbTours,
+      RMin, RMax, RMean,
+      startPlanet, finalPlanet,
+      p0, v0,
+      finalPlanetStartIndice,
+      imp0, impulsions, dates,
+      genome
+   )

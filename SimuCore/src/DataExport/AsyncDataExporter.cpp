@@ -1,5 +1,6 @@
 #include <pch.h>
 #include <DataExport/AsyncDataExporter.h>
+#include <iomanip>
 
 AsyncDataExporter::AsyncDataExporter()
     : m_stop(false)
@@ -62,8 +63,4 @@ void AsyncDataExporter::writeData(std::ofstream& file, const Writable& data) {
     file << data;
 }
 
-std::ofstream& operator<<(std::ofstream& fs, const Writable& writable)
-{
-    fs << writable.string();
-    return fs;
-}
+
