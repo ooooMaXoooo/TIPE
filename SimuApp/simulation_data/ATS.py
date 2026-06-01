@@ -55,10 +55,10 @@ def conversion_data (pos_init_depart, pos_final_depart, pos_init_arrivee, pos_fi
 
     return (pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee)
 
-def affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, generation) :
+def affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, generation) :    
     ax.plot(x_depart, y_depart, '-', color='blue',label='Trajectoire planète départ')
     ax.plot(x_final, y_final, '-', color='red',label='Trajectoire planète final')
-    ax.plot(x_fusee, y_fusee, '+', color='#07b00a',label='Trajectoire fusée')
+    ax.plot(x_fusee, y_fusee, '-', color="#a10976",label='Trajectoire fusée')
     ax.plot(0, 0, 'yo', label='Soleil')  # centre
 
     graphics.DrawRing(planete_depart, k, ax, "Anneau_planete_depart_position_initiale", "skyblue", pos_init_depart)
@@ -80,7 +80,7 @@ def affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee,
 
     # Ajuster les limites pour afficher entièrement le grand cercle
     ax.set_aspect('equal')
-    ax.set_title("Trajectoire des objets du système - gen " + str(generation))
+    ax.set_title("Trajectoire des objets du système")
     ax.set_xlabel("x (km)")
     ax.set_ylabel("y (km)")
     ax.grid(False)
@@ -92,8 +92,8 @@ def _affiche_generation_sur_ax(fig, ax, dossier, generation, verbose=False):
 
     ImportData.init_liste(dossier + "/start_planet.txt", x_depart, y_depart)
     ImportData.init_liste(dossier + "/final_planet.txt", x_final, y_final)
-    ImportData.init_liste(dossier + "/gen_" + str(generation) + "_rocket.txt", x_fusee, y_fusee)
-    tof, max_time, dt, delta_v, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_final, impulsions, est_etat_lie, r_min, r_max = ImportData.lire_donnees(dossier + "/gen_" + str(generation) + "_physics.txt")
+    ImportData.init_liste(dossier + "/Bests/Trajectories/gen_" + str(generation) + ".traj", x_fusee, y_fusee)
+    tof, max_time, dt, delta_v, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_final, impulsions, est_etat_lie, r_min, r_max = ImportData.lire_donnees(dossier + "/Bests/Physics/gen_" + str(generation) + ".phys")
 
     if verbose:
         affiche_console(tof, max_time, dt, delta_v, planete_depart, planete_arrivee, dimension, pos_init_depart, pos_init_arrivee, pos_final_depart, pos_final_arrivee, vitesse_final, impulsions, est_etat_lie, r_min, r_max, len(x_fusee))
@@ -131,7 +131,7 @@ def affiche_fichier(dossier, generation, window_title="Trajectoire", verbose=Tru
     fig, axes = affiche_grille([(dossier, generation)], layout=(1, 1), window_title=window_title, verbose=verbose)
     return fig, axes[0]
 
-def affiche_couple_generations(dir1, dir2, couple_gen, window_title="Title", verbose=False):
+def affiche_couple_generations(dir1, dir2, couple_gen, idx1, idx2, window_title="Title", verbose=False):
     entries = [(dir1, couple_gen[0]), (dir2, couple_gen[1])]
     fig, axes = affiche_grille(entries, layout=(1, 2), window_title=window_title, verbose=verbose)
     return fig, axes[0], axes[1]

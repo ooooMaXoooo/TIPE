@@ -156,20 +156,49 @@ void RocketData::RegisterNewR(double R) {
 }
 
 double distance(const RocketData& r1, const RocketData& r2) {
-	constexpr double coefs[7] = {5, 2, 1, 5, 1, 10, 3};
+	DistInfoRocketData info1, info2;
+
+	constexpr double PI2 = 2 * SimuCore::constants::PI;
+
+	info1.rMin		= r1.m_Rmin;
+	info1.rMax		= r1.m_Rmax;
+	info1.rMean		= r1.m_Rmean / r1.m_NbRegisteredPositions;
+	info1.thetaMin	= r1.m_thetaMin;
+	info1.thetaMax	= r1.m_thetaMax;
+	info1.thetaMean	= r1.m_thetaMean / r1.m_NbRegisteredPositions;
+	info1.nbImpuls	= r1.m_currentImpulsionIndex;
+	info1.nbTurns	= r1.m_TotalTheta / PI2;
+
+	info2.rMin		= r2.m_Rmin;
+	info2.rMax		= r2.m_Rmax;
+	info2.rMean		= r2.m_Rmean / r2.m_NbRegisteredPositions;
+	info2.thetaMin	= r2.m_thetaMin;
+	info2.thetaMax	= r2.m_thetaMax;
+	info2.thetaMean = r2.m_thetaMean / r2.m_NbRegisteredPositions;
+	info2.nbImpuls	= r2.m_currentImpulsionIndex;
+	info2.nbTurns	= r2.m_TotalTheta / PI2;
+
+	return distance(info1, info2);
+}
+
+double distance(const DistInfoRocketData& r1, const DistInfoRocketData& r2) {
+	constexpr double coefs[7] = { 100, 250, 25, 100, 25, 500, 10 };
 
 	double dist_rMin = 0, dist_rMax = 0, dist_rMean = 0, dist_theta = 0, dist_thetaMean = 0, dist_turns = 0, dist_nbImpulsions = 0;
 
-	dist_nbImpulsions = std::abs(r1.m_currentImpulsionIndex - r2.m_currentImpulsionIndex);
-	
-	dist_rMin = std::abs(r1.m_Rmin - r2.m_Rmin);
-	dist_rMax = std::abs(r1.m_Rmax - r2.m_Rmax);
-	dist_rMean = std::abs((r1.m_Rmean / r1.m_NbRegisteredPositions) - (r2.m_Rmean / r2.m_NbRegisteredPositions));
+	dist_nbImpulsions = std::abs(r1.nbImpuls - r2.nbImpuls);
 
-	dist_thetaMean = std::abs((r1.m_thetaMean / r1.m_NbRegisteredPositions) - (r2.m_thetaMean / r2.m_NbRegisteredPositions));
-	dist_theta = std::abs(std::abs(r1.m_thetaMax - r1.m_thetaMin) - std::abs(r2.m_thetaMax - r2.m_thetaMin));
+	// les rayons devraient être en UA
 
-	dist_turns = std::abs(r1.m_TotalTheta  - r2.m_TotalTheta) / (2 * SimuCore::constants::PI);
+	dist_rMin = std::abs(r1.rMin - r2.rMin);
+	dist_rMax = std::abs(r1.rMax - r2.rMax);
+	dist_rMean = std::abs(r1.rMean - r2.rMean);
+
+	// les angles en radians
+	dist_thetaMean = std::abs(r1.thetaMean - r2.thetaMean);
+	dist_theta = std::abs(std::abs(r1.thetaMax - r1.thetaMin) - std::abs(r2.thetaMax - r2.thetaMin));
+
+	dist_turns = std::abs(r1.nbTurns - r2.nbTurns);
 
 	double distance = coefs[0] * dist_rMin + coefs[1] * dist_rMax + coefs[2] * dist_rMean + coefs[3] * dist_theta + coefs[4] * dist_thetaMean + coefs[5] * dist_turns + coefs[6] * dist_nbImpulsions;
 

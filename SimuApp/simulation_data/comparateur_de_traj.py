@@ -1,30 +1,24 @@
 from ATS import affiche_couple_generations
-from stats import distance_generation
 import matplotlib.pyplot as plt
 from graphics import barre_chargement
 import os
+import simu_ind
 
 plt.close("all")
 
-dir1 = "simu_20_05_2026_23_42_24"
-dir2 = "simu_20_05_2026_23_42_24"
+dir1 = "simu_01_06_2026_22_37_31"
+dir2 = "simu_01_06_2026_22_37_31"
 
-gen1 = 1
-gen2 = 70
+gen1 = 300
+gen2 = 300
 
+idx1 = 1
+idx2 = 2
 
-chercher = False
-distance = distance_generation(gen1, gen2, dir1, dir2)
-max_gen2 = 200
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6 * 2, 6 * 1))
 
-while chercher and (distance > 12 or distance < 0) and (gen2 <= max_gen2):
-    distance = distance_generation(gen1, gen2, dir1, dir2)
-    gen2 += 1
+fig, ax1 = simu_ind.simulate_individual(dir1, gen1, idx1, fig, ax1, verbose=False)
+fig, ax2 = simu_ind.simulate_individual(dir2, gen2, idx2, fig, ax2, verbose=False)
 
-if gen2 > max_gen2 :
-    raise "Pas de traj trouvee"
-
-
-fig, _, _ = affiche_couple_generations(dir1, dir2, (gen1, gen2), window_title=f"Score : {distance:.2f} | {(gen1, gen2)}", verbose=False)
 
 plt.show()

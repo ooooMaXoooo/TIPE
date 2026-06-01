@@ -31,11 +31,11 @@ int main(int argc, char** argv) {
     genetic::CrossoverType cross_type = genetic::CrossoverType::UNIFORM_BIT_LEVEL; // ce paramètre ne change rien, on a implémenter en dur un UCLC
     bool elitism = true;                       // diminituion de la vitesse de perte de diversité ?
     bool auto_adapt = false;                    // a tester
-    size_t population_size =  1000;
-    size_t max_generation  =  500;
-    size_t print_interval  =  5;
+    size_t population_size =  100;
+    size_t max_generation  =  20;
+    size_t print_interval  =  1;
     bool verbose = true;
-    size_t snapshot_interval = 5;
+    size_t snapshot_interval = 1;
     bool save_in_file = true;
 	bool calculate_statistics = true;
 

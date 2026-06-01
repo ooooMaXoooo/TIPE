@@ -29,8 +29,5 @@ namespace SimuCore {
 
 			std::vector<const RocketData*> getRockets() const noexcept { return m_rockets; }
 		};
-
-
-		double dissimilarity(Patate const& p1, Patate const& p2);
 	};
 };

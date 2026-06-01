@@ -3,6 +3,7 @@
 #include <SimuCore/constants.h>
 #include <SimuCore/integrator/integrator.h>
 #include <SimuCore.h>
+#include <DataExport/RocketData.h>
 
 #pragma comment(lib, "SimuCore.lib") 
 
@@ -121,16 +122,6 @@ PYBIND11_MODULE(MODULE_NAME, m) {
             std::array<std::array<uint32_t, 2>, 5> genome // 5 chromosomes, 2 gènes par chromosome
             ) -> std::array<std::vector<double>, 2>
         {
-
-            std::cout << "[C++]\n";
-			for (int i = 0; i < 5; i++) {
-				for (int j = 0; j < 2; j++) {
-					std::cout << '\t' << genome[i][j] << " ";
-				}
-				std::cout << "\n";
-			}
-
-
             double lifetime = max_time_days; // durée de simulation en jours
 
             SimuCore::Systems::AdaptedSystem sy{
@@ -144,9 +135,8 @@ PYBIND11_MODULE(MODULE_NAME, m) {
                 lifetime,                                   // durée de simulation en jours
                 dt_seconds};
 
-			sy.Initialize(); // initialise les positions des planètes, etc. (doit être appelé avant de pouvoir convertir un individu en fusée)
-            std::cout << "[C++] RingSize_meter=" << sy.RingSize_meter()
-                << " MaxTime=" << sy.getMaxTime() << std::endl;
+            if (!SimuCore::Systems::AdaptedSystem::Is_initialized())
+                sy.Initialize(); // initialise les positions des planètes, etc. (doit être appelé avant de pouvoir convertir un individu en fusée)
 
             using ConfigType = genetic::Config<double, uint32_t, 5, 2>;
             ConfigType config;
@@ -184,7 +174,6 @@ PYBIND11_MODULE(MODULE_NAME, m) {
 			ind.set_genome(genome);
 
 			std::vector<std::vector<double>> vecs = ind.to_real_vectors();
-            std::cout << "[C++] avant IndividualToRocket" << std::endl;
 			auto [rocket, gen_status] = SimuCore::IndividualToRocket<double>(vecs, sy);
 
             if (gen_status != SimuCore::GenerationState::VALID) {
@@ -204,12 +193,6 @@ PYBIND11_MODULE(MODULE_NAME, m) {
             auto position_callback = [&](const glm::dvec3& pos) {
                 trajectory.push_back(pos);
                 };
-
-            
-            std::cout << "[C++] m_time=" << sy.getCurrentTime()
-                << " start_idx=" << sy.getStartPlanetPositionIndice()
-                << " rocket_pos=(" << rocket.position.x
-                << "," << rocket.position.y << ")\n";
 
             sy.Score(rocket, gen_status, position_callback, false, simulation_duration_days);
 
@@ -231,6 +214,47 @@ PYBIND11_MODULE(MODULE_NAME, m) {
         "Simule la trajectoire d'une sonde spatiale à partir d'un génome donné (5 chromosomes, 2 gènes par chromosome)"
     );
 
+    genetic_mod.def(
+        "distance_rocket",
+        [](
+            double rMin1, double rMax1, double rMean1,
+            double thetaMin1, double thetaMax1, double thetaMean1,
+            uint8_t nbImpuls1, double nbTurns1,
+            double rMin2, double rMax2, double rMean2,
+            double thetaMin2, double thetaMax2, double thetaMean2,
+            uint8_t nbImpuls2, double nbTurns2
+            ) -> double {
+                DistInfoRocketData info1, info2;
+
+                info1.rMin      = rMin1;
+                info1.rMax      = rMax1;
+                info1.rMean     = rMean1;
+                info1.thetaMin  = thetaMin1;
+                info1.thetaMax  = thetaMax1;
+                info1.thetaMean = thetaMean1;
+                info1.nbImpuls  = nbImpuls1;
+                info1.nbTurns   = nbTurns1;
+
+                info2.rMin      = rMin2;
+                info2.rMax      = rMax2;
+                info2.rMean     = rMean2;
+                info2.thetaMin  = thetaMin2;
+                info2.thetaMax  = thetaMax2;
+                info2.thetaMean = thetaMean2;
+                info2.nbImpuls  = nbImpuls2;
+                info2.nbTurns   = nbTurns2;
+
+
+                return distance(info1, info2);
+        },
+        py::arg("rMin1"), py::arg("rMax1"), py::arg("rMean1"),
+        py::arg("thetaMin1"), py::arg("thetaMax1"), py::arg("thetaMean1"),
+        py::arg("nbImpuls1"), py::arg("nbTurns1"),
+        py::arg("rMin2"), py::arg("rMax2"), py::arg("rMean2"),
+        py::arg("thetaMin2"), py::arg("thetaMax2"), py::arg("thetaMean2"),
+        py::arg("nbImpuls2"), py::arg("nbTurns2"),
+        py::call_guard<py::gil_scoped_release>()
+    );
 
 
 

@@ -144,7 +144,7 @@ public:
 
                 // affichage best
                 {
-					std::cout << std::fixed << std::setprecision(30);
+					std::cout << std::fixed << std::setprecision(7);
                     std::cout << "\n\tBest fitness: " << m_best_fitness;
                     std::cout << std::setprecision(3) << std::defaultfloat;
                     if (m_config.enable_auto_adaptation) {
@@ -612,7 +612,7 @@ private:
             Real thread_best = std::numeric_limits<Real>::lowest();
             int thread_best_indice = 0;
 
-            Real thread_worst = std::numeric_limits<Real>::lowest();
+            Real thread_worst = std::numeric_limits<Real>::max();
             int thread_worst_indice = 0;
 
             // Parcours parallèle

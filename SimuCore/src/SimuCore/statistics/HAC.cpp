@@ -7,7 +7,7 @@ namespace SimuCore {
 
 			std::vector<Cluster> SimuCore::Statistics::HAC(const std::vector<std::unique_ptr<RocketData>>& rockets)
 			{
-				constexpr double dissimilarity_threshold = 10; // à ajuster en fonction des résultats
+				constexpr double dissimilarity_threshold = 100; // à ajuster en fonction des résultats
 
 				// on initialise les patates avec une fusée chacune
 				std::vector<Patate> patates;
@@ -21,7 +21,7 @@ namespace SimuCore {
 				}
 
 				// tant que la dissimilitude entre les patates est inférieure au seuil, on fusionne les deux patates les plus proches
-				double dissim = std::numeric_limits<double>::min();
+				double dissim = std::numeric_limits<double>::lowest();
 
 				while (dissim < dissimilarity_threshold && patates.size() > 1) {
 

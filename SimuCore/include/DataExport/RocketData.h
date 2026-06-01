@@ -100,3 +100,12 @@ public:
 
 	friend double distance(const RocketData& r1, const RocketData& r2);
 };
+
+struct DistInfoRocketData {
+	double rMin, rMax, rMean;
+	double thetaMin, thetaMax, thetaMean;
+	double nbTurns;
+	uint8_t nbImpuls;
+};
+
+double distance(const DistInfoRocketData& r1, const DistInfoRocketData& r2);

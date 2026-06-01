@@ -143,7 +143,7 @@ def load_horizons_file(filepath, x_list, y_list):
          continue
 
 
-def lire_donnees_new(nom_fichier):
+def importRocketData(nom_fichier):
    with open(nom_fichier, "r", encoding="utf-8") as f:
       lignes = [ligne.strip() for ligne in f if ligne.strip()]
 
@@ -213,7 +213,7 @@ def lire_donnees_new(nom_fichier):
    for k in range(nbChromosomes) :
       chromo = [int(x) for x in lignes[i].split(";")]
       genome.append(chromo)
-      print(chromo)
+      #print(chromo)
       i+=1
 
 
@@ -228,5 +228,25 @@ def lire_donnees_new(nom_fichier):
       p0, v0,
       finalPlanetStartIndice,
       imp0, impulsions, dates,
+      nbImpulsions,
       genome
    )
+
+
+
+def importClusters (filename):
+   with open(filename, "r", encoding="utf-8") as f:
+      lignes = [ligne.strip() for ligne in f if ligne.strip()]
+
+   i = 0
+
+   NbClusters = int(lignes[i])
+   i += 1
+
+   Clusters = []
+   for j in range(NbClusters) :
+      cluster = [int(x) for x in lignes[i].split(";")]
+      Clusters.append(cluster)
+      i+=1
+
+   return (NbClusters, Clusters)

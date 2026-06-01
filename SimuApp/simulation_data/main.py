@@ -5,8 +5,8 @@ import os
 
 plt.close("all")
 
-dossier = "simu_31_05_2026_21_39_18"
-generation = 2001
+dossier = "simu_31_05_2026_23_18_12"
+generation = 15091
 
 fig, ax = affiche_fichier(dossier, generation, window_title="Terre_jupiter")
 plt.show()
