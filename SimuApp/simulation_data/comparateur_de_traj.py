@@ -6,14 +6,14 @@ import simu_ind
 
 plt.close("all")
 
-dir1 = "simu_01_06_2026_22_37_31"
-dir2 = "simu_01_06_2026_22_37_31"
+dir1 = "simu_01_06_2026_23_58_44"
+dir2 = "simu_01_06_2026_23_58_44"
 
-gen1 = 300
-gen2 = 300
+gen1 = 16
+gen2 = 16
 
-idx1 = 1
-idx2 = 2
+idx1 = 54
+idx2 = 90
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6 * 2, 6 * 1))
 

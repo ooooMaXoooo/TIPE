@@ -19,7 +19,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 
 
-dissimilarity_threshold = 10  # à modifier à la main pour coller au c++
+dissimilarity_threshold = 100  # à modifier à la main pour coller au c++
+
+family_gap = 0.4  # espace vertical (en individus) entre deux familles dans une barre
 
 
 # ── Cache ──────────────────────────────────────────────────────────────────────
@@ -66,7 +68,7 @@ def preload_generation(dossier, gen, all_clusters):
     with ThreadPoolExecutor() as ex:
         futures = {ex.submit(_load_rocket_data, dossier, gen, idx): idx for idx in indices}
         for f in as_completed(futures):
-            f.result()  # propage les exceptions éventuelles
+            f.result()
 
 
 def _distance_from_cache(dossier, gen1, idx1, gen2, idx2):
@@ -86,7 +88,6 @@ def _distance_from_cache(dossier, gen1, idx1, gen2, idx2):
 # ── Propagation ────────────────────────────────────────────────────────────────
 
 def _compute_row(args):
-    """Calcule une ligne entière de la matrice D (tous les j pour un i fixé)."""
     i, cluster_i, clusters_n, dossier, gen_n1, gen_n = args
     row = np.empty(len(clusters_n))
     for j, cluster_j in enumerate(clusters_n):
@@ -148,25 +149,21 @@ def propagate_colors(clusters_n, clusters_n1, dossier, gen_n, gen_n1,
 
 # ── Histogramme ────────────────────────────────────────────────────────────────
 
-def histo_clusters(Nb_gen, dossier, gen_start=1, gen_step=1):
+def histo_clusters(gen_final, dossier, gen_start=1, gen_step=1):
     """
     Affiche l'histogramme des clusters pour les générations sélectionnées.
 
-    Nb_gen     : nombre total de générations disponibles dans la simulation
+    gen_final  : dernière génération à afficher
     dossier    : répertoire de la simulation
     gen_start  : première génération à afficher (1-indexé, défaut=1)
     gen_step   : pas entre deux générations affichées (défaut=1)
-
-    Exemple : histo_clusters(200, dossier, gen_start=31, gen_step=10)
-              → affiche les générations 31, 41, 51, ..., jusqu'à Nb_gen
     """
     filename_base = dossier + "/Stats/HAC/gen_"
 
-    # Liste des générations à afficher (numéros réels dans les fichiers)
-    selected_gens = list(range(gen_start, Nb_gen + 1, gen_step))
+    selected_gens = list(range(gen_start, gen_final + 1, gen_step))
     Nb_selected   = len(selected_gens)
 
-    AllClusters   = []  # AllClusters[i] → clusters de selected_gens[i]
+    AllClusters   = []
     ClustersSizes = []
 
     for gen in selected_gens:
@@ -174,7 +171,6 @@ def histo_clusters(Nb_gen, dossier, gen_start=1, gen_step=1):
         AllClusters.append(clusters)
         ClustersSizes.append(N)
 
-    # Pré-chargement de toutes les fusées en mémoire
     print("Chargement des données...")
     for i, gen in enumerate(tqdm(selected_gens, desc="Lecture fichiers", unit="gen")):
         preload_generation(dossier, gen, AllClusters[i])
@@ -186,7 +182,6 @@ def histo_clusters(Nb_gen, dossier, gen_start=1, gen_step=1):
         for cj in AllClusters[i - 1]
     )
 
-    # Assignation des couleurs
     color_maps  = []
     next_color  = 0
     initial_map = {j: j for j in range(ClustersSizes[0])}
@@ -199,8 +194,8 @@ def histo_clusters(Nb_gen, dossier, gen_start=1, gen_step=1):
                 clusters_n  = AllClusters[i - 1],
                 clusters_n1 = AllClusters[i],
                 dossier     = dossier,
-                gen_n       = selected_gens[i - 1],  # numéro réel de la génération n
-                gen_n1      = selected_gens[i],       # numéro réel de la génération n+1
+                gen_n       = selected_gens[i - 1],
+                gen_n1      = selected_gens[i],
                 threshold   = dissimilarity_threshold,
                 next_color  = next_color,
                 color_map_n = color_maps[i - 1],
@@ -216,14 +211,28 @@ def histo_clusters(Nb_gen, dossier, gen_start=1, gen_step=1):
     cmap    = plt.colormaps["hsv"].resampled(nb_families + 1)
     palette = [cmap(i / nb_families) for i in range(nb_families)]
 
-    # Affichage — les abscisses sont les numéros réels de génération
+    # Affichage — clusters triés par index de palette (rouge en bas),
+    # avec un espace de family_gap entre chaque famille
     fig, ax = plt.subplots()
+    bar_width = gen_step * 0.9
+
     for i, gen in enumerate(selected_gens):
         bottom = 0
-        for cluster_j in range(ClustersSizes[i]):
+        sorted_clusters = sorted(
+            range(ClustersSizes[i]),
+            key=lambda j: id_to_idx[color_maps[i][j]]
+        )
+        for k, cluster_j in enumerate(sorted_clusters):
+            if k > 0:
+                # espace blanc entre deux familles
+                ax.bar(gen, family_gap, bottom=bottom,
+                       color="white", width=bar_width, edgecolor="none")
+                bottom += family_gap
+
             size  = len(AllClusters[i][cluster_j])
             color = palette[id_to_idx[color_maps[i][cluster_j]]]
-            ax.bar(gen, size, bottom=bottom, color=color, width=gen_step * 0.9, edgecolor="none")
+            ax.bar(gen, size, bottom=bottom, color=color,
+                   width=bar_width, edgecolor="black", linewidth=0.3)
             bottom += size
 
     ax.set_xlabel("Génération")
@@ -234,12 +243,12 @@ def histo_clusters(Nb_gen, dossier, gen_start=1, gen_step=1):
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 
-"""
-dossier    = "simu_01_06_2026_22_24_10"
-Nb_gen     = 100
+dossier   = "simu_01_06_2026_23_58_44"
 
-histo_clusters(Nb_gen, dossier, gen_start=1, gen_step=1)
+gen_start = 1
+gen_final = 20
+gen_step  = 1
+
+histo_clusters(gen_final, dossier, gen_start, gen_step)
 
 plt.show()
-"""
-

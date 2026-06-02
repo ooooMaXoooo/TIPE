@@ -159,8 +159,13 @@ namespace Optimization {
 		}
 	}
 
-	void sendStatistics(double best_fit, double worst_fit, double mean_score, int kinds[12], const std::vector<SimuCore::Statistics::Cluster>& clusters, const std::filesystem::path& filepath, AsyncDataExporter& exporter) {
-		StatisticsData stats_data{ clusters.size(), best_fit, worst_fit, mean_score, kinds };
+	void sendStatistics(double best_fit, double worst_fit, double mean_score, int kinds[12], const std::vector<SimuCore::Statistics::Cluster>& clusters, const std::filesystem::path& filepath, AsyncDataExporter& exporter) {		
+		std::array<int, 12> kindsCount;
+		for (int i = 0; i < 12; i++) {
+			kindsCount[i] = kinds[i];
+		}
+		
+		StatisticsData stats_data{ clusters.size(), best_fit, worst_fit, mean_score, kindsCount };
 
 		try {
 			exporter.enqueue(std::make_shared<StatisticsData>(stats_data), filepath);

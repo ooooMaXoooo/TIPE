@@ -102,6 +102,7 @@ namespace SimuCore {
 			{
 				new_position.x = position.x * cos_theta - position.y * sin_theta;
 				new_position.y = position.x * sin_theta + position.y * cos_theta;
+				new_position.z = 0;
 			}
 			position = new_position;
 
@@ -109,6 +110,7 @@ namespace SimuCore {
 			{
 				new_velocity.x = velocity.x * cos_theta - velocity.y * sin_theta;
 				new_velocity.y = velocity.x * sin_theta + velocity.y * cos_theta;
+				new_velocity.z = 0;
 			}
 			velocity = new_velocity;
 

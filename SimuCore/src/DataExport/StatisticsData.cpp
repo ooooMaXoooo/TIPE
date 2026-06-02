@@ -1,13 +1,20 @@
 #include <pch.h>
 #include <DataExport/StatisticsData.h>
 
-StatisticsData::StatisticsData(size_t NClusters, double best_score, double worst_score, double mean_score, int* kindsCount) :
+StatisticsData::StatisticsData(size_t NClusters, double best_score, double worst_score, double mean_score, std::array<int, 12> kindsCount) :
 	m_NClusters(NClusters),
 	m_best_score(best_score),
 	m_worst_score(worst_score),
-	m_mean_score(mean_score),
-	m_kindsCount(kindsCount)
-{}
+	m_mean_score(mean_score) {
+
+	#pragma opm critical
+	{
+		for (int i = 0; i < 12; i++) {
+			m_kindsCount[i] = kindsCount[i];
+		}
+	}
+}
+
 
 std::string StatisticsData::string() const {
 	std::ostringstream oss;

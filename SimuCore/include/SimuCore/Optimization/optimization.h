@@ -422,7 +422,7 @@ namespace SimuCore {
 									*	11 ~~> Valid
 									*
 									*/
-									int kinds[12] = { 0 };
+									int kinds[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 									auto type_of_trajectory = [&](double fitness) -> int {
 										if (fitness < 0) return -1;
@@ -452,9 +452,17 @@ namespace SimuCore {
 
 										if (ind.have_been_evaluated()) {
 											double fitness = ind.get_fitness();
-											score_mean += fitness;
 
-											kinds[type_of_trajectory(fitness)]++;
+											if (fitness > 0) {
+												score_mean += fitness;
+
+												int kind = type_of_trajectory(fitness);
+												kinds[kind]++;
+
+												if (kind < -0.5 || kinds[kind] < -0.5) {
+													throw std::runtime_error("pas cool");
+												}
+											}
 										}
 										else {
 											throw std::runtime_error("Un individu n'a pas ete evalue, alors que tous les individus devraient l'etre à ce stade de l'algorithme genetique.");

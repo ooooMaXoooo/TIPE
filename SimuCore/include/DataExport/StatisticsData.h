@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DataExport/Writable.h>
+#include <array>
 
 class StatisticsData : public Writable {
 public :
@@ -9,7 +10,7 @@ public :
 		double best_score,
 		double worst_score,
 		double mean_score,
-		int* kindsCount
+		std::array<int, 12> kindsCount
 	);
 
 	std::string string() const override;
@@ -29,7 +30,7 @@ private:
 	double m_worst_score;
 	double m_mean_score;
 
-	int* m_kindsCount;
+	std::array<int, 12> m_kindsCount;
 	static constexpr int s_kindsCountSize = 12;
 
 };

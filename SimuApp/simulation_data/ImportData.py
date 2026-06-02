@@ -250,3 +250,27 @@ def importClusters (filename):
       i+=1
 
    return (NbClusters, Clusters)
+
+
+
+def importStats (filename, extension=".stats"):
+   with open(filename + extension, "r", encoding="utf-8") as f:
+      lignes = [ligne.strip() for ligne in f if ligne.strip()]
+
+   i = 0
+
+   NbClusters = int(lignes[i])
+   i += 1
+
+   max_score = float(lignes[i])
+   i += 1
+
+   min_score = float(lignes[i])
+   i += 1
+
+   mean_score = float(lignes[i])
+   i += 1
+
+   
+
+   return (NbClusters, )
