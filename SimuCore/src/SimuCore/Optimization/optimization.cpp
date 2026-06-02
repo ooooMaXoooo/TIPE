@@ -70,11 +70,22 @@ namespace Optimization {
 		}
 	}
 
-	void sendIndividualTrajectory(const SimuCore::Structures::Rocket& rocket, const std::filesystem::path& filepath, SimuCore::Systems::AdaptedSystem* system, AsyncDataExporter& exporter) {
-		
+	void sendIndividualTrajectory(const SimuCore::Structures::Rocket& rocket, GenerationState gen_state, const std::filesystem::path& filepath, SimuCore::Systems::AdaptedSystem* system, AsyncDataExporter& exporter) {
+		/*
 		system->SetRocket(rocket);
 		std::vector<glm::dvec3> trajectory;
 		system->GetRocketTrajectory(trajectory);
+		*/
+
+		std::vector<glm::dvec3> trajectory;
+		const size_t trajectory_size = static_cast<const size_t>(daysInSeconds(system->getMaxTime()) / system->getDeltaTime());
+		trajectory.reserve(trajectory_size + 1);
+
+		auto position_callback = [&trajectory](const glm::dvec3& pos) {
+			trajectory.push_back(pos);
+		};
+
+		system->Score(rocket, gen_state, position_callback);
 
 		TrajectoryData trajectoryData{ trajectory, 2 };
 		try {

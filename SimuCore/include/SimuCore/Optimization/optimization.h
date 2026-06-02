@@ -29,7 +29,7 @@ namespace SimuCore {
 
 
 		void sendPlanetsTrajectory(const std::filesystem::path& filepath_start, const std::filesystem::path& filepath_final, SimuCore::Systems::AdaptedSystem system);
-		void sendIndividualTrajectory(const SimuCore::Structures::Rocket& rocket, const std::filesystem::path& filepath, SimuCore::Systems::AdaptedSystem* system, AsyncDataExporter& exporter);
+		void sendIndividualTrajectory(const SimuCore::Structures::Rocket& rocket, GenerationState gen_state, const std::filesystem::path& filepath, SimuCore::Systems::AdaptedSystem* system, AsyncDataExporter& exporter);
 		void sendRocketPhysics(const SimuCore::Structures::Rocket& rocket, const std::filesystem::path& filepath, SimuCore::Systems::AdaptedSystem* system, AsyncDataExporter& exporter);
 		void sendStatistics(double best_fit, double worst_fit, double mean_score, int kinds[12], const std::vector<SimuCore::Statistics::Cluster>& clusters, const std::filesystem::path& filepath, AsyncDataExporter& exporter);
 
@@ -346,7 +346,7 @@ namespace SimuCore {
 										generate_snapshot_filename("gen_", gen+1, "", "traj");
 
 
-									sendIndividualTrajectory(rocket, filepath, &copy_system, generationalExporter);
+									sendIndividualTrajectory(rocket, state, filepath, &copy_system, generationalExporter);
 								}
 
 								// envoi des données physiques
