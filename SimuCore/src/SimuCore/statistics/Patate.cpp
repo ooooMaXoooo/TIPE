@@ -18,9 +18,19 @@ namespace SimuCore {
 			other.m_rockets.clear();
 		}
 
-		double dissimilarity(Patate const& p1, Patate const& p2) {
-			/* on utilise la dissimilarité moyenne */
+		RocketDataVectorSpace Patate::GetCentroid() const { // TODO : à check
+			RocketDataVectorSpace barycentre;
 
+			size_t size = m_rockets.size();
+
+			for (int i = 0; i < size; i++) {
+				barycentre += m_rockets[i]->GetAssociatedVector();
+			}
+
+			return barycentre / size;
+		}
+
+		double dissimilarity_mean(Patate const& p1, Patate const& p2) {
 			double Dmean = 0;
 			size_t total = 0;
 
@@ -33,6 +43,17 @@ namespace SimuCore {
 			}
 
 			return Dmean / total;
+		}
+
+		double dissimilarity_centroids(Patate const& p1, Patate const& p2) {
+			RocketDataVectorSpace c1 = p1.GetCentroid();
+			RocketDataVectorSpace c2 = p1.GetCentroid();
+
+			return (c1 - c2).Length();
+		}
+
+		double dissimilarity(Patate const& p1, Patate const& p2) {
+			return dissimilarity_centroids(p1, p2);
 		}
 	}; // namespace Statistics
 }; // namespace SimuCore

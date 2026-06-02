@@ -20,7 +20,7 @@ import threading
 
 
 dissimilarity_threshold = 100  # à modifier à la main pour coller au c++
-family_gap              = 0.4  # espace vertical (en individus) entre deux familles dans une barre
+family_gap              = 0  # espace vertical (en individus) entre deux familles dans une barre
 outlier_iqr_factor      = 1.5  # facteur IQR pour la détection des outliers (boîte à moustaches)
 outlier_dark_factor     = 0.30 # facteur d'assombrissement des couleurs outliers (0 = noir, 1 = normal)
 
@@ -296,15 +296,7 @@ def propagate_colors(clusters_n, clusters_n1, dossier, gen_n, gen_n1,
 
 # ── Histogramme HAC ────────────────────────────────────────────────────────────
 
-def histo_clusters(fig, ax, gen_final, dossier, gen_start=1, gen_step=1):
-    """
-    Affiche l'histogramme des clusters pour les générations sélectionnées.
-
-    gen_final  : dernière génération à afficher
-    dossier    : répertoire de la simulation
-    gen_start  : première génération à afficher (1-indexé, défaut=1)
-    gen_step   : pas entre deux générations affichées (défaut=1)
-    """
+def chargeData_histo_clusters(dossier, gen_start, gen_final, gen_step) :
     filename_base = dossier + "/Stats/HAC/gen_"
 
     selected_gens = list(range(gen_start, gen_final + 1, gen_step))
@@ -364,8 +356,11 @@ def histo_clusters(fig, ax, gen_final, dossier, gen_start=1, gen_step=1):
         dark_factor = outlier_dark_factor
     )
 
-    # Affichage — clusters triés par position MDS croissante
-    bar_width = gen_step * 0.9
+    return (selected_gens, ClustersSizes, positions_dict, color_maps, AllClusters, palette_dict)
+
+
+def affiche_histo_clusters(fig, ax, gen_step, selected_gens, ClustersSizes, positions_dict, color_maps, AllClusters, palette_dict) :
+    bar_width = gen_step
 
     for i, gen in enumerate(selected_gens):
         bottom = 0
@@ -382,7 +377,7 @@ def histo_clusters(fig, ax, gen_final, dossier, gen_start=1, gen_step=1):
             size  = len(AllClusters[i][cluster_j])
             color = palette_dict[color_maps[i][cluster_j]]
             ax.bar(gen, size, bottom=bottom, color=color,
-                   width=bar_width, edgecolor="black", linewidth=0.3)
+                   width=bar_width, edgecolor="black", linewidth=0)
             bottom += size
 
     ax.set_xlabel("Génération")
@@ -391,11 +386,121 @@ def histo_clusters(fig, ax, gen_final, dossier, gen_start=1, gen_step=1):
     plt.tight_layout()
 
 
+def histo_clusters(fig, ax, gen_final, dossier, gen_start=1, gen_step=1):
+    """
+    Affiche l'histogramme des clusters pour les générations sélectionnées.
+
+    gen_final  : dernière génération à afficher
+    dossier    : répertoire de la simulation
+    gen_start  : première génération à afficher (1-indexé, défaut=1)
+    gen_step   : pas entre deux générations affichées (défaut=1)
+    """
+
+    (selected_gens, ClustersSizes, positions_dict, color_maps, AllClusters, palette_dict) = chargeData_histo_clusters(dossier, gen_start, gen_final, gen_step)
+    affiche_histo_clusters(fig, ax, gen_step, selected_gens, ClustersSizes, positions_dict, color_maps, AllClusters, palette_dict)
+
+
 
 
 # ── Graphe score ────────────────────────────────────────────────────────────
 
-def plotScores (fig, ax, dossier, end_gen, start_gen=1, gen_step=1) :
-    filename_base = dossier + "Stats/Simple/gen_"
 
-    
+def toHex(dec):
+    digits = "0123456789ABCDEF"
+    x = (dec % 16)
+    rest = dec // 16
+    if (rest == 0):
+        return digits[x]
+    return toHex(rest) + digits[x]
+
+def hexToDec (hex) :
+    return int(hex, 16)
+
+
+def hexGradient (hexStart, hexFinal, N) :
+    res = []
+
+    decStart = hexToDec(hexStart)
+    decFinal = hexToDec(hexFinal)
+
+    for i in range(N) :
+        n = int(decStart + ((decFinal - decStart) * i / (N-1)))
+        res.append(toHex(n))
+
+    return res
+
+
+
+
+def plotKindsCount (fig, ax, dossier, end_gen, start_gen=1, gen_step=1) :
+    kindsGap = 0
+
+    filename_base = dossier + "/Stats/Simple/gen_"
+
+    Invalid_colors = [("#" + hex + "0000") for hex in hexGradient("79", "FF", 8)]
+    Neutral_colors = [("#FF" + hex + "00") for hex in hexGradient("99", "EE", 3)]
+    Valid_color = "#007500"
+
+    bar_width = gen_step
+
+    for gen in range(start_gen, end_gen+1, gen_step):
+        bottom = 0
+        gap = 0
+
+        (_, Invalids, Neutrals, Valids, _, _, _) = ImportData.importStats(filename_base + str(gen))
+
+
+        # ── Invalides ────────────────────────────────
+        for i in range(len(Invalids)) :
+            if i > 0 :
+                ax.bar(gen, kindsGap, bottom=bottom, color="white", width=bar_width, edgecolor="none")
+                bottom += kindsGap
+
+            size = Invalids[i]
+            ax.bar(gen, size, bottom=bottom, color=Invalid_colors[i],
+                   width=bar_width, edgecolor="black", linewidth=0.3)
+            bottom += size
+            
+        # ── Neutres ──────────────────────────────────
+        for i in range(len(Neutrals)) :
+            ax.bar(gen, kindsGap, bottom=bottom, color="white", width=bar_width, edgecolor="none")
+            bottom += kindsGap
+
+            size = Neutrals[i]
+            ax.bar(gen, size, bottom=bottom, color=Neutral_colors[i],
+                   width=bar_width, edgecolor="black", linewidth=0.3)
+            bottom += size
+
+        # ── Valides ───────────────────────────────────
+        ax.bar(gen, kindsGap, bottom=bottom, color="white", width=bar_width, edgecolor="none")
+        bottom += kindsGap
+
+        size = Valids
+        ax.bar(gen, size, bottom=bottom, color=Valid_color,
+                width=bar_width, edgecolor="black", linewidth=0)
+        bottom += size
+
+
+
+
+def plotScores (fig, ax, dossier, end_gen, start_gen=1, gen_step=1) :
+    filename_base = dossier + "/Stats/Simple/gen_"
+
+    X = range(start_gen, end_gen+1, gen_step)
+
+    Maxs, Mins, Means = [], [], []
+
+    for gen in range(start_gen, end_gen+1, gen_step):
+        (_, _, _, _, maxScore, minScore, meanScore) = ImportData.importStats(filename_base + str(gen))
+        Maxs.append(maxScore)
+        Mins.append(minScore)
+        Means.append(meanScore)
+
+    ax.plot(X, Maxs, ':', color="black")
+    ax.plot(X, Mins, ':', color="black")
+    ax.plot(X, Means, ':', color="blue", label='Score moyen')
+
+    ax.set_xlabel("Génération")
+    ax.set_ylabel("Taille des clusters")
+    ax.set_title("évolution du score")
+    plt.tight_layout()

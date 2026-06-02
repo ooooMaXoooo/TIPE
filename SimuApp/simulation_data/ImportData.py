@@ -271,6 +271,32 @@ def importStats (filename, extension=".stats"):
    mean_score = float(lignes[i])
    i += 1
 
-   
+   """
+   /**
+      *	 0 ~~> Collision start panet with high speed
+      *	 1 ~~> Collision start panet with low speed
+      *	 2 ~~> Collision sun with high speed
+      *	 3 ~~> Collision sun with low speed
+      *	 4 ~~> Acceleration too high
+      *	 5 ~~> Rocket get too far in the system
+      *	 6 ~~> Collision final panet with high speed
+      *	 7 ~~> Collision final panet with low speed
+      *	 8 ~~> Neutral : not in ring
+      *	 9 ~~> Neutral : in ring but not in orbit
+      *	10 ~~> Neutral : in orbit but too large
+      *	11 ~~> Valid
+      */
+   """
+   Invalids, Neutrals, Valids = [], [], 0
 
-   return (NbClusters, )
+   for _ in range(8):
+      Invalids.append(int(lignes[i]))
+      i += 1
+
+   for _ in range(3):
+      Neutrals.append(int(lignes[i]))
+      i += 1
+
+   Valids = int(lignes[i])
+
+   return (NbClusters, Invalids, Neutrals, Valids, max_score, min_score, mean_score)

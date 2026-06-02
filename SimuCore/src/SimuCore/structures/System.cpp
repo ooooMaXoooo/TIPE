@@ -21,10 +21,10 @@ namespace SimuCore::Systems {
 		SimuCore::Structures::Planet("Mercure", 3.3011e23, 2439.7,    0,     5038, glm::dvec3(  57.91e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 47.87e3, 0)),
 		SimuCore::Structures::Planet("Venus",   4.8675e24, 6051.8,  175,    47600, glm::dvec3( 108.21e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 35.02e3, 0)),
 
-		/*k=1*/
+		/*k=1 */
 		SimuCore::Structures::Planet("Terre",   5.9722e24, 6371.0,  450,  253111, glm::dvec3(  149.6e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 29.78e3, 0)),
 		SimuCore::Structures::Planet("Mars",    6.4171e23, 3389.5,  200,  126093, glm::dvec3( 227.92e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 24.13e3, 0)),
-		
+		//*/
 
 		/*k=100
 		SimuCore::Structures::Planet("Terre",   5.9722e24, 6371.0,  450,  19611, glm::dvec3(149.6e9_m_to_AU, 0, 0), convert_speed* glm::dvec3(0, 29.78e3, 0)),

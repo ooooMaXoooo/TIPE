@@ -7,7 +7,7 @@ StatisticsData::StatisticsData(size_t NClusters, double best_score, double worst
 	m_worst_score(worst_score),
 	m_mean_score(mean_score) {
 
-	#pragma opm critical
+	#pragma omp critical
 	{
 		for (int i = 0; i < 12; i++) {
 			m_kindsCount[i] = kindsCount[i];

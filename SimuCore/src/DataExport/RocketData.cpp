@@ -93,6 +93,23 @@ void RocketData::RegisterNewImpulsion(const glm::dvec3& impulsion, double time) 
 	}
 }
 
+RocketDataVectorSpace RocketData::GetAssociatedVector() const {
+	RocketDataVectorSpace res;
+
+	res.rMin = m_Rmin;
+	res.rMax = m_Rmax;
+	res.rMean = m_Rmean / m_NbRegisteredPositions;
+
+	res.thetaMean = m_thetaMean / m_NbRegisteredPositions;
+	res.thetaSpan = std::abs(m_thetaMax - m_thetaMin);
+
+	res.nbImpuls = m_currentImpulsionIndex + 1;
+
+	res.nbTurns = m_TotalTheta / (2 * SimuCore::constants::PI);
+
+	return res;
+}
+
 std::string RocketData::formatVector(const glm::dvec3& vec) const {
 	std::ostringstream oss;
 	oss << vec.x << ';' << vec.y;
@@ -166,7 +183,7 @@ double distance(const RocketData& r1, const RocketData& r2) {
 	info1.thetaMin	= r1.m_thetaMin;
 	info1.thetaMax	= r1.m_thetaMax;
 	info1.thetaMean	= r1.m_thetaMean / r1.m_NbRegisteredPositions;
-	info1.nbImpuls	= r1.m_currentImpulsionIndex;
+	info1.nbImpuls	= r1.m_currentImpulsionIndex + 1;
 	info1.nbTurns	= r1.m_TotalTheta / PI2;
 
 	info2.rMin		= r2.m_Rmin;
@@ -175,7 +192,7 @@ double distance(const RocketData& r1, const RocketData& r2) {
 	info2.thetaMin	= r2.m_thetaMin;
 	info2.thetaMax	= r2.m_thetaMax;
 	info2.thetaMean = r2.m_thetaMean / r2.m_NbRegisteredPositions;
-	info2.nbImpuls	= r2.m_currentImpulsionIndex;
+	info2.nbImpuls	= r2.m_currentImpulsionIndex + 1;
 	info2.nbTurns	= r2.m_TotalTheta / PI2;
 
 	return distance(info1, info2);
@@ -203,4 +220,77 @@ double distance(const DistInfoRocketData& r1, const DistInfoRocketData& r2) {
 	double distance = coefs[0] * dist_rMin + coefs[1] * dist_rMax + coefs[2] * dist_rMean + coefs[3] * dist_theta + coefs[4] * dist_thetaMean + coefs[5] * dist_turns + coefs[6] * dist_nbImpulsions;
 
 	return distance;
+}
+
+RocketDataVectorSpace& RocketDataVectorSpace::operator=(const RocketDataVectorSpace& other) {
+	// Guard self assignment
+	if (this == &other)
+		return *this;
+
+	this->rMin			= other.rMin;
+	this->rMax			= other.rMax;
+	this->rMean			= other.rMean;
+	this->thetaSpan		= other.thetaSpan;
+	this->thetaMean		= other.thetaMean;
+	this->nbTurns		= other.nbTurns;
+	this->nbImpuls		= other.nbImpuls;
+
+	return *this;
+}
+
+RocketDataVectorSpace& RocketDataVectorSpace::operator-(const RocketDataVectorSpace& other) {
+	this->rMin		-= other.rMin;
+	this->rMax		-= other.rMax;
+	this->rMean		-= other.rMean;
+	this->thetaSpan	-= other.thetaSpan;
+	this->thetaMean -= other.thetaMean;
+	this->nbTurns	-= other.nbTurns;
+	this->nbImpuls	-= other.nbImpuls;
+
+	return *this;
+}
+
+RocketDataVectorSpace& RocketDataVectorSpace::operator+(const RocketDataVectorSpace& other) {
+	this->rMin		+= other.rMin;
+	this->rMax		+= other.rMax;
+	this->rMean		+= other.rMean;
+	this->thetaSpan += other.thetaSpan;
+	this->thetaMean += other.thetaMean;
+	this->nbTurns	+= other.nbTurns;
+	this->nbImpuls	+= other.nbImpuls;
+
+	return *this;
+}
+
+RocketDataVectorSpace& RocketDataVectorSpace::operator*(double scalar) {
+	this->rMin		*= scalar;
+	this->rMax		*= scalar;
+	this->rMean		*= scalar;
+	this->thetaSpan *= scalar;
+	this->thetaMean *= scalar;
+	this->nbTurns	*= scalar;
+	this->nbImpuls	*= scalar;
+
+	return *this;
+}
+
+RocketDataVectorSpace& RocketDataVectorSpace::operator/(double scalar) {
+	this->rMin		/= scalar;
+	this->rMax		/= scalar;
+	this->rMean		/= scalar;
+	this->thetaSpan /= scalar;
+	this->thetaMean /= scalar;
+	this->nbTurns	/= scalar;
+	this->nbImpuls	/= scalar;
+
+	return *this;
+}
+
+RocketDataVectorSpace& RocketDataVectorSpace::operator+=(const RocketDataVectorSpace& other) {
+	*this = *this + other;
+	return *this;
+}
+
+double RocketDataVectorSpace::Length() const {
+	return std::abs(rMin) +  std::abs(rMax) + std::abs(rMean) + std::abs(thetaSpan) + std::abs(thetaMean) + std::abs(nbTurns) + nbImpuls;
 }

@@ -8,6 +8,25 @@
 #include <glm/fwd.hpp>
 
 
+struct RocketDataVectorSpace {
+	double rMin, rMax, rMean;
+	double thetaSpan, thetaMean;
+	double nbTurns;
+	int16_t nbImpuls;
+
+	RocketDataVectorSpace& operator=(const RocketDataVectorSpace& other);
+	RocketDataVectorSpace& operator-(const RocketDataVectorSpace& other);
+	RocketDataVectorSpace& operator+(const RocketDataVectorSpace& other);
+	RocketDataVectorSpace& operator*(double scalar);
+	RocketDataVectorSpace& operator/(double scalar);
+
+	RocketDataVectorSpace& operator+=(const RocketDataVectorSpace& other);
+
+
+	double Length() const;
+};
+
+
 class RocketData : public Writable {
 public:
 	RocketData(
@@ -33,6 +52,8 @@ public:
 	void RegisterNewCartesianPosition(glm::dvec3 pos);
 	void RegisterNewPolarPosition(double R, double theta);
 	void RegisterNewImpulsion(const glm::dvec3& impulsion, double time);
+
+	RocketDataVectorSpace GetAssociatedVector() const;
 
 private:
 	uint8_t m_dimension;
