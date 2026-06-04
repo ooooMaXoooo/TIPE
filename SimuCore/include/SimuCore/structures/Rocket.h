@@ -132,6 +132,9 @@ namespace SimuCore {
 			void Rotate(const glm::dvec3& pos);
 
 			glm::dvec3 GetInitialImpulsion() const;
+
+
+			void CutImpulsions(double time);
 		};		
 	}; // namespace Structures
 }; // namespace SimuCore

@@ -238,7 +238,7 @@ def prolong2 (dossier, gen, verbose=False) :
       p0, v0,
       finalPlanetStartIndice,
       imp0, impulsions, dates
-   ) = ImportData.lire_donnees_new(dossier + "/gen_" + str(gen) + "_rockets_data.txt")
+   ) = ImportData.lire_donnees_new(dossier + "/Bests/RocketsData/gen_" + str(gen) + ".rck")
     
     def vec_to3D (vec) :
         return [vec[0], vec[1], 0]
@@ -280,8 +280,8 @@ def prolong2 (dossier, gen, verbose=False) :
 
 
 
-dossier = "simu_21_05_2026_23_55_59"
-gen = 2
+dossier = "simu_02_06_2026_20_04_52"
+gen = 42
 
 #prolongement(0, dossier, gen, True)
 prolong2(dossier, gen)

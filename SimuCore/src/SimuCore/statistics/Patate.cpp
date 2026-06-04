@@ -53,7 +53,7 @@ namespace SimuCore {
 		}
 
 		double dissimilarity(Patate const& p1, Patate const& p2) {
-			return dissimilarity_centroids(p1, p2);
+			return dissimilarity_mean(p1, p2);
 		}
 	}; // namespace Statistics
 }; // namespace SimuCore

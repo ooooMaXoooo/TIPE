@@ -55,10 +55,10 @@ def conversion_data (pos_init_depart, pos_final_depart, pos_init_arrivee, pos_fi
 
     return (pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee)
 
-def affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, generation) :    
-    ax.plot(x_depart, y_depart, '-', color='blue',label='Trajectoire planète départ')
-    ax.plot(x_final, y_final, '-', color='red',label='Trajectoire planète final')
-    ax.plot(x_fusee, y_fusee, '-', color="#a10976",label='Trajectoire fusée')
+
+def affiche_background(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, col_start='blue', col_final='red'):
+    ax.plot(x_depart, y_depart, '-', color=col_start,label='Trajectoire planète départ')
+    ax.plot(x_final, y_final, '-', color=col_final,label='Trajectoire planète final')
     ax.plot(0, 0, 'yo', label='Soleil')  # centre
 
     graphics.DrawRing(planete_depart, k, ax, "Anneau_planete_depart_position_initiale", "skyblue", pos_init_depart)
@@ -70,13 +70,16 @@ def affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee,
         graphics.DrawRealRing(r_min, r_max, pos_final_arrivee, ax, "#0A680C", "encadrement ellipse final")
 
 
-    graphics.affiche_impulsions(impulsions, dt, x_fusee, y_fusee, ax)
+    
 
-    ax.plot([], [], 'ko', label='Impulsions')
-    ax.plot([], [], color='green', label='Delta-v')
+def affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, trajColor, plotBackground=True, col_start='blue', col_final='red') :    
+    
+    if plotBackground :
+        affiche_background(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, col_start=col_start, col_final=col_final)
+        graphics.affiche_impulsions(impulsions, dt, x_fusee, y_fusee, ax)
+        ax.plot(x_fusee[-1], y_fusee[-1], 'o')
 
-    ax.plot(x_fusee[-1], y_fusee[-1], 'o')
-
+    ax.plot(x_fusee, y_fusee, '-', color=trajColor, label='Trajectoire fusée' if plotBackground else '')
 
     # Ajuster les limites pour afficher entièrement le grand cercle
     ax.set_aspect('equal')
@@ -100,7 +103,7 @@ def _affiche_generation_sur_ax(fig, ax, dossier, generation, verbose=False):
 
     pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee = conversion_data(pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee)
 
-    affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, generation)
+    affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, trajColor="#2A962D", plotBackground=True)
 
 
 def affiche_grille(dossiers_generations, layout, window_title="Trajectoires", verbose=False):

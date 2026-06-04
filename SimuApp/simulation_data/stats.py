@@ -100,6 +100,73 @@ def _distance_barycenters(b1, b2):
     )
 
 
+
+
+
+
+
+
+def get_cluster_representative(dossier, gen, cluster):
+    """
+    Retourne l'indice de l'individu le plus proche du barycentre du cluster.
+    Si le cluster est un singleton, retourne directement son unique membre.
+    """
+    if len(cluster) == 1:
+        return cluster[0]
+
+    bary = compute_cluster_barycenter(dossier, gen, cluster)
+
+    best_idx  = cluster[0]
+    best_dist = np.inf
+    for idx in cluster:
+        data = _load_rocket_data(dossier, gen, idx)
+        dist = _distance_barycenters(data, bary)
+        if dist < best_dist:
+            best_dist = dist
+            best_idx  = idx
+
+    return best_idx
+
+
+def get_generation_representatives(dossier, gen_idx, gen_number,
+                                   clusters, color_map, palette_dict):
+    """
+    Pour une génération donnée, retourne la liste des représentants de chaque cluster
+    avec leur couleur associée.
+
+    Paramètres
+    ----------
+    dossier      : répertoire de la simulation
+    gen_idx      : index dans AllClusters / color_maps (0-based)
+    gen_number   : numéro de génération réel (pour les chemins de fichiers)
+    clusters     : AllClusters[gen_idx]
+    color_map    : color_maps[gen_idx]
+    palette_dict : dict color_id -> (r, g, b)
+
+    Retourne
+    --------
+    Liste de dict :
+        { "idx": int, "color": (r,g,b), "color_id": int, "cluster_size": int }
+    """
+    result = []
+    for cluster_j, cluster in enumerate(clusters):
+        color_id  = color_map[cluster_j]
+        color     = palette_dict[color_id]
+        rep_idx   = get_cluster_representative(dossier, gen_number, cluster)
+        result.append({
+            "idx":          rep_idx,
+            "color":        color,
+            "color_id":     color_id,
+            "cluster_size": len(cluster)
+        })
+    return result
+
+
+
+
+
+
+
 # ── Palette basée sur les longueurs d'onde ─────────────────────────────────────
 
 def wavelength_to_rgb(wavelength, gamma=0.8):
@@ -137,7 +204,6 @@ def classical_mds_1d(D):
     coord = eigenvectors[:, idx] * np.sqrt(max(eigenvalues[idx], 0.0))
     return coord
 
-
 def compute_family_palette(all_color_ids, inter_family_distances,
                            iqr_factor=1.5, dark_factor=0.30):
     """
@@ -145,7 +211,6 @@ def compute_family_palette(all_color_ids, inter_family_distances,
     Retourne (palette_dict, positions_dict).
     """
     n = len(all_color_ids)
-
     if n == 1:
         return {all_color_ids[0]: wavelength_to_rgb(550)}, {all_color_ids[0]: 0.5}
 
@@ -153,18 +218,13 @@ def compute_family_palette(all_color_ids, inter_family_distances,
 
     D = np.full((n, n), np.inf)
     np.fill_diagonal(D, 0.0)
-
     for (cid_a, cid_b), dist in inter_family_distances.items():
         i, j = id_to_local[cid_a], id_to_local[cid_b]
         D[i, j] = dist
         D[j, i] = dist
 
-    for k in range(n):
-        for i in range(n):
-            for j in range(n):
-                candidate = D[i, k] + D[k, j]
-                if candidate < D[i, j]:
-                    D[i, j] = candidate
+    for k in tqdm(range(n), desc="Floyd-Warshall", unit="iter", leave=False):
+        D = np.minimum(D, D[:, k:k+1] + D[k:k+1, :])
 
     finite_vals = D[np.isfinite(D)]
     max_finite  = float(np.max(finite_vals)) if finite_vals.size > 0 else 1.0
@@ -202,7 +262,6 @@ def compute_family_palette(all_color_ids, inter_family_distances,
     WL_MIN, WL_MAX = 420.0, 680.0
     palette_dict   = {}
     positions_dict = {}
-
     for cid in all_color_ids:
         local_idx = id_to_local[cid]
         pos       = renorm[local_idx]
@@ -213,7 +272,6 @@ def compute_family_palette(all_color_ids, inter_family_distances,
         positions_dict[cid] = float(positions[local_idx])
 
     return palette_dict, positions_dict
-
 
 # ── Propagation (centroid linkage) ─────────────────────────────────────────────
 
@@ -360,7 +418,7 @@ def affiche_histo_clusters(fig, ax, gen_step, selected_gens, ClustersSizes,
                        color="white", width=bar_width, edgecolor="none")
                 bottom += family_gap
 
-            size  = len(AllClusters[i][cluster_j])
+            size = len(AllClusters[i][cluster_j])
             color = palette_dict[color_maps[i][cluster_j]]
             ax.bar(gen, size, bottom=bottom, color=color,
                    width=bar_width, edgecolor="black", linewidth=0)
@@ -378,6 +436,74 @@ def histo_clusters(fig, ax, gen_final, dossier, gen_start=1, gen_step=1):
         dossier, gen_start, gen_final, gen_step)
     affiche_histo_clusters(fig, ax, gen_step, selected_gens, ClustersSizes,
                            positions_dict, color_maps, AllClusters, palette_dict)
+
+
+
+
+
+
+
+# ── Streamgraph HAC ────────────────────────────────────────────────────────────
+
+def _distinct_palette(all_ids, positions_dict):
+    """
+    Une couleur DISTINCTE par famille (garantit autant de couleurs que de
+    familles), espacees par rang le long de 'turbo'. L'ordre suit la position
+    MDS, donc familles proches -> teintes proches (continuite de l'aspect), et
+    la couleur reste attachee a l'id de famille -> continuite au fil des gen.
+    """
+    order = sorted(all_ids, key=lambda fid: positions_dict.get(fid, 0.5))
+    n = max(len(order), 1)
+    cmap = plt.get_cmap("turbo")
+    return {fid: cmap((k + 0.5) / n) for k, fid in enumerate(order)}
+
+
+
+def affiche_streamgraph_clusters(fig, ax, selected_gens, color_maps, AllClusters,
+                                 positions_dict, palette_dict=None, baseline="sym", verbose=False):
+    """Dessine le streamgraph et verifie la coherence familles <-> couleurs."""
+    # familles ordonnees par position MDS : familles proches -> bandes adjacentes
+    all_ids = sorted({cid for cm in color_maps for cid in cm.values()},
+                     key=lambda fid: positions_dict.get(fid, 0.5))
+    if palette_dict is None:
+        palette_dict = _distinct_palette(all_ids, positions_dict)
+    row = {fid: k for k, fid in enumerate(all_ids)}
+
+    # matrice effectifs [famille, generation]
+    M = np.zeros((len(all_ids), len(selected_gens)))
+    for i in range(len(selected_gens)):
+        for j, cluster in enumerate(AllClusters[i]):
+            M[row[color_maps[i][j]], i] += len(cluster)
+
+    colors = [palette_dict[fid] for fid in all_ids]
+
+    # ── Verification : autant de couleurs que de familles ──
+    n_fam = len(all_ids)
+    n_col = len({tuple(round(c, 4) for c in palette_dict[fid][:3]) for fid in all_ids})
+    n_transient = int((np.sum(M > 0, axis=1) == 1).sum())
+
+    if verbose :
+        print(f"[stats2] {n_fam} familles distinctes, {n_col} couleurs distinctes, "
+            f"{len(colors)} bandes tracees, sur {len(selected_gens)} generations.")
+        if n_col != n_fam:
+            print(f"[stats2] ATTENTION : {n_fam - n_col} collision(s) de couleur "
+                f"(familles de teinte quasi identique).")
+        else:
+            print("[stats2] OK : 1 couleur par famille.")
+        if n_transient:
+            print(f"[stats2] {n_transient}/{n_fam} familles n'apparaissent que sur 1 generation "
+                f"-> seuil de matching peut-etre trop strict (augmente threshold).")
+
+    ax.stackplot(selected_gens, M, colors=colors, baseline=baseline)
+    ax.set_xlabel("Generation")
+    ax.set_ylabel("Effectif des familles")
+    #ax.set_yscale('log')
+
+    ax.set_title("Abondance des familles au fil des generations (couleurs continues)")
+    plt.tight_layout()
+    return all_ids, M
+
+
 
 
 # ── Graphe score ────────────────────────────────────────────────────────────────

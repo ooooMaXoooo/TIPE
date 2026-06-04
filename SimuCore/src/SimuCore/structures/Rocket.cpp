@@ -141,5 +141,16 @@ namespace SimuCore {
 			return m_Impulsions.empty() ? glm::dvec3(0) : m_Impulsions[0].first.GetDeltaV_vec();
 		}
 
+		void Rocket::CutImpulsions(double time) {
+			std::vector<std::pair<Impulsion, double>> impulsions;
+
+			for (auto& impuls : m_Impulsions) {
+				if (impuls.second <= time)
+					impulsions.push_back(impuls);
+			}
+
+			m_Impulsions = impulsions;
+		}
+
 	}; // namespace Structures
 }; // namespace SimuCore

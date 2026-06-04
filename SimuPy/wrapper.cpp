@@ -115,6 +115,7 @@ PYBIND11_MODULE(MODULE_NAME, m) {
 		"GetIndividualTrajectory__configD32_2_2", // D pour double, 32 pour uint32_t, 2 pour impulsions, 2 la dimension de l'espace
         [](double dt_seconds,
             double max_time_days,
+            double tof_days,
 			double simulation_duration_days,
             double mass_kg,
             uint8_t startPlanet,
@@ -176,6 +177,8 @@ PYBIND11_MODULE(MODULE_NAME, m) {
 			std::vector<std::vector<double>> vecs = ind.to_real_vectors();
 			auto [rocket, gen_status] = SimuCore::IndividualToRocket<double>(vecs, sy);
 
+            rocket.CutImpulsions(tof_days);
+
             if (gen_status != SimuCore::GenerationState::VALID) {
                 // génome invalide, retourner un résultat vide ou lever une exception
                 return std::array<std::vector<double>, 2>{};
@@ -207,7 +210,7 @@ PYBIND11_MODULE(MODULE_NAME, m) {
 			}
 			return result;
         },
-		py::arg("dt_seconds"), py::arg("max_time_days"),
+		py::arg("dt_seconds"), py::arg("max_time_days"), py::arg("tof_days"),
         py::arg("simulation_duration_days"), py::arg("mass_kg"),
 		py::arg("startPlanet"), py::arg("finalPlanet"),
 		py::arg("genome"),
