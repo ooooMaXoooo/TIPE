@@ -57,8 +57,8 @@ def conversion_data (pos_init_depart, pos_final_depart, pos_init_arrivee, pos_fi
 
 
 def affiche_background(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, col_start='blue', col_final='red'):
-    ax.plot(x_depart, y_depart, '-', color=col_start,label='Trajectoire planète départ')
-    ax.plot(x_final, y_final, '-', color=col_final,label='Trajectoire planète final')
+    ax.plot(x_depart, y_depart, '-', color=col_start, label='Trajectoire planète départ')
+    ax.plot(x_final, y_final, '-', color=col_final, label='Trajectoire planète final')
     ax.plot(0, 0, 'yo', label='Soleil')  # centre
 
     graphics.DrawRing(planete_depart, k, ax, "Anneau_planete_depart_position_initiale", "skyblue", pos_init_depart)

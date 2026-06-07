@@ -14,7 +14,7 @@
 
 int main(int argc, char** argv) {
     
-	double lifetime = 260; // durée de simulation en jours
+	double lifetime = 300; // durée de simulation en jours
 	SimuCore::Systems::AdaptedSystem sy(
         SimuCore::Systems::PlanetsName::Terre,   // planète de départ
         SimuCore::Systems::PlanetsName::Mars,    // planète d'arrivée
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     bool elitism = true;                        // diminituion de la vitesse de perte de diversité ?
     bool auto_adapt = false;                    // a tester
     size_t population_size =  1000;
-    size_t max_generation  =  500;
+    size_t max_generation  =  1000;
     size_t print_interval  =  1;
     bool verbose = true;
     size_t snapshot_interval = 10;
