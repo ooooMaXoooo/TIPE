@@ -5,11 +5,11 @@ import simu_ind
 
 plt.close("all")
 
-dossier = "simu_02_06_2026_20_59_49"
-generation = 215
+dossier = "simu_07_06_2026_15_43_01"
+generation = 31
 verbose = False
 
 fig, ax = affiche_fichier(dossier, generation, window_title="Terre_jupiter", verbose=verbose)
-simu_ind.simulate_individual(dossier, generation, 0, fig, ax, verbose=verbose, is_best=True)
+simu_ind.simulate_individual(dossier, generation, 0, fig, ax, verbose=verbose, is_best=True, trajColor="#9A228C")
 
 plt.show()
