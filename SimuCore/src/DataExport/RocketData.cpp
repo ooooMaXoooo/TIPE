@@ -199,7 +199,7 @@ double distance(const RocketData& r1, const RocketData& r2) {
 }
 
 double distance(const DistInfoRocketData& r1, const DistInfoRocketData& r2) {
-	constexpr double coefs[7] = { 100, 250, 25, 100, 25, 500, 10 };
+	constexpr double coefs[7] = { 50, 30, 25, 50, 15, 500, 10 };
 
 	double dist_rMin = 0, dist_rMax = 0, dist_rMean = 0, dist_theta = 0, dist_thetaMean = 0, dist_turns = 0, dist_nbImpulsions = 0;
 

@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
 	double lifetime = 260; // durée de simulation en jours
 	SimuCore::Systems::AdaptedSystem sy(
         SimuCore::Systems::PlanetsName::Terre,   // planète de départ
-        SimuCore::Systems::PlanetsName::Jupiter,  // planète d'arrivée
+        SimuCore::Systems::PlanetsName::Mars,    // planète d'arrivée
         SimuCore::Structures::Rocket(
 			lifetime, // -> durée de vie de la fusée en jours
             std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(),
