@@ -26,14 +26,14 @@ namespace SimuCore::Systems {
 		//SimuCore::Structures::Planet("Jupiter", 1.8982e27,  69911, 2000,  23319047, glm::dvec3( 778.57e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 13.07e3, 0)),
 
 		/*k=10*/
-		SimuCore::Structures::Planet("Terre",   5.9722e24, 6371.0,  450,    75777, glm::dvec3(  149.6e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 29.78e3, 0)),
-		SimuCore::Structures::Planet("Mars",    6.4171e23, 3389.5,  200,    37565, glm::dvec3( 227.92e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 24.13e3, 0)),
-		SimuCore::Structures::Planet("Jupiter", 1.8982e27,  69911, 2000,  7480085, glm::dvec3( 778.57e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 13.07e3, 0)),
+		//SimuCore::Structures::Planet("Terre",   5.9722e24, 6371.0,  450,    75777, glm::dvec3(  149.6e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 29.78e3, 0)),
+		//SimuCore::Structures::Planet("Mars",    6.4171e23, 3389.5,  200,    37565, glm::dvec3( 227.92e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 24.13e3, 0)),
+		//SimuCore::Structures::Planet("Jupiter", 1.8982e27,  69911, 2000,  7480085, glm::dvec3( 778.57e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 13.07e3, 0)),
 
 		/*k = 100*/
-		//SimuCore::Structures::Planet("Terre",   5.9722e24, 6371.0,  450,    19611, glm::dvec3(149.6e9_m_to_AU, 0, 0), convert_speed* glm::dvec3(0, 29.78e3, 0)),
-		//SimuCore::Structures::Planet("Mars",    6.4171e23, 3389.5,  200,     9556, glm::dvec3(227.92e9_m_to_AU, 0, 0), convert_speed* glm::dvec3(0, 24.13e3, 0)),
-		//SimuCore::Structures::Planet("Jupiter", 1.8982e27,  69911, 2000,  2332435, glm::dvec3(778.57e9_m_to_AU, 0, 0), convert_speed* glm::dvec3(0, 13.07e3, 0)),
+		SimuCore::Structures::Planet("Terre",   5.9722e24, 6371.0,  450,    19611, glm::dvec3(149.6e9_m_to_AU, 0, 0), convert_speed* glm::dvec3(0, 29.78e3, 0)),
+		SimuCore::Structures::Planet("Mars",    6.4171e23, 3389.5,  200,     9556, glm::dvec3(227.92e9_m_to_AU, 0, 0), convert_speed* glm::dvec3(0, 24.13e3, 0)),
+		SimuCore::Structures::Planet("Jupiter", 1.8982e27,  69911, 2000,  2332435, glm::dvec3(778.57e9_m_to_AU, 0, 0), convert_speed* glm::dvec3(0, 13.07e3, 0)),
 
 		/*k=1000*/
 		//SimuCore::Structures::Planet("Terre",   5.9722e24, 6371.0,  450,    1842, glm::dvec3(  149.6e9_m_to_AU, 0, 0), convert_speed * glm::dvec3(0, 29.78e3, 0)),

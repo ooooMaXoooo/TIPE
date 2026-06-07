@@ -14,10 +14,10 @@
 
 int main(int argc, char** argv) {
     
-	double lifetime = 300; // durée de simulation en jours
+	double lifetime = 500; // durée de simulation en jours
 	SimuCore::Systems::AdaptedSystem sy(
         SimuCore::Systems::PlanetsName::Terre,   // planète de départ
-        SimuCore::Systems::PlanetsName::Mars,    // planète d'arrivée
+        SimuCore::Systems::PlanetsName::Jupiter,    // planète d'arrivée
         SimuCore::Structures::Rocket(
 			lifetime, // -> durée de vie de la fusée en jours
             std::vector<std::pair<SimuCore::Structures::Impulsion, double>>(),
@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     size_t max_generation  =  1000;
     size_t print_interval  =  1;
     bool verbose = true;
-    size_t snapshot_interval = 10;
+    size_t snapshot_interval = 5;
     bool save_in_file = true;
 	bool calculate_statistics = true;
 

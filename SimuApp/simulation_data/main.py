@@ -1,7 +1,7 @@
 from ATS import affiche_fichier, affiche_couple_generations
 import matplotlib.pyplot as plt
 import os
-import simu_ind
+import prolong_ind
 
 plt.close("all")
 
@@ -12,7 +12,7 @@ verbose = False
 #fig, ax = affiche_fichier(dossier, generation, window_title="Terre_jupiter", verbose=verbose)
 
 fig, ax = plt.subplots()
-simu_ind.simulate_individual(
+prolong_ind.simulate_individual(
     dossier,
     generation,
     0,

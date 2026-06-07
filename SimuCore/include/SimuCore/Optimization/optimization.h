@@ -65,7 +65,7 @@ namespace SimuCore {
 			config.initial_mutation_probability = 0.8;				// paramètre à ajuster
 			config.initial_self_adaptation_probability = 0.8;		// paramètre à ajuster
 
-			config.custom_mutation_proba = 0.5 * 0.003125;					// on prend la proba uniforme (-1 pour uniforme)
+			config.custom_mutation_proba = 1.5 * 0.003125;					// on prend la proba uniforme (-1 pour uniforme)
 			//config.custom_mutation_proba = 1 * config.number_of_vectors * config.dimension * 0.003125;					// on prend la proba uniforme (-1 pour uniforme)
 			//config.custom_mutation_proba = -1;					// on prend la proba uniforme (-1 pour uniforme)
 
