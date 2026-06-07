@@ -66,15 +66,15 @@ R_Saturne = 9.54 * AU
 R_Uranus  = 19.18 * AU
 R_Neptune = 30.11 * AU 
 
-R_final = R_Jupiter
+R_final = R_Mars
 R_depart = R_Terre
 
 
 # === Paramètres utilisateur ===
 n_points = 500
-tof_min_days, tof_max_days = 900, 1100
+tof_min_days, tof_max_days = 50, 500
 theta_min, theta_max = np.pi + 0.01 , 3 * np.pi - 0.01
-tof_chosen_days, theta_chosen = 1000, np.deg2rad(45 + 360)
+tof_chosen_days, theta_chosen = 400, np.deg2rad(45 + 360)
 
 width_mars = 3
 width_traj = 3
@@ -382,8 +382,8 @@ def update_plots(tof_days, theta_deg, display_options):
         title=f'Surface Δv(θ, temps) - C++ {cpp_version}<br>'
               f'<sub>{computation_time:.2f}s, {total_computations/computation_time:.0f} calc/s</sub>',
         scene=dict(
-            xaxis_title='Angle θ (rad)',
-            yaxis_title='Temps (jours)',
+            xaxis_title='θ (rad)',
+            yaxis_title='tof (jours)',
             zaxis_title=color_title,
             zaxis_type=zaxis_type,
             camera=dict(eye=dict(x=1.2, y=1.2, z=0.8))
