@@ -40,7 +40,7 @@ public:
      * @brief Fitness function type
      * Takes vectors of real values and returns a fitness score (higher is better)
      */
-    using FitnessFunction = typename std::function<Real(const Individual&, size_t, bool)>;
+    using FitnessFunction = typename std::function<Real(const Individual&, size_t, bool, int)>;
 
 	// generation - > best fitness - > best individual indice -> worst fitness -> worst individual indice -> population
     using CallbackFunctionType = typename std::function<void(size_t, Real, int, Real, int, const Population&)>;
@@ -239,12 +239,12 @@ private:
         update_best();
     }
 
-    void evaluate_population(bool last_evaluation) {
+    void evaluate_population(bool last_evaluation, int gen) {
         #pragma omp parallel
         {
             #pragma omp for
             for (int i = 0; i < m_config.population_size; i++) {
-                Real eval = m_fitness_func(m_population[i], i, last_evaluation);
+                Real eval = m_fitness_func(m_population[i], i, last_evaluation, gen);
                 m_population[i].set_fitness(eval);
             }
         }
@@ -568,7 +568,7 @@ private:
     void step(int gen) {
 		//std::cout << "Generation " << gen << ":\n";
         // évaluation
-        evaluate_population(false); // multithreadé
+        evaluate_population(false, gen); // multithreadé
 
         // Sélection
         selection(gen); // multithreadé
@@ -590,7 +590,7 @@ private:
         }
 
 		//std::cout << "\nAfter mutation of generation " << gen << ":\n";
-        evaluate_population(true); // les mutés n'ont pas de score valide
+        evaluate_population(true, gen); // les mutés n'ont pas de score valide
         // Mise à jour du meilleur
         update_best(); // multithreadé // update aussi le pire
 

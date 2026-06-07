@@ -29,6 +29,7 @@ public:
 
 private:
     genome m_genome;
+
     proba_array m_mutation_probas;
     const ConfigType* m_config;
 

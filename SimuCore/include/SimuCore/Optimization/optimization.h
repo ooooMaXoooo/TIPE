@@ -89,7 +89,7 @@ namespace SimuCore {
 			std::vector<std::unique_ptr<RocketData>> rockets_data;
 			rockets_data.resize(config.population_size);
 			// associe à un génome un score
-			auto fitness = [&](const Ind& individu, size_t indice, bool last_evaluation) -> Real {
+			auto fitness = [&](const Ind& individu, size_t indice, bool last_evaluation, int gen) -> Real {
 				// vec[0] --> un vecteur à 3 dimension, équivalent à la position initiale
 				// vec[1] --> un vecteur à 3 dimension, équivalent à l'impulsion initiale
 				// vec[2] --> un vecteur à 3 dimension, dont on n'utilise que la première composante, équivalent à l'instant de la 1ere impulsion
@@ -100,7 +100,7 @@ namespace SimuCore {
 				double score = SimuCore::Systems::AdaptedSystem::m_LowestScore; // score par défaut pour les individus invalides
 				auto [rocket, gen_state] = IndividualToRocket(vecs, local_system);
 
-				if (last_evaluation) { // TODO : ajouter calculate_statistics en condition pour limiter les calculs lorsque c'est possible
+				if (last_evaluation && (gen % snapshot_interval == 0)) { // TODO : ajouter calculate_statistics en condition pour limiter les calculs lorsque c'est possible
 
 					//local_system.Reset();		// On réinitialise le système pour que les individus commençent tous dans les mêmes confitions initiales.
 					// On n'a pas besoin de réinitialiser car la fonction Score le fait déjà.
