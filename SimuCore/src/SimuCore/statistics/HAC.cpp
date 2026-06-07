@@ -7,7 +7,12 @@ namespace SimuCore {
 
 			std::vector<Cluster> SimuCore::Statistics::HAC(const std::vector<std::unique_ptr<RocketData>>& rockets)
 			{
-				constexpr double dissimilarity_threshold = 500; // à ajuster en fonction des résultats
+				constexpr double dissimilarity_threshold = 100; // à ajuster en fonction des résultats
+
+				/*
+				dissimilarity_threshold : 100 pour Mars
+				dissimilarity_threshold : 500 pour Jupiter
+				*/
 
 				// on initialise les patates avec une fusée chacune
 				std::vector<Patate> patates;

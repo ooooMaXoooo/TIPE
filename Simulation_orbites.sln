@@ -1,12 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36127.28 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.6.11822.322 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimuCore", "SimuCore\SimuCore.vcxproj", "{ECAB35E1-9D47-4716-8C39-E5AFA96A8159}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimuApp", "SimuApp\SimuApp.vcxproj", "{4B015973-C633-46B4-9F20-931B94607825}"
 	ProjectSection(ProjectDependencies) = postProject
+		{87AA83C5-3890-433B-A9BB-CC19C1752339} = {87AA83C5-3890-433B-A9BB-CC19C1752339}
 		{ECAB35E1-9D47-4716-8C39-E5AFA96A8159} = {ECAB35E1-9D47-4716-8C39-E5AFA96A8159}
 	EndProjectSection
 EndProject
