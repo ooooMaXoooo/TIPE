@@ -32,6 +32,48 @@ namespace orbit {
         const std::vector<double>& tof_list,
         double mu = SimuCore::constants::mu
     );
+
+    /// <summary>
+    /// </summary>
+    /// <returns>le delta_v minimal, puis les 10 scalaires qui définissent l'état du système pour l'otpimal</returns>
+    std::array<double, 17> lambert_by_parts(
+        double mu_start, double mu_final, double mu_sun,
+        double distFinalSun,
+        double tof1_min, double tof1_max,
+        double tof2_min, double tof2_max,
+        double tof3_min, double tof3_max,
+        double r1_min, double r1_max, double theta1_min, double theta1_max,
+        double r2_min, double r2_max, double theta2_min, double theta2_max,
+        double RStart, double thetaStart_min, double thetaStart_max,
+        double RFinal, double thetaFinal_min, double thetaFinal_max,
+        double thetaFinalPlanet_min, double thetaFinalPlanet_max,
+        double Nt1, double Nt2, double Nt3,
+        double Nr1, double Nth1,
+        double Nr2, double Nth2,
+        double NthStart, double NthFinal,
+        double NthFinalPlanet
+    );
+
+    /// <summary>
+    /// </summary>
+    /// <returns>le delta_v minimal, puis les 10 scalaires qui définissent l'état du système pour l'otpimal</returns>
+    std::array<double, 11> lambert_by_parts_OpenMP(
+        double mu_start, double mu_final, double mu_sun,
+        double distFinalSun,
+        double tof1_min, double tof1_max,
+        double tof2_min, double tof2_max,
+        double tof3_min, double tof3_max,
+        double r1_min, double r1_max, double theta1_min, double theta1_max,
+        double r2_min, double r2_max, double theta2_min, double theta2_max,
+        double RStart, double thetaStart_min, double thetaStart_max,
+        double RFinal, double thetaFinal_min, double thetaFinal_max,
+        double thetaFinalPlanet_min, double thetaFinalPlanet_max,
+        double Nt1, double Nt2, double Nt3,
+        double Nr1, double Nth1,
+        double Nr2, double Nth2,
+        double NthStart, double NthFinal,
+        double NthFinalPlanet
+    );
 };
 
 glm::dvec3 forceAttractionGrav(const SimuCore::Structures::Entity& from, const SimuCore::Structures::Entity& on);

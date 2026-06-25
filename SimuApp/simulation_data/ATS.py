@@ -44,7 +44,15 @@ def convert_vec_to_km (vec_ua) :
 def convert_list_to_km(xs, ys):
     return [x * AU for x in xs], [y * AU for y in ys]
 
-def conversion_data (pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee) :
+def conversion_data (
+        pos_init_depart,
+        pos_final_depart,
+        pos_init_arrivee,
+        pos_final_arrivee,
+        x_depart, y_depart,
+        x_final, y_final,
+        x_fusee, y_fusee
+    ) :
     pos_init_depart = convert_vec_to_km(pos_init_depart)
     pos_final_depart = convert_vec_to_km(pos_final_depart)
     pos_init_arrivee = convert_vec_to_km(pos_init_arrivee)
@@ -56,30 +64,93 @@ def conversion_data (pos_init_depart, pos_final_depart, pos_init_arrivee, pos_fi
     return (pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee)
 
 
-def affiche_background(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, col_start='blue', col_final='red'):
-    ax.plot(x_depart, y_depart, '-', color=col_start, label='Trajectoire planète départ')
-    ax.plot(x_final, y_final, '-', color=col_final, label='Trajectoire planète final')
-    ax.plot(0, 0, 'yo', label='Soleil')  # centre
+def affiche_background(
+        fig, ax,
+        pos_init_depart, pos_final_depart,
+        pos_init_arrivee, pos_final_arrivee,
+        x_depart, y_depart,
+        x_final, y_final,
+        planete_depart, planete_arrivee,
+        est_etat_lie, r_min, r_max,
+        impulsions,
+        dt,
+        col_start='blue', col_final='red',
+        col_sun = 'yellow',
+        col_startStartRing="skyblue",
+        col_startFinalRing="blue",
+        col_finalStartRing="lightcoral",
+        col_finalFinalRing="red",
+        col_rocketRing="#0A680C",
+        linewidthStart=2, linewidthFinal=2,
+        linestyleStart = '-', linestyleFinal='-'
+        ):
+    ax.plot(x_depart, y_depart, linestyleStart, color=col_start, label='Trajectoire planète départ', linewidth=linewidthStart)
+    ax.plot(x_final, y_final, linestyleFinal, color=col_final, label='Trajectoire planète final', linewidth=linewidthFinal)
+    ax.plot(0, 0, 'o', label='Soleil', color=col_sun)  # centre
 
-    graphics.DrawRing(planete_depart, k, ax, "Anneau_planete_depart_position_initiale", "skyblue", pos_init_depart)
-    graphics.DrawRing(planete_depart, k, ax, "Anneau_planete_depart_position_final", "blue", pos_final_depart)
-    graphics.DrawRing(planete_arrivee, k, ax, "Anneau_planete_final_position_initiale", "lightcoral", pos_init_arrivee)
-    graphics.DrawRing(planete_arrivee, k, ax, "Anneau_planete_final_position_final", "red", pos_final_arrivee)
+    graphics.DrawRing(planete_depart, k, ax, "Anneau_planete_depart_position_initiale", col_startStartRing, pos_init_depart)
+    graphics.DrawRing(planete_depart, k, ax, "Anneau_planete_depart_position_final", col_startFinalRing, pos_final_depart)
+    graphics.DrawRing(planete_arrivee, k, ax, "Anneau_planete_final_position_initiale", col_finalStartRing, pos_init_arrivee)
+    graphics.DrawRing(planete_arrivee, k, ax, "Anneau_planete_final_position_final", col_finalFinalRing, pos_final_arrivee)
 
     if (est_etat_lie) :
-        graphics.DrawRealRing(r_min, r_max, pos_final_arrivee, ax, "#0A680C", "encadrement ellipse final")
+        graphics.DrawRealRing(r_min, r_max, pos_final_arrivee, ax, col_rocketRing, "encadrement ellipse final")
 
 
     
 
-def affiche_orbite(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, x_fusee, y_fusee, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, trajColor, plotBackground=True, col_start='blue', col_final='red') :    
+def affiche_orbite(
+        fig, ax,
+        pos_init_depart, pos_final_depart,
+        pos_init_arrivee, pos_final_arrivee,
+        x_depart, y_depart,
+        x_final, y_final,
+        x_fusee, y_fusee,
+        planete_depart, planete_arrivee,
+        est_etat_lie, r_min, r_max,
+        impulsions,
+        dt,
+        trajColor,
+        plotBackground=True,
+        col_start='blue', col_final='red',
+        col_sun = 'yellow',
+        col_startStartRing="skyblue",
+        col_startFinalRing="blue",
+        col_finalStartRing="lightcoral",
+        col_finalFinalRing="red",
+        col_rocketRing="#0A680C",
+        col_final_rocket_position='black',
+        linewidthStart=2, linewidthFinal=2,
+        linewidthRocket=2,
+        linestyleStart = '-', linestyleFinal='-',
+        linestyleRocket='-'
+        ) :    
     
+    ax.plot(x_fusee, y_fusee, linestyleRocket, color=trajColor, label='Trajectoire fusée' if plotBackground else '', linewidth=linewidthRocket)
     if plotBackground :
-        affiche_background(fig, ax, pos_init_depart, pos_final_depart, pos_init_arrivee, pos_final_arrivee, x_depart, y_depart, x_final, y_final, planete_depart, planete_arrivee, est_etat_lie, r_min, r_max, impulsions, dt, col_start=col_start, col_final=col_final)
-        graphics.affiche_impulsions(impulsions, dt, x_fusee, y_fusee, ax)
-        ax.plot(x_fusee[-1], y_fusee[-1], 'o')
+        affiche_background(
+            fig, ax,
+            pos_init_depart, pos_final_depart,
+            pos_init_arrivee, pos_final_arrivee,
+            x_depart, y_depart,
+            x_final, y_final,
+            planete_depart, planete_arrivee,
+            est_etat_lie, r_min, r_max,
+            impulsions,
+            dt,
+            col_start=col_start, col_final=col_final,
+            col_sun = col_sun,
+            col_startStartRing=col_startStartRing,
+            col_startFinalRing=col_startFinalRing,
+            col_finalStartRing=col_finalStartRing,
+            col_finalFinalRing=col_finalFinalRing,
+            col_rocketRing=col_rocketRing,
+            linewidthStart=linewidthStart, linewidthFinal=linewidthFinal,
+            linestyleStart=linestyleStart, linestyleFinal=linestyleFinal
+            )
+        graphics.affiche_impulsions(impulsions, dt, x_fusee, y_fusee, ax, color='#000000')
+        ax.plot(x_fusee[-1], y_fusee[-1], 'o', color=col_final_rocket_position)
 
-    ax.plot(x_fusee, y_fusee, '-', color=trajColor, label='Trajectoire fusée' if plotBackground else '')
 
     # Ajuster les limites pour afficher entièrement le grand cercle
     ax.set_aspect('equal')

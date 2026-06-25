@@ -19,7 +19,27 @@ import stats
 #plt.style.use('dark_background')
 
 
-def simulate_individual (dossier, gen, idx, fig, ax, verbose=False, is_best=False, trajColor="#229A28", plotBackground=True, col_start='blue', col_final='red', alpha=2) :
+def simulate_individual (
+        dossier, gen, idx,
+        fig, ax,
+        verbose=False,
+        is_best=False,
+        trajColor="#229A28",
+        plotBackground=True,
+        col_start='blue', col_final='red',
+        alpha=2,
+        col_sun = 'yellow',
+        col_startStartRing="skyblue",
+        col_startFinalRing="blue",
+        col_finalStartRing="lightcoral",
+        col_finalFinalRing="red",
+        col_rocketRing="#0A680C",
+        col_final_rocket_position='black',
+        linewidthStart=2, linewidthFinal=2,
+        linewidthRocket=2,
+        linestyleStart = '-', linestyleFinal='-',
+        linestyleRocket='-'
+        ) :
     filepath = dossier + "/RocketsData/gen_" + str(gen) + "/ind_" + str(idx) + ".rck"
 
     if is_best :
@@ -83,12 +103,23 @@ def simulate_individual (dossier, gen, idx, fig, ax, verbose=False, is_best=Fals
         est_etat_lie, r_min, r_max, 
         impulsions, dt, trajColor=trajColor,
         plotBackground=plotBackground,
-        col_start=col_start, col_final=col_final
+        col_start=col_start, col_final=col_final,
+        col_sun = col_sun,
+        col_startStartRing=col_startStartRing,
+        col_startFinalRing=col_startFinalRing,
+        col_finalStartRing=col_finalStartRing,
+        col_finalFinalRing=col_finalFinalRing,
+        col_rocketRing=col_rocketRing,
+        col_final_rocket_position=col_final_rocket_position,
+        linewidthStart=linewidthStart, linewidthFinal=linewidthFinal,
+        linewidthRocket=linewidthRocket,
+        linestyleStart = linestyleStart, linestyleFinal=linestyleFinal,
+        linestyleRocket=linestyleRocket
     )
 
 
     ax.set_aspect('equal')
-    ax.set_title("Trajectoire des objets du système - gen ")
+    ax.set_title(f"Trajectoire des objets du système - gen {gen}")
     ax.set_xlabel("x (km)")
     ax.set_ylabel("y (km)")
     ax.grid(False)

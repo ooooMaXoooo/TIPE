@@ -4,6 +4,7 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+#include <Units/all.h>
 
 
 double stumpff::C(double z) {
@@ -158,6 +159,508 @@ std::vector<double> orbit::lambert_batch(
 
     return deltaV;
 }
+
+std::array<double, 17> orbit::lambert_by_parts(
+    double mu_start, double mu_final, double mu_sun,
+    double distFinalSun,
+    double tof1_min, double tof1_max,
+    double tof2_min, double tof2_max,
+    double tof3_min, double tof3_max,
+    double r1_min, double r1_max,
+    double phi1_min, double phi1_max,
+    double r2_min, double r2_max,
+    double phi2_min, double phi2_max,
+    double RStart,
+    double phiStart_min, double phiStart_max,
+    double RFinal,
+    double phiFinal_min, double phiFinal_max,
+    double phiFinalPlanet_min, double phiFinalPlanet_max,
+    double Nt1, double Nt2, double Nt3,
+    double Nr1, double Nphi1,
+    double Nr2, double Nphi2,
+    double NphiStart, double NphiFinal, double NphiFinalPlanet) {
+
+    std::array<double, 17> res{};
+
+    double delta_v_best = std::numeric_limits<double>::infinity();
+    double phiFinalPlanet_best = phiFinalPlanet_min;
+    double tof1_best = tof1_min;
+    double tof2_best = tof2_min;
+    double tof3_best = tof3_min;
+    double phiStart_best = phiStart_min;
+    double phiFinal_best = phiFinal_min;
+    double r1_best = r1_min;
+    double phi1_best = phi1_min;
+    double r2_best = r2_min;
+    double phi2_best = phi2_min;
+
+    // Variables pour l'export Leapfrog Python
+    double v1_start_x_best = 0.0;
+    double v1_start_y_best = 0.0;
+    double v2_start_x_best = 0.0;
+    double v2_start_y_best = 0.0;
+    double v3_start_x_best = 0.0;
+    double v3_start_y_best = 0.0;
+
+    {
+        constexpr double pos_terre_x = AU_to_meters(1.);
+        constexpr double pos_terre_y = 0;
+
+        double d1 = (phiFinalPlanet_max - phiFinalPlanet_min) / NphiFinalPlanet;
+        double d2 = (tof1_max - tof1_min) / Nt1;
+        double d3 = (tof2_max - tof2_min) / Nt2;
+        double d4 = (tof3_max - tof3_min) / Nt3;
+        double d5 = (phiStart_max - phiStart_min) / NphiStart;
+        double d6 = (phiFinal_max - phiFinal_min) / NphiFinal;
+        double d7 = (r1_max - r1_min) / Nr1;
+        double d8 = (phi1_max - phi1_min) / Nphi1;
+        double d9 = (r2_max - r2_min) / Nr2;
+        double d10 = (phi2_max - phi2_min) / Nphi2;
+
+        for (double phiFinalPlanet = phiFinalPlanet_min; phiFinalPlanet < phiFinalPlanet_max; phiFinalPlanet += d1) {
+            std::array<double, 3> pos_finalPlanet;
+            {
+                double cos_phi = std::cos(phiFinalPlanet);
+                double sin_phi = std::sin(phiFinalPlanet);
+
+                pos_finalPlanet[0] = cos_phi * distFinalSun;
+                pos_finalPlanet[1] = sin_phi * distFinalSun;
+                pos_finalPlanet[2] = 0;
+            }
+
+            for (double tof1 = tof1_min; tof1 < tof1_max; tof1 += d2)
+                for (double tof2 = tof2_min; tof2 < tof2_max; tof2 += d3)
+                    for (double tof3 = tof3_min; tof3 < tof3_max; tof3 += d4)
+                        for (double phiStart = phiStart_min; phiStart < phiStart_max; phiStart += d5)
+                        {
+                            // CORRECTION : Coordonnées LOCALES relatives à la Terre
+                            std::array<double, 3> p_intermediate_start_local;
+                            p_intermediate_start_local[0] = std::cos(phiStart) * RStart;
+                            p_intermediate_start_local[1] = std::sin(phiStart) * RStart;
+                            p_intermediate_start_local[2] = 0;
+
+                            // Coordonnées absolues héliocentriques pour l'Arc 2
+                            std::array<double, 3> p_intermediate_start_helio;
+                            p_intermediate_start_helio[0] = p_intermediate_start_local[0] + pos_terre_x;
+                            p_intermediate_start_helio[1] = p_intermediate_start_local[1] + pos_terre_y;
+                            p_intermediate_start_helio[2] = 0;
+
+                            for (double r1 = r1_min; r1 < r1_max; r1 += d7)
+                                for (double phi1 = phi1_min; phi1 < phi1_max; phi1 += d8)
+                                {
+                                    // CORRECTION : Coordonnées LOCALES relatives à la Terre
+                                    std::array<double, 3> p_initial_local;
+                                    p_initial_local[0] = std::cos(phi1) * r1;
+                                    p_initial_local[1] = std::sin(phi1) * r1;
+                                    p_initial_local[2] = 0;
+
+                                    // Lambert autour de la Terre utilise les vecteurs locaux
+                                    auto [traj1_start, traj1_final] = orbit::lambert_universal(p_initial_local, p_intermediate_start_local, tof1, mu_start);
+
+                                    std::array<double, 3> v_circ_init;
+                                    {
+                                        double speed = std::sqrt(mu_start / r1);
+                                        glm::dvec2 u_r = glm::normalize(glm::dvec2(p_initial_local[0], p_initial_local[1]));
+                                        v_circ_init[0] = -speed * u_r.y;
+                                        v_circ_init[1] = speed * u_r.x;
+                                        v_circ_init[2] = 0;
+                                    }
+
+                                    double delta_v_start = std::sqrt(
+                                        std::pow(traj1_start[0] - v_circ_init[0], 2) +
+                                        std::pow(traj1_start[1] - v_circ_init[1], 2) +
+                                        std::pow(traj1_start[2] - v_circ_init[2], 2)
+                                    );
+
+                                    for (double phiFinal = phiFinal_min; phiFinal < phiFinal_max; phiFinal += d6)
+                                    {
+                                        // CORRECTION : Coordonnées LOCALES relatives à la planète d'arrivée
+                                        std::array<double, 3> p_intermediate_final_local;
+                                        p_intermediate_final_local[0] = std::cos(phiFinal) * RFinal;
+                                        p_intermediate_final_local[1] = std::sin(phiFinal) * RFinal;
+                                        p_intermediate_final_local[2] = 0;
+
+                                        // Coordonnées absolues héliocentriques pour l'Arc 2
+                                        std::array<double, 3> p_intermediate_final_helio;
+                                        p_intermediate_final_helio[0] = p_intermediate_final_local[0] + pos_finalPlanet[0];
+                                        p_intermediate_final_helio[1] = p_intermediate_final_local[1] + pos_finalPlanet[1];
+                                        p_intermediate_final_helio[2] = 0;
+
+                                        for (double r2 = r2_min; r2 < r2_max; r2 += d9)
+                                            for (double phi2 = phi2_min; phi2 < phi2_max; phi2 += d10)
+                                            {
+                                                // CORRECTION : Coordonnées LOCALES relatives à la planète d'arrivée
+                                                std::array<double, 3> p_final_local;
+                                                p_final_local[0] = std::cos(phi2) * r2;
+                                                p_final_local[1] = std::sin(phi2) * r2;
+                                                p_final_local[2] = 0;
+
+                                                // Arc 2 : Héliocentrique utilise les vecteurs absolus
+                                                auto [traj2_start, traj2_final] = lambert_universal(
+                                                    p_intermediate_start_helio, p_intermediate_final_helio, tof2, mu_sun);
+
+                                                double v_earth_y = std::sqrt(mu_sun / pos_terre_x);
+
+                                                double delta_v_soi_earth = std::sqrt(
+                                                    std::pow(traj2_start[0] - (traj1_final[0] + 0.0), 2) +
+                                                    std::pow(traj2_start[1] - (traj1_final[1] + v_earth_y), 2) +
+                                                    std::pow(traj2_start[2] - traj1_final[2], 2)
+                                                );
+
+                                                double v_fp_speed = std::sqrt(mu_sun / distFinalSun);
+                                                double v_fp_x = -std::sin(phiFinalPlanet) * v_fp_speed;
+                                                double v_fp_y = std::cos(phiFinalPlanet) * v_fp_speed;
+
+                                                // Arc 3 : Lambert autour de la planète finale utilise les vecteurs locaux
+                                                auto [traj3_start, traj3_final] = lambert_universal(
+                                                    p_intermediate_final_local, p_final_local, tof3, mu_final);
+
+                                                double delta_v_soi_final = std::sqrt(
+                                                    std::pow(traj2_final[0] - (traj3_start[0] + v_fp_x), 2) +
+                                                    std::pow(traj2_final[1] - (traj3_start[1] + v_fp_y), 2) +
+                                                    std::pow(traj2_final[2] - traj3_start[2], 2)
+                                                );
+
+                                                double v_circ_final_speed = std::sqrt(mu_final / r2);
+                                                glm::dvec2 u_r_final = glm::normalize(glm::dvec2(p_final_local[0], p_final_local[1]));
+                                                std::array<double, 3> v_circ_final = { -u_r_final.y * v_circ_final_speed, u_r_final.x * v_circ_final_speed, 0.0 };
+
+                                                double delta_v_arrival = std::sqrt(
+                                                    std::pow(traj3_final[0] - v_circ_final[0], 2) +
+                                                    std::pow(traj3_final[1] - v_circ_final[1], 2) +
+                                                    std::pow(traj3_final[2] - v_circ_final[2], 2)
+                                                );
+
+                                                double delta_v_total = delta_v_start + delta_v_soi_earth + delta_v_soi_final + delta_v_arrival;
+
+                                                if (delta_v_total < delta_v_best) {
+                                                    delta_v_best = delta_v_total;
+                                                    phiFinalPlanet_best = phiFinalPlanet;
+                                                    tof1_best = tof1;
+                                                    tof2_best = tof2;
+                                                    tof3_best = tof3;
+                                                    phiStart_best = phiStart;
+                                                    phiFinal_best = phiFinal;
+                                                    r1_best = r1;
+                                                    phi1_best = phi1;
+                                                    r2_best = r2;
+                                                    phi2_best = phi2;
+
+                                                    // Sauvegarde des vitesses d'impulsion pour Python
+                                                    v1_start_x_best = traj1_start[0];
+                                                    v1_start_y_best = traj1_start[1];
+                                                    v2_start_x_best = traj2_start[0];
+                                                    v2_start_y_best = traj2_start[1];
+                                                    v3_start_x_best = traj3_start[0];
+                                                    v3_start_y_best = traj3_start[1];
+                                                }
+                                            }
+                                    }
+                                }
+                        }
+        }
+    }
+
+    res[0] = delta_v_best;
+    res[1] = phiFinalPlanet_best;
+    res[2] = tof1_best;
+    res[3] = tof2_best;
+    res[4] = tof3_best;
+    res[5] = phiStart_best;
+    res[6] = phiFinal_best;
+    res[7] = r1_best;
+    res[8] = phi1_best;
+    res[9] = r2_best;
+    res[10] = phi2_best;
+
+    // Ajouts des impulsions héliocentriques
+    res[11] = v1_start_x_best;
+    res[12] = v1_start_y_best;
+    res[13] = v2_start_x_best;
+    res[14] = v2_start_y_best;
+    res[15] = v3_start_x_best;
+    res[16] = v3_start_y_best;
+
+    return res;
+}
+
+std::array<double, 11> orbit::lambert_by_parts_OpenMP(
+    double mu_start, double mu_final, double mu_sun,
+    double distFinalSun,
+    double tof1_min, double tof1_max,
+    double tof2_min, double tof2_max,
+    double tof3_min, double tof3_max,
+    double r1_min, double r1_max,
+    double theta1_min, double theta1_max,
+    double r2_min, double r2_max,
+    double theta2_min, double theta2_max,
+    double RStart,
+    double thetaStart_min, double thetaStart_max,
+    double RFinal,
+    double thetaFinal_min, double thetaFinal_max,
+    double thetaFinalPlanet_min, double thetaFinalPlanet_max,
+    double Nt1, double Nt2, double Nt3,
+    double Nr1,
+    double Nth1,
+    double Nr2,
+    double Nth2,
+    double NthStart,
+    double NthFinal,
+    double NthFinalPlanet) {
+
+    std::array<double, 11> res{};
+
+    // Variables globales qui stockeront le meilleur résultat absolu
+    double delta_v_best_global = std::numeric_limits<double>::infinity();
+    double thetaFinalPlanet_best_global = thetaFinalPlanet_min;
+    double tof1_best_global = tof1_min;
+    double tof2_best_global = tof2_min;
+    double tof3_best_global = tof3_min;
+    double thetaStart_best_global = thetaStart_min;
+    double thetaFinal_best_global = thetaFinal_min;
+    double r1_best_global = r1_min;
+    double theta1_best_global = theta1_min;
+    double r2_best_global = r2_min;
+    double theta2_best_global = theta2_min;
+
+    // en m
+    constexpr double pos_terre_x = AU_to_meters(1.);
+    // en m
+    constexpr double pos_terre_y = 0;
+
+    // Pas de discrétisation
+    double d1 = (thetaFinalPlanet_max - thetaFinalPlanet_min) / NthFinalPlanet;
+    double d2 = (tof1_max - tof1_min) / Nt1;
+    double d3 = (tof2_max - tof2_min) / Nt2;
+    double d4 = (tof3_max - tof3_min) / Nt3;
+    double d5 = (thetaStart_max - thetaStart_min) / NthStart;
+    double d6 = (thetaFinal_max - thetaFinal_min) / NthFinal;
+    double d7 = (r1_max - r1_min) / Nr1;
+    double d8 = (theta1_max - theta1_min) / Nth1;
+    double d9 = (r2_max - r2_min) / Nr2;
+    double d10 = (theta2_max - theta2_min) / Nth2;
+
+    // Calcul du nombre d'itérations entières pour la boucle OpenMP
+    int iters_outer = static_cast<int>(NthFinalPlanet);
+
+    #pragma omp parallel
+    {
+        // Variables locales au thread
+        double delta_v_best_local = std::numeric_limits<double>::infinity();
+        double thetaFinalPlanet_best_local = thetaFinalPlanet_min;
+        double tof1_best_local = tof1_min;
+        double tof2_best_local = tof2_min;
+        double tof3_best_local = tof3_min;
+        double thetaStart_best_local = thetaStart_min;
+        double thetaFinal_best_local = thetaFinal_min;
+        double r1_best_local = r1_min;
+        double theta1_best_local = theta1_min;
+        double r2_best_local = r2_min;
+        double theta2_best_local = theta2_min;
+
+        // Parcours parallèle sur la boucle externe avec un index entier
+        #pragma omp for schedule(dynamic)
+        for (int i = 0; i < iters_outer; ++i) {
+
+            double thetaFinalPlanet = thetaFinalPlanet_min + i * d1;
+
+            std::array<double, 3> pos_finalPlanet;
+            {
+                double cos_theta = std::cos(thetaFinalPlanet);
+                double sin_theta = std::sin(thetaFinalPlanet);
+
+                pos_finalPlanet[0] = cos_theta * distFinalSun;
+                pos_finalPlanet[1] = sin_theta * distFinalSun;
+                pos_finalPlanet[2] = 0;
+            }
+
+            for (double tof1 = tof1_min; tof1 <= tof1_max; tof1 += d2)
+                for (double tof2 = tof2_min; tof2 <= tof2_max; tof2 += d3)
+                    for (double tof3 = tof3_min; tof3 <= tof3_max; tof3 += d4)
+                        for (double thetaStart = thetaStart_min; thetaStart < thetaStart_max; thetaStart += d5)
+                        {
+                            std::array<double, 3> p_intermediate_start;
+                            {
+                                double cos_theta = std::cos(thetaStart);
+                                double sin_theta = std::sin(thetaStart);
+
+                                p_intermediate_start[0] = cos_theta * RStart + pos_terre_x;
+                                p_intermediate_start[1] = sin_theta * RStart + pos_terre_y;
+                                p_intermediate_start[2] = 0;
+                            }
+
+                            for (double r1 = r1_min; r1 <= r1_max; r1 += d7)
+                                for (double theta1 = theta1_min; theta1 <= theta1_max; theta1 += d8)
+                                {
+                                    std::array<double, 3> p_initial;
+                                    {
+                                        double cos_theta = std::cos(theta1);
+                                        double sin_theta = std::sin(theta1);
+
+                                        p_initial[0] = cos_theta * r1;
+                                        p_initial[1] = sin_theta * r1;
+                                        p_initial[2] = 0;
+                                    }
+
+                                    std::array<double, 3> p_inter_start_local = { std::cos(thetaStart) * RStart, std::sin(thetaStart) * RStart, 0 };
+
+                                    auto [traj1_start, traj1_final] = lambert_universal(p_initial, p_inter_start_local, tof1, mu_start);
+
+
+
+                                    std::array<double, 3> v_circ_init;
+                                    {
+                                        double speed = std::sqrt(mu_start / r1);
+                                        glm::dvec2 u_r = glm::normalize(glm::dvec2(
+                                            p_initial[0] - pos_terre_x,
+                                            p_initial[1] - pos_terre_y
+                                        ));
+
+                                        glm::dvec2 velocity = speed * glm::dvec2(-u_r.y, u_r.x);
+
+                                        v_circ_init[0] = velocity.x;
+                                        v_circ_init[1] = velocity.y;
+                                        v_circ_init[2] = 0;
+                                    }
+
+                                    double delta_v_start = std::sqrt(
+                                        (traj1_start[0] - v_circ_init[0]) * (traj1_start[0] - v_circ_init[0]) +
+                                        (traj1_start[1] - v_circ_init[1]) * (traj1_start[1] - v_circ_init[1]) +
+                                        (traj1_start[2] - v_circ_init[2]) * (traj1_start[2] - v_circ_init[2])
+                                    );
+
+                                    for (double thetaFinal = thetaFinal_min; thetaFinal <= thetaFinal_max; thetaFinal += d6)
+                                    {
+                                        std::array<double, 3> p_intermediate_final;
+                                        {
+                                            double cos_theta = std::cos(thetaFinal);
+                                            double sin_theta = std::sin(thetaFinal);
+
+                                            p_intermediate_final[0] = cos_theta * RFinal + pos_finalPlanet[0];
+                                            p_intermediate_final[1] = sin_theta * RFinal + pos_finalPlanet[1];
+                                            p_intermediate_final[2] = 0;
+                                        }
+
+                                        for (double r2 = r2_min; r2 <= r2_max; r2 += d9)
+                                            for (double theta2 = theta2_min; theta2 <= theta2_max; theta2 += d10)
+                                            {
+                                                std::array<double, 3> p_final;
+                                                {
+                                                    double cos_theta = std::cos(theta2);
+                                                    double sin_theta = std::sin(theta2);
+
+                                                    p_final[0] = cos_theta * r2;
+                                                    p_final[1] = sin_theta * r2;
+                                                    p_final[2] = 0;
+                                                }
+
+                                                // Arc 2 : héliocentrique
+                                                auto [traj2_start, traj2_final] = lambert_universal(
+                                                    p_intermediate_start, p_intermediate_final, tof2, mu_sun);
+
+                                                // Vitesse héliocentrique de la Terre
+                                                double v_earth_y = std::sqrt(mu_sun / pos_terre_x);
+
+                                                // Δv au SOI Terre
+                                                double delta_v_soi_earth = std::sqrt(
+                                                    (traj2_start[0] - (traj1_final[0] + 0.0)) * (traj2_start[0] - (traj1_final[0] + 0.0)) +
+                                                    (traj2_start[1] - (traj1_final[1] + v_earth_y)) * (traj2_start[1] - (traj1_final[1] + v_earth_y)) +
+                                                    (traj2_start[2] - (traj1_final[2])) * (traj2_start[2] - (traj1_final[2]))
+                                                );
+
+                                                // Vitesse héliocentrique de la planète finale
+                                                double v_fp_speed = std::sqrt(mu_sun / distFinalSun);
+                                                double v_fp_x = -std::sin(thetaFinalPlanet) * v_fp_speed;
+                                                double v_fp_y = std::cos(thetaFinalPlanet) * v_fp_speed;
+
+                                                // Arc 3 : approche de la planète finale
+                                                std::array<double, 3> p_inter_final_local = { std::cos(thetaFinal) * RFinal, std::sin(thetaFinal), 0 };
+
+                                                auto [traj3_start, traj3_final] = lambert_universal(
+                                                    p_inter_final_local, p_final, tof3, mu_final);
+
+                                                // Δv au SOI planète finale
+                                                double delta_v_soi_final = std::sqrt(
+                                                    (traj2_final[0] - (traj3_start[0] + v_fp_x)) * (traj2_final[0] - (traj3_start[0] + v_fp_x)) +
+                                                    (traj2_final[1] - (traj3_start[1] + v_fp_y)) * (traj2_final[1] - (traj3_start[1] + v_fp_y)) +
+                                                    (traj2_final[2] - (traj3_start[2])) * (traj2_final[2] - (traj3_start[2]))
+                                                );
+
+                                                // Vitesse de l'orbite circulaire finale
+                                                double v_circ_final_speed = std::sqrt(mu_final / r2);
+                                                glm::dvec2 u_r_final = glm::normalize(glm::dvec2(
+                                                    p_final[0],
+                                                    p_final[1]
+                                                ));
+                                                std::array<double, 3> v_circ_final{};
+                                                v_circ_final[0] = -u_r_final.y * v_circ_final_speed;
+                                                v_circ_final[1] = u_r_final.x * v_circ_final_speed;
+                                                v_circ_final[2] = 0.0;
+
+                                                // Δv arrivée : insertion en orbite circulaire
+                                                double delta_v_arrival = std::sqrt(
+                                                    (traj3_final[0] - v_circ_final[0]) * (traj3_final[0] - v_circ_final[0]) +
+                                                    (traj3_final[1] - v_circ_final[1]) * (traj3_final[1] - v_circ_final[1]) +
+                                                    (traj3_final[2] - v_circ_final[2]) * (traj3_final[2] - v_circ_final[2])
+                                                );
+
+                                                // ── Mise à jour du meilleur LOCAL ──────────────────────────────────────
+                                                double delta_v_total = delta_v_start + delta_v_soi_earth + delta_v_soi_final + delta_v_arrival;
+
+                                                if (delta_v_total < delta_v_best_local) {
+                                                    delta_v_best_local = delta_v_total;
+                                                    thetaFinalPlanet_best_local = thetaFinalPlanet;
+                                                    tof1_best_local = tof1;
+                                                    tof2_best_local = tof2;
+                                                    tof3_best_local = tof3;
+                                                    thetaStart_best_local = thetaStart;
+                                                    thetaFinal_best_local = thetaFinal;
+                                                    r1_best_local = r1;
+                                                    theta1_best_local = theta1;
+                                                    r2_best_local = r2;
+                                                    theta2_best_local = theta2;
+                                                }
+                                            }
+                                    }
+                                }
+                        }
+        } // Fin de la boucle #pragma omp for
+
+        // Mise à jour globale sécurisée (une seule fois par thread à la fin de son travail)
+        #pragma omp critical
+        {
+            if (delta_v_best_local < delta_v_best_global) {
+                delta_v_best_global = delta_v_best_local;
+                thetaFinalPlanet_best_global = thetaFinalPlanet_best_local;
+                tof1_best_global = tof1_best_local;
+                tof2_best_global = tof2_best_local;
+                tof3_best_global = tof3_best_local;
+                thetaStart_best_global = thetaStart_best_local;
+                thetaFinal_best_global = thetaFinal_best_local;
+                r1_best_global = r1_best_local;
+                theta1_best_global = theta1_best_local;
+                r2_best_global = r2_best_local;
+                theta2_best_global = theta2_best_local;
+            }
+        }
+    } // Fin du bloc #pragma omp parallel
+
+    // Remplissage du tableau de résultat avec les valeurs globales
+    res[0] = delta_v_best_global;
+    res[1] = thetaFinalPlanet_best_global;
+    res[2] = tof1_best_global;
+    res[3] = tof2_best_global;
+    res[4] = tof3_best_global;
+    res[5] = thetaStart_best_global;
+    res[6] = thetaFinal_best_global;
+    res[7] = r1_best_global;
+    res[8] = theta1_best_global;
+    res[9] = r2_best_global;
+    res[10] = theta2_best_global;
+
+    return res;
+}
+
 
 
 

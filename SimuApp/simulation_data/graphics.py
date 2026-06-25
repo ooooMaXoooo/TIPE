@@ -17,7 +17,7 @@ def DrawRing(planete, k, ax, nom, couleur, position):
    ax.add_artist(anneau_min)
    ax.add_artist(anneau_max)
 
-def affiche_impulsions (impulsions, dt, x_fusee, y_fusee, ax) :
+def affiche_impulsions (impulsions, dt, x_fusee, y_fusee, ax, color="green") :
    for t, dv in impulsions:
       index = int((t * 86400) / dt)
 
@@ -27,7 +27,7 @@ def affiche_impulsions (impulsions, dt, x_fusee, y_fusee, ax) :
          y = y_fusee[index]
 
          # point d'impulsion
-         ax.plot(x, y, 'ko')  # point noir
+         #ax.plot(x, y, 'ko')  # point noir
 
          # vecteur impulsion
          scale = 3*1e7  # ajuste selon visibilité
@@ -38,7 +38,7 @@ def affiche_impulsions (impulsions, dt, x_fusee, y_fusee, ax) :
                angles='xy',
                scale_units='xy',
                scale=1,
-               color='green'
+               color=color
          )
 
 def barre_chargement (value, max_value, size, fill_char='#', empty_char='_') :
